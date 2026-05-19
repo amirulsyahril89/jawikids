@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kuiz Huruf Arab | Dashboard Guru</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="navbar-brand" href="guru.html">
+    <span>ب</span> Kuiz Huruf Arab
+  </a>
+  <div class="navbar-right">
+    <span class="nama-pengguna" id="nama-nav">—</span>
+    <button class="btn-keluar" onclick="logKeluar()">Log Keluar</button>
+  </div>
+</nav>
+
+<div class="container-wide" style="padding-top:1.5rem;">
+
+  <!-- TABS GURU -->
+  <div class="tabs" style="display:flex;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap;">
+    <button class="tab aktif-tab" id="tab-papan" onclick="tunjukTab('papan')">📊 Rekod Murid</button>
+    <button class="tab" id="tab-leader" onclick="tunjukTab('leader')">🏆 Leaderboard</button>
+    <button class="tab" id="tab-cari" onclick="tunjukTab('cari')">🔍 Cari Murid</button>
+  </div>
+
+  <!-- TAB: REKOD MURID -->
+  <div id="skrin-papan">
+    <div class="grid-stat">
+      <div class="stat-kad"><div class="nilai" id="jum-murid">—</div><div class="label">Jumlah Murid</div></div>
+      <div class="stat-kad"><div class="nilai" id="jum-kuiz">—</div><div class="label">Sesi Kuiz</div></div>
+      <div class="stat-kad"><div class="nilai" id="avg-peratus">—</div><div class="label">Purata Markah</div></div>
+    </div>
+
+    <div class="kad">
+      <div class="kad-header">
+        <h2>Semua Rekod Kuiz</h2>
+        <div style="display:flex;gap:8px;">
+          <select id="tapis-mod" onchange="tapisRekod()" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);font-family:'Outfit',sans-serif;font-size:13px;">
+            <option value="">Semua mod</option>
+            <option value="bunyi">Huruf → Bunyi</option>
+            <option value="huruf">Bunyi → Huruf</option>
+            <option value="keluarga">Keluarga Huruf</option>
+          </select>
+          <button onclick="muatRekodGuru()" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;cursor:pointer;font-family:'Outfit',sans-serif;font-size:13px;">
+            🔄 Muat semula
+          </button>
+        </div>
+      </div>
+      <div class="kad-body" style="overflow-x:auto;" id="jadual-rekod">
+        <div class="loading"><div class="spinner"></div>Memuatkan rekod...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: LEADERBOARD -->
+  <div id="skrin-leader" style="display:none;">
+    <div class="kad">
+      <div class="kad-header"><h2>🏆 Papan Mata Teratas</h2></div>
+      <div class="kad-body" id="senarai-leader">
+        <div class="loading"><div class="spinner"></div>Memuatkan...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: CARI MURID -->
+  <div id="skrin-cari" style="display:none;">
+    <div class="kad">
+      <div class="kad-header"><h2>🔍 Cari Rekod Murid</h2></div>
+      <div class="kad-body">
+        <div style="display:flex;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap;">
+          <input type="text" id="input-cari" placeholder="Nama murid atau kelas..."
+            style="flex:1;min-width:200px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-family:'Outfit',sans-serif;font-size:14px;"
+            oninput="cariMurid()" />
+        </div>
+        <div id="hasil-cari">
+          <p style="color:var(--teks-muted);font-size:14px;">Taip nama murid atau kelas untuk mencari.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/auth.js"></script>
+<script>
+let semuaRekod = [];
+
+(async () => {
+  const sesi = await semakSesi();
+  if (!sesi) { window.location.href = 'index.html'; return; }
+  const p = await ambilProfil(sesi.user.id);
+  if (!p || p.peranan !== 'guru') { window.location.href = 'murid.html'; return; }
+  document.getElementById('nama-nav').textContent = p.nama + ' (Guru)';
+  muatRekodGuru();
+  muatLeaderboard();
+})();
+
+function tunjukTab(tab) {
+  ['papan','leader','cari'].forEach(t => {
+    document.getElementById('skrin-' + t).style.display = t === tab ? 'block' : 'none';
+    document.getElementById('tab-' + t).classList.toggle('aktif-tab', t === tab);
+  });
+}
+
+async function muatRekodGuru() {
+  semuaRekod = await ambilSemuaRekod();
+  paparRekod(semuaRekod);
+
+  // Kira stat
+  const muridUnik = new Set(semuaRekod.map(r => r.user_id)).size;
+  const avg = semuaRekod.length
+    ? Math.round(semuaRekod.reduce((s, r) => s + r.peratus, 0) / semuaRekod.length)
+    : 0;
+  document.getElementById('jum-murid').textContent = muridUnik;
+  document.getElementById('jum-kuiz').textContent = semuaRekod.length;
+  document.getElementById('avg-peratus').textContent = avg + '%';
+}
+
+function tapisRekod() {
+  const mod = document.getElementById('tapis-mod').value;
+  const tapis = mod ? semuaRekod.filter(r => r.mod === mod) : semuaRekod;
+  paparRekod(tapis);
+}
+
+function paparRekod(rekod) {
+  const el = document.getElementById('jadual-rekod');
+  if (!rekod.length) {
+    el.innerHTML = '<p style="color:var(--teks-muted);font-size:14px;">Tiada rekod dijumpai.</p>';
+    return;
+  }
+  el.innerHTML = `
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Tarikh & Masa</th>
+          <th>Nama Murid</th>
+          <th>Kelas</th>
+          <th>Mod</th>
+          <th>Betul/Jumlah</th>
+          <th>Peratus</th>
+          <th>Prestasi</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rekod.map(r => `
+          <tr>
+            <td style="font-size:13px;color:var(--teks-muted);">
+              ${new Date(r.masa).toLocaleDateString('ms-MY')}<br>
+              ${new Date(r.masa).toLocaleTimeString('ms-MY', {hour:'2-digit',minute:'2-digit'})}
+            </td>
+            <td style="font-weight:500;">${r.nama || '—'}</td>
+            <td>${r.kelas || '—'}</td>
+            <td>
+              <span class="badge badge-emas">
+                ${r.mod === 'bunyi' ? 'Huruf→Bunyi' : r.mod === 'huruf' ? 'Bunyi→Huruf' : 'Keluarga'}
+              </span>
+            </td>
+            <td>${r.betul}/${r.jumlah}</td>
+            <td><strong>${r.peratus}%</strong></td>
+            <td>
+              <span class="badge ${r.peratus >= 80 ? 'badge-hijau' : r.peratus >= 60 ? 'badge-emas' : 'badge-merah'}">
+                ${r.peratus >= 80 ? '⭐ Cemerlang' : r.peratus >= 60 ? '👍 Sederhana' : '💪 Perlu Latih'}
+              </span>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+async function muatLeaderboard() {
+  const data = await ambilLeaderboard(15);
+  const el = document.getElementById('senarai-leader');
+  if (!data.length) {
+    el.innerHTML = '<p style="color:var(--teks-muted);font-size:14px;">Belum ada rekod.</p>';
+    return;
+  }
+  el.innerHTML = data.map((r, i) => `
+    <div class="leaderboard-baris">
+      <div class="lb-ranking ${i === 0 ? 'emas' : i === 1 ? 'perak' : i === 2 ? 'gangsa' : ''}">
+        ${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
+      </div>
+      <div class="lb-nama">
+        ${r.nama || 'Tanpa nama'}
+        <div class="lb-kelas">${r.kelas || '—'} · ${new Date(r.masa).toLocaleDateString('ms-MY')}</div>
+      </div>
+      <div>
+        <div class="lb-markah">${r.peratus}%</div>
+        <div style="font-size:12px;color:var(--teks-muted);">${r.betul}/${r.jumlah} betul</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function cariMurid() {
+  const kata = document.getElementById('input-cari').value.toLowerCase().trim();
+  if (!kata) {
+    document.getElementById('hasil-cari').innerHTML = '<p style="color:var(--teks-muted);font-size:14px;">Taip nama murid atau kelas untuk mencari.</p>';
+    return;
+  }
+  const hasil = semuaRekod.filter(r =>
+    (r.nama || '').toLowerCase().includes(kata) ||
+    (r.kelas || '').toLowerCase().includes(kata)
+  );
+  if (!hasil.length) {
+    document.getElementById('hasil-cari').innerHTML = '<p style="color:var(--teks-muted);font-size:14px;">Tiada rekod dijumpai untuk "' + kata + '".</p>';
+    return;
+  }
+  paparRekodCari(hasil);
+}
+
+function paparRekodCari(rekod) {
+  document.getElementById('hasil-cari').innerHTML = `
+    <p style="font-size:13px;color:var(--teks-muted);margin-bottom:1rem;">${rekod.length} rekod dijumpai</p>
+    <table class="tbl">
+      <thead><tr><th>Tarikh</th><th>Nama</th><th>Kelas</th><th>Mod</th><th>Betul/Jumlah</th><th>Peratus</th></tr></thead>
+      <tbody>
+        ${rekod.map(r => `
+          <tr>
+            <td>${new Date(r.masa).toLocaleDateString('ms-MY')}</td>
+            <td style="font-weight:500;">${r.nama || '—'}</td>
+            <td>${r.kelas || '—'}</td>
+            <td>${r.mod}</td>
+            <td>${r.betul}/${r.jumlah}</td>
+            <td><span class="badge ${r.peratus >= 70 ? 'badge-hijau' : 'badge-merah'}">${r.peratus}%</span></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+// Style tab aktif
+const styleEl = document.createElement('style');
+styleEl.textContent = `
+  .tab { padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;font-size:14px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;color:var(--teks-muted);transition:all 0.15s; }
+  .tab.aktif-tab { background:var(--hijau-muda);color:var(--hijau-gelap);border-color:var(--hijau); }
+  .tab:hover:not(.aktif-tab) { background:var(--kelabu); }
+`;
+document.head.appendChild(styleEl);
+</script>
+</body>
+</html>
