@@ -95,10 +95,10 @@
 <script>
 (async () => {
   const sesi = await semakSesi();
-  if (!sesi) { window.location.href = 'index.html'; return; }
+  if (!sesi) { window.location.href = '/'; return; }
   profil = await ambilProfil(sesi.user.id);
-  if (!profil) { window.location.href = 'index.html'; return; }
-  if (profil.peranan === 'guru') { window.location.href = 'guru.html'; return; }
+  if (!profil) { window.location.href = '/'; return; }
+  if (profil.peranan === 'guru') { window.location.href = '/guru.html'; return; }
 
   document.getElementById('nama-nav').textContent = profil.nama;
   muatRekod();

@@ -93,9 +93,9 @@ let semuaRekod = [];
 
 (async () => {
   const sesi = await semakSesi();
-  if (!sesi) { window.location.href = 'index.html'; return; }
+  if (!sesi) { window.location.href = '/'; return; }
   const p = await ambilProfil(sesi.user.id);
-  if (!p || p.peranan !== 'guru') { window.location.href = 'murid.html'; return; }
+  if (!p || p.peranan !== 'guru') { window.location.href = '/murid.html'; return; }
   document.getElementById('nama-nav').textContent = p.nama + ' (Guru)';
   muatRekodGuru();
   muatLeaderboard();

@@ -1,70 +1,71 @@
 // ═══════════════════════════════════════════════
-//  TETAPAN SUPABASE — ISI URL DAN KEY ANDA DI SINI
+//  TETAPAN SUPABASE
 // ═══════════════════════════════════════════════
 const SUPABASE_URL = 'https://zrhqiymjayqbxogtatip.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpyaHFpeW1qYXlxYnhvZ3RhdGlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxOTU3MDQsImV4cCI6MjA5NDc3MTcwNH0.HsF4lTzEPCwTH9ciug8gM72uN-9kJo0Ja3lwH6w8lns';
+const APP_URL = 'https://jawikids.vercel.app';
 
-// Mulakan klien Supabase
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ───────────────────────────────────────────────
-//  SEMAK SESI SEMASA MUAT
-// ───────────────────────────────────────────────
 async function semakSesi() {
   const { data: { session } } = await sb.auth.getSession();
   return session;
 }
 
-// ───────────────────────────────────────────────
-//  LOG MASUK
-// ───────────────────────────────────────────────
 async function logMasuk(email, katalaluan) {
   const { data, error } = await sb.auth.signInWithPassword({ email, password: katalaluan });
   if (error) throw error;
   return data;
 }
 
-// ───────────────────────────────────────────────
-//  DAFTAR PENGGUNA BARU
-// ───────────────────────────────────────────────
 async function daftarPengguna(email, katalaluan, nama, peranan, kelas) {
   const { data, error } = await sb.auth.signUp({
-    email, password: katalaluan,
-    options: { data: { nama, peranan, kelas } }
+    email,
+    password: katalaluan,
+    options: {
+      emailRedirectTo: APP_URL + '/',
+      data: { nama, peranan, kelas }
+    }
   });
   if (error) throw error;
 
-  // Simpan profil ke jadual 'profil'
-  if (data.user) {
+  const userId = data.user?.id;
+  if (userId) {
     await sb.from('profil').upsert({
-      id: data.user.id,
-      email, nama, peranan, kelas,
+      id: userId,
+      email, nama, peranan,
+      kelas: kelas || null,
       dicipta_pada: new Date().toISOString()
     });
   }
   return data;
 }
 
-// ───────────────────────────────────────────────
-//  LOG KELUAR
-// ───────────────────────────────────────────────
 async function logKeluar() {
   await sb.auth.signOut();
-  window.location.href = 'index.html';
+  window.location.href = APP_URL + '/';
 }
 
-// ───────────────────────────────────────────────
-//  AMBIL PROFIL PENGGUNA
-// ───────────────────────────────────────────────
 async function ambilProfil(userId) {
   const { data, error } = await sb.from('profil').select('*').eq('id', userId).single();
-  if (error) return null;
-  return data;
+  if (!error && data) return data;
+
+  // Fallback: bina dari user metadata
+  const { data: { user } } = await sb.auth.getUser();
+  if (user?.user_metadata?.nama) {
+    const profil = {
+      id: user.id,
+      email: user.email,
+      nama: user.user_metadata.nama,
+      peranan: user.user_metadata.peranan || 'murid',
+      kelas: user.user_metadata.kelas || null,
+    };
+    await sb.from('profil').upsert(profil);
+    return profil;
+  }
+  return null;
 }
 
-// ───────────────────────────────────────────────
-//  SIMPAN REKOD KUIZ
-// ───────────────────────────────────────────────
 async function simpanRekod({ userId, nama, kelas, mod, betul, jumlah, peratus }) {
   const { error } = await sb.from('rekod_kuiz').insert({
     user_id: userId,
@@ -75,9 +76,6 @@ async function simpanRekod({ userId, nama, kelas, mod, betul, jumlah, peratus })
   if (error) console.error('Ralat simpan rekod:', error);
 }
 
-// ───────────────────────────────────────────────
-//  AMBIL LEADERBOARD
-// ───────────────────────────────────────────────
 async function ambilLeaderboard(had = 10) {
   const { data, error } = await sb
     .from('rekod_kuiz')
@@ -89,9 +87,6 @@ async function ambilLeaderboard(had = 10) {
   return data;
 }
 
-// ───────────────────────────────────────────────
-//  AMBIL SEMUA REKOD (UNTUK GURU)
-// ───────────────────────────────────────────────
 async function ambilSemuaRekod() {
   const { data, error } = await sb
     .from('rekod_kuiz')
@@ -101,9 +96,6 @@ async function ambilSemuaRekod() {
   return data;
 }
 
-// ───────────────────────────────────────────────
-//  AMBIL REKOD MURID SENDIRI
-// ───────────────────────────────────────────────
 async function ambilRekodSendiri(userId) {
   const { data, error } = await sb
     .from('rekod_kuiz')
