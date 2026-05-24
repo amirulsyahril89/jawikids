@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JawiKids — Dashboard Guru</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F7F8FC;
+  --primary: #FF6B35;
+  --purple: #9B5DE5;
+  --purple-light: #EDE0FF;
+  --green: #06D6A0;
+  --green-light: #D0F7EE;
+  --red: #EF476F;
+  --red-light: #FDDDE6;
+  --accent: #FFD93D;
+  --blue: #4ECDC4;
+  --text: #1a1a2e;
+  --text-light: #7A7A7A;
+  --card: #FFFFFF;
+  --border: #EEEEEE;
+  --shadow: 0 4px 20px rgba(0,0,0,0.07);
+  --radius: 18px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
+  background: var(--card); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; padding: 24px 16px; z-index: 100;
+  box-shadow: 2px 0 16px rgba(0,0,0,0.05);
+}
+.sidebar-logo { font-family: 'Fredoka One', cursive; font-size: 1.6rem; color: var(--primary); margin-bottom: 4px; }
+.sidebar-logo span { color: var(--purple); }
+.sidebar-sub { font-size: 0.65rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--text-light); margin-bottom: 28px; }
+.sidebar-nav { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; border-radius: 12px;
+  font-size: 0.9rem; font-weight: 800; cursor: pointer;
+  color: var(--text-light); border: none; background: none;
+  width: 100%; text-align: left; transition: all 0.15s;
+}
+.nav-item:hover { background: var(--bg); color: var(--text); }
+.nav-item.active { background: var(--purple-light); color: var(--purple); }
+.nav-item .nav-icon { font-size: 1.1rem; width: 22px; text-align: center; }
+.sidebar-footer { border-top: 1px solid var(--border); padding-top: 16px; }
+.guru-info { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.guru-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--purple-light); display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; font-weight: 800; color: var(--purple);
+  flex-shrink: 0;
+}
+.guru-name { font-size: 0.85rem; font-weight: 800; }
+.guru-role { font-size: 0.7rem; color: var(--text-light); font-weight: 700; }
+.btn-logout {
+  width: 100%; padding: 9px; background: var(--red-light); color: var(--red);
+  border: none; border-radius: 10px; font-family: 'Nunito', sans-serif;
+  font-size: 0.82rem; font-weight: 800; cursor: pointer; transition: all 0.15s;
+}
+.btn-logout:hover { background: var(--red); color: white; }
+
+/* ── MAIN ── */
+.main { margin-left: 240px; padding: 28px; min-height: 100vh; }
+.page-header { margin-bottom: 24px; }
+.page-title { font-family: 'Fredoka One', cursive; font-size: 1.8rem; }
+.page-sub { font-size: 0.85rem; color: var(--text-light); font-weight: 600; margin-top: 2px; }
+
+/* ── STATS CARDS ── */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 20px; box-shadow: var(--shadow); position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 4px 4px 0 0;
+}
+.stat-card.blue::before { background: var(--blue); }
+.stat-card.green::before { background: var(--green); }
+.stat-card.purple::before { background: var(--purple); }
+.stat-card.orange::before { background: var(--primary); }
+.stat-num { font-family: 'Fredoka One', cursive; font-size: 2rem; margin-bottom: 2px; }
+.stat-label { font-size: 0.75rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; }
+
+/* ── GRID LAYOUT ── */
+.content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.full-width { grid-column: 1 / -1; }
+
+/* ── CARD ── */
+.card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 22px; box-shadow: var(--shadow);
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.card-title { font-family: 'Fredoka One', cursive; font-size: 1.1rem; }
+.card-action {
+  padding: 7px 14px; border: none; border-radius: 10px;
+  font-family: 'Nunito', sans-serif; font-size: 0.8rem; font-weight: 800;
+  cursor: pointer; transition: all 0.15s;
+}
+.card-action.primary { background: var(--purple-light); color: var(--purple); }
+.card-action.primary:hover { background: var(--purple); color: white; }
+
+/* ── KOD KELAS ── */
+.kod-display {
+  background: linear-gradient(135deg, var(--purple-light), #f0e8ff);
+  border: 2px dashed var(--purple);
+  border-radius: 14px; padding: 16px; text-align: center; margin-bottom: 14px;
+}
+.kod-text {
+  font-family: 'Fredoka One', cursive; font-size: 1.8rem; color: var(--purple);
+  letter-spacing: 4px; margin-bottom: 4px;
+}
+.kod-sub { font-size: 0.75rem; color: var(--text-light); font-weight: 700; }
+.btn-copy {
+  padding: 8px 20px; background: var(--purple); color: white; border: none;
+  border-radius: 10px; font-family: 'Nunito', sans-serif; font-size: 0.82rem;
+  font-weight: 800; cursor: pointer; transition: all 0.15s; width: 100%; margin-top: 8px;
+}
+.btn-copy:hover { background: var(--primary); }
+
+/* ── CLASS FORM ── */
+.class-form { display: flex; gap: 10px; margin-bottom: 16px; }
+.class-form input {
+  flex: 1; padding: 11px 14px; border: 2px solid var(--border);
+  border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 0.9rem;
+  font-weight: 700; color: var(--text); outline: none; transition: border-color 0.2s;
+}
+.class-form input:focus { border-color: var(--purple); }
+.class-form button {
+  padding: 11px 18px; background: var(--purple); color: white; border: none;
+  border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 0.85rem;
+  font-weight: 800; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.class-form button:hover { background: var(--primary); }
+
+/* ── CLASS LIST ── */
+.class-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; background: var(--bg); border-radius: 12px; margin-bottom: 8px;
+  cursor: pointer; transition: all 0.15s; border: 2px solid transparent;
+}
+.class-item:hover { border-color: var(--purple); background: var(--purple-light); }
+.class-item.active { border-color: var(--purple); background: var(--purple-light); }
+.class-item-name { font-size: 0.9rem; font-weight: 800; }
+.class-item-meta { font-size: 0.73rem; color: var(--text-light); font-weight: 700; }
+.class-item-kod { font-size: 0.72rem; font-weight: 800; color: var(--purple); letter-spacing: 1px; }
+
+/* ── STUDENT TABLE ── */
+.student-table { width: 100%; border-collapse: collapse; }
+.student-table th {
+  text-align: left; font-size: 0.72rem; font-weight: 800;
+  color: var(--text-light); text-transform: uppercase; letter-spacing: 1px;
+  padding: 8px 12px; border-bottom: 2px solid var(--border);
+}
+.student-table td { padding: 11px 12px; border-bottom: 1px solid var(--border); font-size: 0.88rem; font-weight: 700; }
+.student-table tr:last-child td { border-bottom: none; }
+.student-table tr:hover td { background: var(--bg); }
+.badge {
+  display: inline-block; padding: 3px 10px; border-radius: 99px;
+  font-size: 0.72rem; font-weight: 800;
+}
+.badge.green { background: var(--green-light); color: #04a87d; }
+.badge.red { background: var(--red-light); color: var(--red); }
+.badge.purple { background: var(--purple-light); color: var(--purple); }
+
+/* ── CHART BAR ── */
+.huruf-bar { margin-bottom: 10px; }
+.huruf-bar-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.78rem; font-weight: 800; margin-bottom: 4px;
+}
+.huruf-bar-label .char { font-size: 1.1rem; direction: rtl; }
+.huruf-bar-track { height: 10px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.huruf-bar-fill { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center; padding: 32px 20px; color: var(--text-light);
+}
+.empty-state .icon { font-size: 2.5rem; margin-bottom: 8px; }
+.empty-state p { font-size: 0.85rem; font-weight: 700; }
+
+/* ── LOADING ── */
+.loading-spinner {
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px; color: var(--text-light); gap: 10px; font-weight: 700;
+}
+.spin { animation: spin 0.8s linear infinite; font-size: 1.2rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── ALERT ── */
+.alert { padding: 10px 14px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; margin-bottom: 12px; display: none; }
+.alert.error { background: var(--red-light); color: var(--red); display: block; }
+.alert.success { background: var(--green-light); color: #04a87d; display: block; }
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 16px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .content-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div>
+    <div class="sidebar-logo">Jawi<span>Kids</span></div>
+    <div class="sidebar-sub">Panel Guru</div>
+  </div>
+  <nav class="sidebar-nav">
+    <button class="nav-item active" onclick="showSection('overview')">
+      <span class="nav-icon">📊</span> Gambaran Keseluruhan
+    </button>
+    <button class="nav-item" onclick="showSection('classes')">
+      <span class="nav-icon">🏫</span> Urus Kelas
+    </button>
+    <button class="nav-item" onclick="showSection('students')">
+      <span class="nav-icon">🎒</span> Rekod Murid
+    </button>
+    <button class="nav-item" onclick="showSection('huruf')">
+      <span class="nav-icon">ب</span> Analisis Huruf
+    </button>
+    <div style="flex:1;"></div>
+    <button class="nav-item" onclick="window.open('index.html','_blank')">
+      <span class="nav-icon">📚</span> Buka Flash Card
+    </button>
+    <button class="nav-item" onclick="window.open('games/index.html','_blank')">
+      <span class="nav-icon">🎮</span> Buka Games
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="guru-info">
+      <div class="guru-avatar" id="guruAvatar">U</div>
+      <div>
+        <div class="guru-name" id="guruName">Guru</div>
+        <div class="guru-role">👩‍🏫 Guru JawiKids</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="logout()">🚪 Log Keluar</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ══ OVERVIEW ══ -->
+  <div id="sectionOverview">
+    <div class="page-header">
+      <div class="page-title">📊 Gambaran Keseluruhan</div>
+      <div class="page-sub" id="overviewDate">Selamat datang!</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-num" id="statKelas">—</div>
+        <div class="stat-label">Jumlah Kelas</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-num" id="statMurid">—</div>
+        <div class="stat-label">Jumlah Murid</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-num" id="statSesi">—</div>
+        <div class="stat-label">Sesi Latihan</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-num" id="statJawapan">—</div>
+        <div class="stat-label">Jumlah Jawapan</div>
+      </div>
+    </div>
+
+    <div class="content-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🏆 Murid Aktif Terkini</div>
+        </div>
+        <div id="recentStudentsList"><div class="loading-spinner"><span class="spin">⏳</span> Memuatkan...</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">⚠️ Huruf Paling Lemah (Seluruh Kelas)</div>
+        </div>
+        <div id="weakHurufList"><div class="loading-spinner"><span class="spin">⏳</span> Memuatkan...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CLASSES ══ -->
+  <div id="sectionClasses" style="display:none;">
+    <div class="page-header">
+      <div class="page-title">🏫 Urus Kelas</div>
+      <div class="page-sub">Cipta kelas dan kongsi kod dengan murid</div>
+    </div>
+    <div class="content-grid">
+      <div class="card">
+        <div class="card-header"><div class="card-title">➕ Cipta Kelas Baru</div></div>
+        <div class="alert" id="classAlert"></div>
+        <div class="class-form">
+          <input type="text" id="newClassName" placeholder="cth: Darjah 3 Arif" maxlength="40">
+          <button onclick="createClass()">+ Cipta</button>
+        </div>
+        <div id="classList"><div class="loading-spinner"><span class="spin">⏳</span> Memuatkan...</div></div>
+      </div>
+      <div class="card" id="classDetailCard" style="display:none;">
+        <div class="card-header">
+          <div class="card-title" id="classDetailTitle">Butiran Kelas</div>
+          <button class="card-action primary" onclick="deleteClass()">🗑 Padam</button>
+        </div>
+        <div class="kod-display">
+          <div class="kod-sub">Kod Kelas</div>
+          <div class="kod-text" id="classDetailKod">—</div>
+          <div class="kod-sub">Kongsi kod ini dengan murid kamu</div>
+        </div>
+        <button class="btn-copy" onclick="copyKod()">📋 Salin Kod Kelas</button>
+        <div style="margin-top:16px;">
+          <div style="font-size:0.78rem;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Murid dalam kelas ini</div>
+          <div id="classStudentsList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STUDENTS ══ -->
+  <div id="sectionStudents" style="display:none;">
+    <div class="page-header">
+      <div class="page-title">🎒 Rekod Murid</div>
+      <div class="page-sub">Pantau kemajuan setiap murid</div>
+    </div>
+    <div class="card full-width">
+      <div class="card-header">
+        <div class="card-title">Semua Murid</div>
+        <select id="filterClass" onchange="loadStudents()" style="padding:8px 12px;border:2px solid var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;outline:none;">
+          <option value="">Semua Kelas</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="student-table">
+          <thead>
+            <tr>
+              <th>Nama Murid</th>
+              <th>Kelas</th>
+              <th>Sesi</th>
+              <th>Betul</th>
+              <th>Salah</th>
+              <th>% Betul</th>
+              <th>Huruf Lemah</th>
+            </tr>
+          </thead>
+          <tbody id="studentTableBody">
+            <tr><td colspan="7"><div class="loading-spinner"><span class="spin">⏳</span> Memuatkan...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ HURUF ══ -->
+  <div id="sectionHuruf" style="display:none;">
+    <div class="page-header">
+      <div class="page-title">ب Analisis Huruf</div>
+      <div class="page-sub">Huruf yang paling lemah dalam kalangan semua murid</div>
+    </div>
+    <div class="content-grid">
+      <div class="card">
+        <div class="card-header"><div class="card-title">❌ Huruf Paling Banyak Salah</div></div>
+        <div id="hurufSalahList"><div class="loading-spinner"><span class="spin">⏳</span> Memuatkan...</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">✅ Huruf Paling Banyak Betul</div></div>
+        <div id="hurufBetulList"><div class="loading-spinner"><span class="spin">⏳</span> Memuatkan...</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ══════════════════════════════════════════
+// ⚠️ GANTI DENGAN CREDENTIALS SUPABASE ANDA
+// ══════════════════════════════════════════
+const SUPABASE_URL = 'MASUKKAN_URL_ANDA_DI_SINI';
+const SUPABASE_ANON_KEY = 'MASUKKAN_ANON_KEY_ANDA_DI_SINI';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let guruData = null;
+let allClasses = [];
+let selectedClass = null;
+
+// ── INIT ──
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = 'auth.html'; return; }
+
+  guruData = session.user;
+  const nama = guruData.user_metadata?.nama || guruData.email.split('@')[0];
+  document.getElementById('guruName').textContent = nama;
+  document.getElementById('guruAvatar').textContent = nama.charAt(0).toUpperCase();
+  document.getElementById('overviewDate').textContent =
+    `Selamat datang, ${nama}! • ${new Date().toLocaleDateString('ms-MY', {weekday:'long',year:'numeric',month:'long',day:'numeric'})}`;
+
+  await loadAllData();
+})();
+
+// ── NAVIGATION ──
+function showSection(name) {
+  ['Overview','Classes','Students','Huruf'].forEach(s => {
+    document.getElementById(`section${s}`).style.display = 'none';
+  });
+  document.getElementById(`section${name.charAt(0).toUpperCase()+name.slice(1)}`).style.display = 'block';
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event.currentTarget?.classList.add('active');
+}
+
+// ── LOAD DATA ──
+async function loadAllData() {
+  await loadClasses();
+  await loadOverviewStats();
+  await loadWeakHuruf();
+  await loadRecentStudents();
+  await loadStudents();
+  await loadHurufAnalysis();
+}
+
+async function loadClasses() {
+  const { data, error } = await supabase
+    .from('classes')
+    .select('*, students(count)')
+    .eq('guru_id', guruData.id)
+    .order('created_at', { ascending: false });
+
+  if (error) { console.error(error); return; }
+  allClasses = data || [];
+  document.getElementById('statKelas').textContent = allClasses.length;
+
+  // Render class list
+  const listEl = document.getElementById('classList');
+  if (!allClasses.length) {
+    listEl.innerHTML = '<div class="empty-state"><div class="icon">🏫</div><p>Belum ada kelas. Cipta kelas pertama anda!</p></div>';
+    return;
+  }
+  listEl.innerHTML = allClasses.map(c => `
+    <div class="class-item" onclick="selectClass('${c.id}')">
+      <div>
+        <div class="class-item-name">${c.nama_kelas}</div>
+        <div class="class-item-meta">${c.students[0]?.count || 0} murid</div>
+      </div>
+      <div class="class-item-kod">${c.kod_kelas}</div>
+    </div>`).join('');
+
+  // Filter dropdown
+  const filterEl = document.getElementById('filterClass');
+  filterEl.innerHTML = '<option value="">Semua Kelas</option>' +
+    allClasses.map(c => `<option value="${c.id}">${c.nama_kelas}</option>`).join('');
+}
+
+async function loadOverviewStats() {
+  // Total murid
+  const { count: muridCount } = await supabase.from('students')
+    .select('id', { count: 'exact', head: true });
+  document.getElementById('statMurid').textContent = muridCount || 0;
+
+  // Filter murid dalam kelas guru ini
+  const classIds = allClasses.map(c => c.id);
+  if (!classIds.length) {
+    document.getElementById('statSesi').textContent = 0;
+    document.getElementById('statJawapan').textContent = 0;
+    return;
+  }
+
+  const { data: myStudents } = await supabase.from('students').select('id').in('class_id', classIds);
+  const studentIds = (myStudents || []).map(s => s.id);
+
+  const { count: sesiCount } = await supabase.from('sessions')
+    .select('id', { count: 'exact', head: true })
+    .in('student_id', studentIds);
+  document.getElementById('statSesi').textContent = sesiCount || 0;
+
+  const { count: jawapanCount } = await supabase.from('answers')
+    .select('id', { count: 'exact', head: true })
+    .in('student_id', studentIds);
+  document.getElementById('statJawapan').textContent = jawapanCount || 0;
+}
+
+async function loadWeakHuruf() {
+  const classIds = allClasses.map(c => c.id);
+  if (!classIds.length) {
+    document.getElementById('weakHurufList').innerHTML = '<div class="empty-state"><div class="icon">📊</div><p>Belum ada data.</p></div>';
+    return;
+  }
+
+  const { data: myStudents } = await supabase.from('students').select('id').in('class_id', classIds);
+  const studentIds = (myStudents || []).map(s => s.id);
+  if (!studentIds.length) { document.getElementById('weakHurufList').innerHTML = '<div class="empty-state"><div class="icon">📊</div><p>Belum ada murid.</p></div>'; return; }
+
+  const { data: answers } = await supabase.from('answers')
+    .select('huruf_char, huruf_name, betul')
+    .in('student_id', studentIds);
+
+  if (!answers?.length) { document.getElementById('weakHurufList').innerHTML = '<div class="empty-state"><div class="icon">📊</div><p>Belum ada jawapan direkod.</p></div>'; return; }
+
+  const stats = {};
+  answers.forEach(a => {
+    if (!stats[a.huruf_char]) stats[a.huruf_char] = { char: a.huruf_char, name: a.huruf_name, betul: 0, salah: 0 };
+    a.betul ? stats[a.huruf_char].betul++ : stats[a.huruf_char].salah++;
+  });
+
+  const sorted = Object.values(stats)
+    .filter(h => h.salah > 0)
+    .sort((a, b) => b.salah - a.salah)
+    .slice(0, 6);
+
+  document.getElementById('weakHurufList').innerHTML = sorted.map(h => {
+    const total = h.betul + h.salah;
+    const pct = Math.round(h.betul / total * 100);
+    const color = pct < 40 ? '#EF476F' : pct < 70 ? '#FFD93D' : '#06D6A0';
+    return `<div class="huruf-bar">
+      <div class="huruf-bar-label">
+        <span><span class="char">${h.char}</span> ${h.name}</span>
+        <span style="color:${color}">${pct}% betul</span>
+      </div>
+      <div class="huruf-bar-track">
+        <div class="huruf-bar-fill" style="width:${pct}%;background:${color}"></div>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty-state"><p>Tiada huruf lemah dikesan! 🎉</p></div>';
+}
+
+async function loadRecentStudents() {
+  const classIds = allClasses.map(c => c.id);
+  if (!classIds.length) { document.getElementById('recentStudentsList').innerHTML = '<div class="empty-state"><div class="icon">🎒</div><p>Belum ada murid.</p></div>'; return; }
+
+  const { data: sessions } = await supabase.from('sessions')
+    .select('student_id, started_at, students(nama, class_id, classes(nama_kelas))')
+    .order('started_at', { ascending: false })
+    .limit(6);
+
+  if (!sessions?.length) { document.getElementById('recentStudentsList').innerHTML = '<div class="empty-state"><div class="icon">🎒</div><p>Belum ada aktiviti.</p></div>'; return; }
+
+  const seen = new Set();
+  const unique = sessions.filter(s => { if (seen.has(s.student_id)) return false; seen.add(s.student_id); return true; });
+
+  document.getElementById('recentStudentsList').innerHTML = unique.map(s => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-size:0.9rem;font-weight:800;">${s.students?.nama || '—'}</div>
+        <div style="font-size:0.73rem;color:var(--text-light);font-weight:700;">${s.students?.classes?.nama_kelas || '—'}</div>
+      </div>
+      <div style="font-size:0.73rem;color:var(--text-light);font-weight:700;">
+        ${new Date(s.started_at).toLocaleDateString('ms-MY')}
+      </div>
+    </div>`).join('');
+}
+
+async function loadStudents() {
+  const classFilter = document.getElementById('filterClass')?.value;
+  const classIds = classFilter ? [classFilter] : allClasses.map(c => c.id);
+  if (!classIds.length) { document.getElementById('studentTableBody').innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="icon">🎒</div><p>Belum ada murid.</p></div></td></tr>'; return; }
+
+  const { data: students } = await supabase.from('students')
+    .select('id, nama, created_at, classes(nama_kelas)')
+    .in('class_id', classIds)
+    .order('nama');
+
+  if (!students?.length) { document.getElementById('studentTableBody').innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="icon">🎒</div><p>Belum ada murid dalam kelas ini.</p></div></td></tr>'; return; }
+
+  // Get answer stats per student
+  const studentIds = students.map(s => s.id);
+  const { data: answers } = await supabase.from('answers')
+    .select('student_id, betul, huruf_char, huruf_name')
+    .in('student_id', studentIds);
+
+  const { data: sessions } = await supabase.from('sessions')
+    .select('student_id')
+    .in('student_id', studentIds);
+
+  const answerMap = {};
+  (answers || []).forEach(a => {
+    if (!answerMap[a.student_id]) answerMap[a.student_id] = { betul: 0, salah: 0, hurufSalah: {} };
+    a.betul ? answerMap[a.student_id].betul++ : answerMap[a.student_id].salah++;
+    if (!a.betul) {
+      const key = a.huruf_char;
+      answerMap[a.student_id].hurufSalah[key] = (answerMap[a.student_id].hurufSalah[key] || 0) + 1;
+    }
+  });
+
+  const sesiMap = {};
+  (sessions || []).forEach(s => { sesiMap[s.student_id] = (sesiMap[s.student_id] || 0) + 1; });
+
+  document.getElementById('studentTableBody').innerHTML = students.map(s => {
+    const stats = answerMap[s.id] || { betul: 0, salah: 0, hurufSalah: {} };
+    const total = stats.betul + stats.salah;
+    const pct = total ? Math.round(stats.betul / total * 100) : 0;
+    const badgeClass = pct >= 70 ? 'green' : pct >= 40 ? 'purple' : 'red';
+    const weakHuruf = Object.entries(stats.hurufSalah).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([c])=>c).join(' ');
+    return `<tr>
+      <td><strong>${s.nama}</strong></td>
+      <td>${s.classes?.nama_kelas || '—'}</td>
+      <td>${sesiMap[s.id] || 0}</td>
+      <td style="color:var(--green)">${stats.betul}</td>
+      <td style="color:var(--red)">${stats.salah}</td>
+      <td><span class="badge ${badgeClass}">${total ? pct + '%' : '—'}</span></td>
+      <td style="direction:rtl;font-size:1.1rem;letter-spacing:4px;">${weakHuruf || '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadHurufAnalysis() {
+  const classIds = allClasses.map(c => c.id);
+  if (!classIds.length) return;
+  const { data: myStudents } = await supabase.from('students').select('id').in('class_id', classIds);
+  const studentIds = (myStudents || []).map(s => s.id);
+  if (!studentIds.length) return;
+
+  const { data: answers } = await supabase.from('answers').select('huruf_char, huruf_name, betul').in('student_id', studentIds);
+  if (!answers?.length) return;
+
+  const stats = {};
+  answers.forEach(a => {
+    if (!stats[a.huruf_char]) stats[a.huruf_char] = { char: a.huruf_char, name: a.huruf_name, betul: 0, salah: 0 };
+    a.betul ? stats[a.huruf_char].betul++ : stats[a.huruf_char].salah++;
+  });
+
+  const all = Object.values(stats);
+  const bySalah = [...all].sort((a,b) => b.salah - a.salah).slice(0, 8);
+  const byBetul = [...all].sort((a,b) => {
+    const pA = a.betul / (a.betul + a.salah);
+    const pB = b.betul / (b.betul + b.salah);
+    return pB - pA;
+  }).slice(0, 8);
+
+  const maxSalah = bySalah[0]?.salah || 1;
+  document.getElementById('hurufSalahList').innerHTML = bySalah.map(h => `
+    <div class="huruf-bar">
+      <div class="huruf-bar-label">
+        <span><span class="char">${h.char}</span> ${h.name}</span>
+        <span style="color:var(--red)">${h.salah} kali salah</span>
+      </div>
+      <div class="huruf-bar-track">
+        <div class="huruf-bar-fill" style="width:${Math.round(h.salah/maxSalah*100)}%;background:var(--red)"></div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('hurufBetulList').innerHTML = byBetul.map(h => {
+    const pct = Math.round(h.betul / (h.betul + h.salah) * 100);
+    return `<div class="huruf-bar">
+      <div class="huruf-bar-label">
+        <span><span class="char">${h.char}</span> ${h.name}</span>
+        <span style="color:var(--green)">${pct}% betul</span>
+      </div>
+      <div class="huruf-bar-track">
+        <div class="huruf-bar-fill" style="width:${pct}%;background:var(--green)"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── CREATE CLASS ──
+function generateKod(nama) {
+  const prefix = nama.replace(/[^a-zA-Z]/g, '').toUpperCase().slice(0, 4);
+  const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `${prefix}-${rand}`;
+}
+
+async function createClass() {
+  const nama = document.getElementById('newClassName').value.trim();
+  if (!nama) { showAlert('classAlert', '⚠️ Sila masukkan nama kelas.'); return; }
+
+  const kod = generateKod(nama);
+  const { data, error } = await supabase.from('classes')
+    .insert({ nama_kelas: nama, kod_kelas: kod, guru_id: guruData.id })
+    .select().single();
+
+  if (error) { showAlert('classAlert', '❌ ' + error.message); return; }
+  document.getElementById('newClassName').value = '';
+  showAlert('classAlert', `✅ Kelas "${nama}" berjaya dicipta! Kod: ${kod}`, 'success');
+  await loadClasses();
+  selectClass(data.id);
+}
+
+async function selectClass(classId) {
+  selectedClass = allClasses.find(c => c.id === classId);
+  if (!selectedClass) return;
+
+  document.querySelectorAll('.class-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('classDetailCard').style.display = 'block';
+  document.getElementById('classDetailTitle').textContent = selectedClass.nama_kelas;
+  document.getElementById('classDetailKod').textContent = selectedClass.kod_kelas;
+
+  const { data: students } = await supabase.from('students')
+    .select('id, nama, created_at').eq('class_id', classId).order('nama');
+
+  document.getElementById('classStudentsList').innerHTML = students?.length
+    ? students.map(s => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+          <span style="font-size:0.88rem;font-weight:700;">🎒 ${s.nama}</span>
+          <span style="font-size:0.72rem;color:var(--text-light);font-weight:700;">${new Date(s.created_at).toLocaleDateString('ms-MY')}</span>
+        </div>`).join('')
+    : '<div class="empty-state"><p>Belum ada murid dalam kelas ini.</p></div>';
+}
+
+function copyKod() {
+  if (!selectedClass) return;
+  navigator.clipboard.writeText(selectedClass.kod_kelas).then(() => {
+    showAlert('classAlert', `✅ Kod "${selectedClass.kod_kelas}" telah disalin!`, 'success');
+  });
+}
+
+async function deleteClass() {
+  if (!selectedClass) return;
+  if (!confirm(`Padam kelas "${selectedClass.nama_kelas}"? Semua data murid dalam kelas ini akan hilang.`)) return;
+  const { error } = await supabase.from('classes').delete().eq('id', selectedClass.id);
+  if (error) { alert('Ralat: ' + error.message); return; }
+  document.getElementById('classDetailCard').style.display = 'none';
+  selectedClass = null;
+  await loadClasses();
+  await loadOverviewStats();
+}
+
+// ── ALERT ──
+function showAlert(id, msg, type = 'error') {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = `alert ${type}`;
+  setTimeout(() => { if (el) el.className = 'alert'; }, 4000);
+}
+
+// ── LOGOUT ──
+async function logout() {
+  await supabase.auth.signOut();
+  localStorage.removeItem('jawikids_guru');
+  window.location.href = 'auth.html';
+}
+</script>
+</body>
+</html>
