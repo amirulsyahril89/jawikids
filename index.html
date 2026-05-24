@@ -1164,8 +1164,13 @@ function launchConfetti() {
 // ══════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════
-initAuth();
-renderGroups();
+(async () => {
+
+  await initAuth();
+
+  renderGroups();
+
+})();
 </script>
 </body>
 </html>
