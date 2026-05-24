@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>JawiKids — Permainan</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a1a;
+  --card: #1a1a2e;
+  --primary: #FF6B35;
+  --accent: #FFD93D;
+  --green: #06D6A0;
+  --red: #EF476F;
+  --purple: #9B5DE5;
+  --blue: #4ECDC4;
+  --text: #ffffff;
+  --text-dim: rgba(255,255,255,0.6);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; min-height: 100vh; }
+
+/* ── SHARED ── */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: flex; flex-direction: column; }
+
+canvas { display: block; }
+
+.overlay-panel {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50; padding: 20px;
+}
+.panel-box {
+  background: var(--card); border-radius: 24px; padding: 28px 24px;
+  width: 100%; max-width: 420px; text-align: center;
+  border: 2px solid rgba(255,255,255,0.1);
+  animation: popIn 0.3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn { from{transform:scale(0.7);opacity:0} to{transform:scale(1);opacity:1} }
+
+.panel-title { font-family: 'Fredoka One', cursive; font-size: 1.8rem; margin-bottom: 8px; }
+.panel-sub { font-size: 0.9rem; color: var(--text-dim); margin-bottom: 20px; }
+
+.q-prompt {
+  background: rgba(255,255,255,0.07); border-radius: 16px;
+  padding: 16px; margin-bottom: 16px;
+}
+.q-char { font-size: 5rem; direction: rtl; line-height: 1; margin-bottom: 6px; }
+.q-emoji { font-size: 4rem; line-height: 1; margin-bottom: 6px; }
+.q-hint { font-size: 0.8rem; color: var(--text-dim); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.choice-btn {
+  background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 14px; padding: 14px 8px; cursor: pointer;
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.95rem;
+  color: var(--text); transition: all 0.15s;
+}
+.choice-btn:hover { background: rgba(255,255,255,0.15); border-color: var(--accent); transform: scale(1.03); }
+.choice-btn.correct { background: rgba(6,214,160,0.25); border-color: var(--green); color: var(--green); }
+.choice-btn.wrong { background: rgba(239,71,111,0.25); border-color: var(--red); color: var(--red); }
+.choice-btn.reveal { background: rgba(6,214,160,0.15); border-color: var(--green); }
+.choice-btn:disabled { cursor: default; }
+.choice-jawi { font-size: 2rem; direction: rtl; display: block; }
+
+.feedback { font-size: 1rem; font-weight: 800; min-height: 24px; margin-bottom: 10px; }
+.feedback.ok { color: var(--green); }
+.feedback.fail { color: var(--red); }
+
+.btn-main {
+  width: 100%; padding: 14px; background: var(--primary); border: none;
+  border-radius: 14px; font-family: 'Fredoka One', cursive; font-size: 1.1rem;
+  color: white; cursor: pointer; transition: all 0.15s;
+  box-shadow: 0 4px 16px rgba(255,107,53,0.4);
+}
+.btn-main:hover { transform: translateY(-2px); }
+.btn-main.green { background: var(--green); box-shadow: 0 4px 16px rgba(6,214,160,0.4); }
+.btn-main.purple { background: var(--purple); box-shadow: 0 4px 16px rgba(155,93,229,0.4); }
+
+/* HUD */
+.hud {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+}
+.hud-logo { font-family: 'Fredoka One', cursive; font-size: 1rem; color: var(--primary); }
+.hud-logo span { color: var(--purple); }
+.hud-score { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: var(--accent); }
+.hud-btn { background: rgba(255,255,255,0.1); border: none; border-radius: 10px; padding: 6px 14px; color: white; font-weight: 800; cursor: pointer; font-size: 0.85rem; }
+.hud-btn:hover { background: rgba(255,255,255,0.2); }
+
+/* ── HUB SCREEN ── */
+#hub {
+  background: radial-gradient(ellipse at top, #1a0533 0%, #0a0a1a 60%);
+  align-items: center; padding: 20px;
+}
+.hub-header { text-align: center; margin-bottom: 32px; padding-top: 20px; }
+.hub-logo { font-family: 'Fredoka One', cursive; font-size: 2.2rem; color: var(--primary); }
+.hub-logo span { color: var(--purple); }
+.hub-sub { font-size: 0.75rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-top: 2px; }
+.hub-tagline { font-size: 1rem; color: var(--text-dim); margin-top: 8px; }
+
+.games-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; max-width: 480px; }
+.game-card {
+  border-radius: 20px; padding: 20px 14px;
+  cursor: pointer; transition: all 0.22s cubic-bezier(.34,1.56,.64,1);
+  position: relative; overflow: hidden; text-align: center;
+  border: 2px solid rgba(255,255,255,0.08);
+}
+.game-card:hover { transform: translateY(-5px) scale(1.03); }
+.game-card-emoji { font-size: 2.8rem; margin-bottom: 8px; display: block; }
+.game-card-name { font-family: 'Fredoka One', cursive; font-size: 1.1rem; margin-bottom: 4px; }
+.game-card-group { font-size: 0.72rem; font-weight: 800; opacity: 0.7; letter-spacing: 1px; text-transform: uppercase; }
+.game-card-letters { font-size: 1.1rem; direction: rtl; margin-top: 8px; letter-spacing: 3px; opacity: 0.8; }
+
+.gc-snake { background: linear-gradient(135deg, #0d3b1e, #1a5c2e); }
+.gc-jet   { background: linear-gradient(135deg, #0d1f3b, #1a3a6e); }
+.gc-run   { background: linear-gradient(135deg, #3b0d2e, #6e1a5c); }
+.gc-car   { background: linear-gradient(135deg, #3b2200, #6e4200); }
+
+.hub-footer { margin-top: 32px; text-align: center; font-size: 0.72rem; color: var(--text-dim); }
+.hub-footer span { color: var(--primary); font-weight: 800; }
+
+/* ── RESULT OVERLAY ── */
+.result-overlay { display: none; }
+.result-overlay.show { display: flex; }
+.result-trophy { font-size: 4rem; margin-bottom: 12px; animation: float 2s ease-in-out infinite; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.result-stars { font-size: 2rem; letter-spacing: 6px; margin-bottom: 16px; }
+.result-stats { display: flex; gap: 12px; justify-content: center; margin-bottom: 20px; }
+.result-stat { background: rgba(255,255,255,0.08); border-radius: 14px; padding: 12px 18px; min-width: 80px; }
+.result-stat .num { font-family: 'Fredoka One', cursive; font-size: 1.8rem; }
+.result-stat .lbl { font-size: 0.7rem; color: var(--text-dim); font-weight: 700; }
+.result-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.result-btns button { flex: 1; min-width: 120px; }
+
+/* confetti */
+.confetti-piece { position: fixed; width: 8px; height: 8px; top: -8px; animation: fall linear forwards; z-index: 999; pointer-events: none; }
+@keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
+@media (max-width: 400px) {
+  .games-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .game-card { padding: 14px 10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HUB ══════════════ -->
+<div id="hub" class="screen active">
+  <div class="hub-header">
+    <div class="hub-logo">Jawi<span>Kids</span></div>
+    <div class="hub-sub">Huruf Jawi Tunggal</div>
+    <div class="hub-tagline">Pilih permainan untuk mula! 🎮</div>
+  </div>
+
+  <div class="games-grid">
+    <div class="game-card gc-snake" onclick="launchGame('snake')">
+      <span class="game-card-emoji">🐍</span>
+      <div class="game-card-name">Snake</div>
+      <div class="game-card-group">Kumpulan A · Perahu</div>
+      <div class="game-card-letters">ب ت ث ن ي</div>
+    </div>
+    <div class="game-card gc-jet" onclick="launchGame('jet')">
+      <span class="game-card-emoji">✈️</span>
+      <div class="game-card-name">Jet Tembak</div>
+      <div class="game-card-group">Kumpulan C · Lengkung</div>
+      <div class="game-card-letters">د ذ ر ز و</div>
+    </div>
+    <div class="game-card gc-run" onclick="launchGame('run')">
+      <span class="game-card-emoji">🏃</span>
+      <div class="game-card-name">Lumba Lari</div>
+      <div class="game-card-group">Kumpulan E · Kepala Bulat</div>
+      <div class="game-card-letters">ع غ ف ق</div>
+    </div>
+    <div class="game-card gc-car" onclick="launchGame('car')">
+      <span class="game-card-emoji">🏎️</span>
+      <div class="game-card-name">Lumba Kereta</div>
+      <div class="game-card-group">Kumpulan F · Huruf Unik</div>
+      <div class="game-card-letters">ا ل م ك ه ة</div>
+    </div>
+  </div>
+
+  <div class="hub-footer">
+    JawiKids · <span>Direka oleh Ustaz Wan</span>
+  </div>
+</div>
+
+<!-- ══════════════ SNAKE GAME ══════════════ -->
+<div id="snakeScreen" class="screen">
+  <div class="hud">
+    <div class="hud-logo">Jawi<span>Kids</span> 🐍</div>
+    <div class="hud-score">⭐ <span id="snakeScore">0</span></div>
+    <button class="hud-btn" onclick="showHub()">← Keluar</button>
+  </div>
+  <canvas id="snakeCanvas"></canvas>
+
+  <!-- Q Panel -->
+  <div class="overlay-panel" id="snakeQPanel" style="display:none;">
+    <div class="panel-box">
+      <div class="panel-title">🐍 Soalan!</div>
+      <div class="q-prompt">
+        <div id="snakeQChar" class="q-char"></div>
+        <div id="snakeQHint" class="q-hint"></div>
+      </div>
+      <div class="choices" id="snakeChoices"></div>
+      <div class="feedback" id="snakeFeedback"></div>
+    </div>
+  </div>
+
+  <!-- Start Panel -->
+  <div class="overlay-panel" id="snakeStartPanel">
+    <div class="panel-box">
+      <div class="panel-title">🐍 Snake Jawi</div>
+      <div class="panel-sub">Kumpulan A · Bentuk Perahu<br>ب ت ث ن ي</div>
+      <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:20px;">Guna butang arah untuk gerak ular. Makan makanan untuk dapat soalan. Jawab betul = tumbuh! Jawab salah = nyawa kurang!</p>
+      <button class="btn-main" onclick="startSnake()">▶ Mula Permainan</button>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="overlay-panel result-overlay" id="snakeResult">
+    <div class="panel-box">
+      <div class="result-trophy" id="snakeTrophy">🏆</div>
+      <div class="panel-title" id="snakeResultTitle">Tahniah!</div>
+      <div class="result-stars" id="snakeStars">⭐⭐⭐</div>
+      <div class="result-stats">
+        <div class="result-stat"><div class="num" style="color:var(--green)" id="snakeRScore">0</div><div class="lbl">Skor</div></div>
+        <div class="result-stat"><div class="num" style="color:var(--accent)" id="snakeRCorrect">0</div><div class="lbl">Betul</div></div>
+        <div class="result-stat"><div class="num" style="color:var(--red)" id="snakeRWrong">0</div><div class="lbl">Salah</div></div>
+      </div>
+      <div class="result-btns">
+        <button class="btn-main" onclick="startSnake()">🔁 Cuba Lagi</button>
+        <button class="btn-main purple" onclick="showHub()">🏠 Menu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ JET GAME ══════════════ -->
+<div id="jetScreen" class="screen">
+  <div class="hud">
+    <div class="hud-logo">Jawi<span>Kids</span> ✈️</div>
+    <div class="hud-score">⭐ <span id="jetScore">0</span></div>
+    <button class="hud-btn" onclick="showHub()">← Keluar</button>
+  </div>
+  <canvas id="jetCanvas"></canvas>
+
+  <div class="overlay-panel" id="jetQPanel" style="display:none;">
+    <div class="panel-box">
+      <div class="panel-title">✈️ Tembak!</div>
+      <div class="q-prompt">
+        <div id="jetQChar" class="q-char"></div>
+        <div id="jetQHint" class="q-hint"></div>
+      </div>
+      <div class="choices" id="jetChoices"></div>
+      <div class="feedback" id="jetFeedback"></div>
+    </div>
+  </div>
+
+  <div class="overlay-panel" id="jetStartPanel">
+    <div class="panel-box">
+      <div class="panel-title">✈️ Jet Tembak</div>
+      <div class="panel-sub">Kumpulan C · Bentuk Lengkung<br>د ذ ر ز و</div>
+      <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:20px;">Tembak sasaran untuk dapat soalan. Jawab betul = +skor! Jet akan makin laju!</p>
+      <button class="btn-main" onclick="startJet()">▶ Mula Permainan</button>
+    </div>
+  </div>
+
+  <div class="overlay-panel result-overlay" id="jetResult">
+    <div class="panel-box">
+      <div class="result-trophy" id="jetTrophy">🏆</div>
+      <div class="panel-title" id="jetResultTitle">Tahniah!</div>
+      <div class="result-stars" id="jetStars">⭐⭐⭐</div>
+      <div class="result-stats">
+        <div class="result-stat"><div class="num" style="color:var(--green)" id="jetRScore">0</div><div class="lbl">Skor</div></div>
+        <div class="result-stat"><div class="num" style="color:var(--accent)" id="jetRCorrect">0</div><div class="lbl">Betul</div></div>
+        <div class="result-stat"><div class="num" style="color:var(--red)" id="jetRWrong">0</div><div class="lbl">Salah</div></div>
+      </div>
+      <div class="result-btns">
+        <button class="btn-main" onclick="startJet()">🔁 Cuba Lagi</button>
+        <button class="btn-main purple" onclick="showHub()">🏠 Menu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ RUN GAME ══════════════ -->
+<div id="runScreen" class="screen">
+  <div class="hud">
+    <div class="hud-logo">Jawi<span>Kids</span> 🏃</div>
+    <div class="hud-score">⭐ <span id="runScore">0</span></div>
+    <button class="hud-btn" onclick="showHub()">← Keluar</button>
+  </div>
+  <canvas id="runCanvas"></canvas>
+
+  <div class="overlay-panel" id="runQPanel" style="display:none;">
+    <div class="panel-box">
+      <div class="panel-title">🏃 Lari!</div>
+      <div class="q-prompt">
+        <div id="runQChar" class="q-char"></div>
+        <div id="runQHint" class="q-hint"></div>
+      </div>
+      <div class="choices" id="runChoices"></div>
+      <div class="feedback" id="runFeedback"></div>
+    </div>
+  </div>
+
+  <div class="overlay-panel" id="runStartPanel">
+    <div class="panel-box">
+      <div class="panel-title">🏃 Lumba Lari</div>
+      <div class="panel-sub">Kumpulan E · Kepala Bulat<br>ع غ ف ق</div>
+      <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:20px;">Jawab soalan untuk berlari lebih laju! Jawab betul = mara ke hadapan. Jawab salah = lawan menyusul!</p>
+      <button class="btn-main" onclick="startRun()">▶ Mula Permainan</button>
+    </div>
+  </div>
+
+  <div class="overlay-panel result-overlay" id="runResult">
+    <div class="panel-box">
+      <div class="result-trophy" id="runTrophy">🏆</div>
+      <div class="panel-title" id="runResultTitle">Tahniah!</div>
+      <div class="result-stars" id="runStars">⭐⭐⭐</div>
+      <div class="result-stats">
+        <div class="result-stat"><div class="num" style="color:var(--green)" id="runRScore">0</div><div class="lbl">Skor</div></div>
+        <div class="result-stat"><div class="num" style="color:var(--accent)" id="runRCorrect">0</div><div class="lbl">Betul</div></div>
+        <div class="result-stat"><div class="num" style="color:var(--red)" id="runRWrong">0</div><div class="lbl">Salah</div></div>
+      </div>
+      <div class="result-btns">
+        <button class="btn-main" onclick="startRun()">🔁 Cuba Lagi</button>
+        <button class="btn-main purple" onclick="showHub()">🏠 Menu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ CAR GAME ══════════════ -->
+<div id="carScreen" class="screen">
+  <div class="hud">
+    <div class="hud-logo">Jawi<span>Kids</span> 🏎️</div>
+    <div class="hud-score">⭐ <span id="carScore">0</span></div>
+    <button class="hud-btn" onclick="showHub()">← Keluar</button>
+  </div>
+  <canvas id="carCanvas"></canvas>
+
+  <div class="overlay-panel" id="carQPanel" style="display:none;">
+    <div class="panel-box">
+      <div class="panel-title">🏎️ Pandu!</div>
+      <div class="q-prompt">
+        <div id="carQChar" class="q-char"></div>
+        <div id="carQHint" class="q-hint"></div>
+      </div>
+      <div class="choices" id="carChoices"></div>
+      <div class="feedback" id="carFeedback"></div>
+    </div>
+  </div>
+
+  <div class="overlay-panel" id="carStartPanel">
+    <div class="panel-box">
+      <div class="panel-title">🏎️ Lumba Kereta</div>
+      <div class="panel-sub">Kumpulan F · Huruf Unik<br>ا ل م ك ه ة</div>
+      <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:20px;">Jawab soalan untuk pandu lebih laju! Jawab betul = mara. Jawab salah = lawan mengejar!</p>
+      <button class="btn-main" onclick="startCar()">▶ Mula Permainan</button>
+    </div>
+  </div>
+
+  <div class="overlay-panel result-overlay" id="carResult">
+    <div class="panel-box">
+      <div class="result-trophy" id="carTrophy">🏆</div>
+      <div class="panel-title" id="carResultTitle">Tahniah!</div>
+      <div class="result-stars" id="carStars">⭐⭐⭐</div>
+      <div class="result-stats">
+        <div class="result-stat"><div class="num" style="color:var(--green)" id="carRScore">0</div><div class="lbl">Skor</div></div>
+        <div class="result-stat"><div class="num" style="color:var(--accent)" id="carRCorrect">0</div><div class="lbl">Betul</div></div>
+        <div class="result-stat"><div class="num" style="color:var(--red)" id="carRWrong">0</div><div class="lbl">Salah</div></div>
+      </div>
+      <div class="result-btns">
+        <button class="btn-main" onclick="startCar()">🔁 Cuba Lagi</button>
+        <button class="btn-main purple" onclick="showHub()">🏠 Menu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════
+const LETTER_GROUPS = {
+  snake: [
+    { char:'ب', name:'Ba', dots:'Satu titik bawah', word:'Baju', wordEmoji:'👕' },
+    { char:'ت', name:'Ta', dots:'Dua titik atas', word:'Tali', wordEmoji:'🪢' },
+    { char:'ث', name:'Tha', dots:'Tiga titik atas', word:'Salji', wordEmoji:'❄️' },
+    { char:'ن', name:'Nun', dots:'Satu titik atas', word:'Nuri', wordEmoji:'🦜' },
+    { char:'ي', name:'Ya', dots:'Dua titik bawah', word:'Yakin', wordEmoji:'💪' },
+  ],
+  jet: [
+    { char:'د', name:'Dal', dots:'Tiada titik', word:'Daun', wordEmoji:'🍃' },
+    { char:'ذ', name:'Zal', dots:'Satu titik atas', word:'Zat', wordEmoji:'⚗️' },
+    { char:'ر', name:'Ra', dots:'Tiada titik', word:'Roti', wordEmoji:'🍞' },
+    { char:'ز', name:'Zai', dots:'Satu titik atas', word:'Zaitun', wordEmoji:'🫒' },
+    { char:'و', name:'Wau', dots:'Tiada titik', word:'Warna', wordEmoji:'🎨' },
+  ],
+  run: [
+    { char:'ع', name:'Ain', dots:'Tiada titik', word:'Amal', wordEmoji:'🤲' },
+    { char:'غ', name:'Ghain', dots:'Satu titik atas', word:'Ghaib', wordEmoji:'👻' },
+    { char:'ف', name:'Fa', dots:'Satu titik atas', word:'Fajar', wordEmoji:'🌅' },
+    { char:'ق', name:'Qaf', dots:'Dua titik atas', word:'Qamar', wordEmoji:'🌙' },
+  ],
+  car: [
+    { char:'ا', name:'Alif', dots:'Tiada titik', word:'Ayam', wordEmoji:'🐔' },
+    { char:'ل', name:'Lam', dots:'Tiada titik', word:'Lampu', wordEmoji:'💡' },
+    { char:'م', name:'Mim', dots:'Tiada titik', word:'Meja', wordEmoji:'🪑' },
+    { char:'ك', name:'Kaf', dots:'Tiada titik', word:'Kapal', wordEmoji:'🚢' },
+    { char:'ه', name:'Ha', dots:'Tiada titik', word:'Hujan', wordEmoji:'🌧️' },
+    { char:'ة', name:'Ta Marbutah', dots:'Dua titik atas', word:'Madrasah', wordEmoji:'🏫' },
+  ]
+};
+
+const ALL_LETTERS = [
+  {char:'ا',name:'Alif'},{char:'ب',name:'Ba'},{char:'ت',name:'Ta'},{char:'ث',name:'Tha'},
+  {char:'ج',name:'Jim'},{char:'ح',name:'Ha'},{char:'خ',name:'Kha'},{char:'د',name:'Dal'},
+  {char:'ذ',name:'Zal'},{char:'ر',name:'Ra'},{char:'ز',name:'Zai'},{char:'س',name:'Sin'},
+  {char:'ش',name:'Syin'},{char:'ص',name:'Sad'},{char:'ض',name:'Dad'},{char:'ع',name:'Ain'},
+  {char:'غ',name:'Ghain'},{char:'ف',name:'Fa'},{char:'ق',name:'Qaf'},{char:'ك',name:'Kaf'},
+  {char:'ل',name:'Lam'},{char:'م',name:'Mim'},{char:'ن',name:'Nun'},{char:'ه',name:'Ha'},
+  {char:'و',name:'Wau'},{char:'ي',name:'Ya'},{char:'ة',name:'Ta Marbutah'}
+];
+
+// ── SOALAN ──
+function makeQuestion(letter) {
+  const modes = ['char2name','name2char','emoji2char'];
+  const mode = modes[Math.floor(Math.random() * modes.length)];
+  return { letter, mode };
+}
+
+function renderQuestion(q, charEl, hintEl, choicesEl, feedbackEl, onAnswer) {
+  const { letter, mode } = q;
+  feedbackEl.textContent = '';
+  feedbackEl.className = 'feedback';
+
+  if (mode === 'char2name') {
+    charEl.textContent = letter.char;
+    charEl.style.fontSize = '5rem';
+    hintEl.textContent = 'Apakah nama huruf ini?';
+    const correct = { label: letter.name, isCorrect: true };
+    const wrongs = shuffle(ALL_LETTERS.filter(l => l.name !== letter.name)).slice(0,3).map(l => ({ label: l.name, isCorrect: false }));
+    renderChoiceButtons(shuffle([correct,...wrongs]), choicesEl, feedbackEl, onAnswer, 'name');
+  } else if (mode === 'emoji2char') {
+    charEl.textContent = letter.wordEmoji;
+    charEl.style.fontSize = '4rem';
+    hintEl.textContent = `${letter.word} — pilih huruf!`;
+    renderJawiChoices(letter, choicesEl, feedbackEl, onAnswer);
+  } else {
+    charEl.textContent = letter.name;
+    charEl.style.fontSize = '2.2rem';
+    hintEl.textContent = 'Pilih huruf yang betul!';
+    renderJawiChoices(letter, choicesEl, feedbackEl, onAnswer);
+  }
+}
+
+function renderJawiChoices(letter, choicesEl, feedbackEl, onAnswer) {
+  const correct = { char: letter.char, name: letter.name, isCorrect: true };
+  const wrongs = shuffle(ALL_LETTERS.filter(l => l.char !== letter.char)).slice(0,3).map(l => ({ ...l, isCorrect: false }));
+  const choices = shuffle([correct, ...wrongs]);
+  choicesEl.innerHTML = choices.map(c => `
+    <button class="choice-btn" onclick="handleChoice(this, ${c.isCorrect}, '${c.name}', '${letter.name}')" data-correct="${c.isCorrect}">
+      <span class="choice-jawi">${c.char}</span>
+    </button>`).join('');
+  choicesEl._onAnswer = onAnswer;
+  choicesEl._correctName = letter.name;
+}
+
+function renderChoiceButtons(choices, choicesEl, feedbackEl, onAnswer, type) {
+  choicesEl.innerHTML = choices.map(c => `
+    <button class="choice-btn" onclick="handleChoice(this, ${c.isCorrect}, '${c.label}', '${c.isCorrect ? c.label : ''}')" data-correct="${c.isCorrect}">
+      ${c.label}
+    </button>`).join('');
+  choicesEl._onAnswer = onAnswer;
+}
+
+function handleChoice(btn, isCorrect, chosen, correct) {
+  const choicesEl = btn.closest('.choices');
+  if (!choicesEl) return;
+  const onAnswer = choicesEl._onAnswer;
+  const btns = choicesEl.querySelectorAll('.choice-btn');
+  btns.forEach(b => b.disabled = true);
+  if (isCorrect) {
+    btn.classList.add('correct');
+  } else {
+    btn.classList.add('wrong');
+    btns.forEach(b => { if (b.dataset.correct === 'true') b.classList.add('reveal'); });
+  }
+  const feedbackEl = choicesEl.closest('.panel-box').querySelector('.feedback');
+  if (feedbackEl) {
+    feedbackEl.textContent = isCorrect ? randomPraise() : 'Salah! Cuba lagi 💪';
+    feedbackEl.className = 'feedback ' + (isCorrect ? 'ok' : 'fail');
+  }
+  if (onAnswer) setTimeout(() => onAnswer(isCorrect), 900);
+}
+
+function shuffle(a) { return [...a].sort(() => Math.random() - 0.5); }
+function randomPraise() {
+  return ['Bagus! 🎉','Betul! 🌟','Pandai! ✨','Hebat! 🔥','Tepat! 💪','Syabas! 🏅'][Math.floor(Math.random()*6)];
+}
+
+// ── SCREENS ──
+function showHub() {
+  stopAllGames();
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('hub').classList.add('active');
+}
+
+function launchGame(type) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(type + 'Screen').classList.add('active');
+  if (type === 'snake') initSnake();
+  else if (type === 'jet') initJet();
+  else if (type === 'run') initRun();
+  else if (type === 'car') initCar();
+}
+
+function stopAllGames() {
+  if (snakeLoop) clearInterval(snakeLoop);
+  if (jetLoop) cancelAnimationFrame(jetLoop);
+  if (runLoop) cancelAnimationFrame(runLoop);
+  if (carLoop) cancelAnimationFrame(carLoop);
+  snakeLoop = jetLoop = runLoop = carLoop = null;
+}
+
+// ── CONFETTI ──
+function launchConfetti() {
+  const colors = ['#FF6B35','#FFD93D','#4ECDC4','#9B5DE5','#06D6A0','#EF476F'];
+  for (let i = 0; i < 50; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.cssText = `left:${Math.random()*100}vw;background:${colors[Math.floor(Math.random()*6)]};width:${Math.random()*8+4}px;height:${Math.random()*8+4}px;border-radius:${Math.random()>0.5?'50%':'2px'};animation-duration:${Math.random()*2+1.5}s`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }, i * 40);
+  }
+}
+
+function showResult(prefix, score, correct, wrong) {
+  const pct = Math.round(correct / (correct + wrong || 1) * 100);
+  const stars = pct >= 80 ? 3 : pct >= 50 ? 2 : 1;
+  document.getElementById(prefix+'RScore').textContent = score;
+  document.getElementById(prefix+'RCorrect').textContent = correct;
+  document.getElementById(prefix+'RWrong').textContent = wrong;
+  document.getElementById(prefix+'Stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3-stars);
+  if (pct >= 80) {
+    document.getElementById(prefix+'Trophy').textContent = '🏆';
+    document.getElementById(prefix+'ResultTitle').textContent = 'Luar Biasa!';
+    launchConfetti();
+  } else if (pct >= 50) {
+    document.getElementById(prefix+'Trophy').textContent = '🌟';
+    document.getElementById(prefix+'ResultTitle').textContent = 'Bagus!';
+  } else {
+    document.getElementById(prefix+'Trophy').textContent = '💪';
+    document.getElementById(prefix+'ResultTitle').textContent = 'Teruskan!';
+  }
+  document.getElementById(prefix+'Result').classList.add('show');
+}
+
+// ══════════════════════════════════════════════════════
+// 🐍 SNAKE GAME
+// ══════════════════════════════════════════════════════
+let snakeLoop = null;
+let snakeState = {};
+
+function initSnake() {
+  document.getElementById('snakeResult').classList.remove('show');
+  document.getElementById('snakeStartPanel').style.display = 'flex';
+}
+
+function startSnake() {
+  document.getElementById('snakeStartPanel').style.display = 'none';
+  document.getElementById('snakeResult').classList.remove('show');
+  document.getElementById('snakeQPanel').style.display = 'none';
+
+  const canvas = document.getElementById('snakeCanvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const CELL = Math.floor(Math.min(canvas.width, canvas.height) / 20);
+  const cols = Math.floor(canvas.width / CELL);
+  const rows = Math.floor(canvas.height / CELL);
+
+  snakeState = {
+    canvas, ctx: canvas.getContext('2d'), CELL, cols, rows,
+    snake: [{ x: Math.floor(cols/2), y: Math.floor(rows/2) }],
+    dir: { x: 1, y: 0 }, nextDir: { x: 1, y: 0 },
+    food: null, score: 0, correct: 0, wrong: 0, lives: 3,
+    paused: false, speed: 200
+  };
+  spawnSnakeFood();
+  document.getElementById('snakeScore').textContent = '0';
+
+  if (snakeLoop) clearInterval(snakeLoop);
+  snakeLoop = setInterval(snakeTick, snakeState.speed);
+
+  // Controls
+  document.onkeydown = (e) => {
+    const d = snakeState.nextDir;
+    if (e.key === 'ArrowUp' && snakeState.dir.y !== 1) snakeState.nextDir = {x:0,y:-1};
+    if (e.key === 'ArrowDown' && snakeState.dir.y !== -1) snakeState.nextDir = {x:0,y:1};
+    if (e.key === 'ArrowLeft' && snakeState.dir.x !== 1) snakeState.nextDir = {x:-1,y:0};
+    if (e.key === 'ArrowRight' && snakeState.dir.x !== -1) snakeState.nextDir = {x:1,y:0};
+  };
+
+  // Mobile swipe controls
+  addSwipeControls(canvas, (dir) => {
+    if (dir === 'up' && snakeState.dir.y !== 1) snakeState.nextDir = {x:0,y:-1};
+    if (dir === 'down' && snakeState.dir.y !== -1) snakeState.nextDir = {x:0,y:1};
+    if (dir === 'left' && snakeState.dir.x !== 1) snakeState.nextDir = {x:-1,y:0};
+    if (dir === 'right' && snakeState.dir.x !== -1) snakeState.nextDir = {x:1,y:0};
+  });
+
+  // On-screen dpad
+  renderSnakeDpad();
+}
+
+function renderSnakeDpad() {
+  let dpad = document.getElementById('snakeDpad');
+  if (!dpad) {
+    dpad = document.createElement('div');
+    dpad.id = 'snakeDpad';
+    dpad.style.cssText = 'position:fixed;bottom:30px;right:20px;z-index:20;display:grid;grid-template-columns:44px 44px 44px;grid-template-rows:44px 44px 44px;gap:4px;';
+    dpad.innerHTML = `
+      <div></div>
+      <button onclick="snakeDirBtn(0,-1)" style="${dpadStyle()}">▲</button>
+      <div></div>
+      <button onclick="snakeDirBtn(-1,0)" style="${dpadStyle()}">◀</button>
+      <div style="background:rgba(255,255,255,0.05);border-radius:10px;"></div>
+      <button onclick="snakeDirBtn(1,0)" style="${dpadStyle()}">▶</button>
+      <div></div>
+      <button onclick="snakeDirBtn(0,1)" style="${dpadStyle()}">▼</button>
+      <div></div>`;
+    document.getElementById('snakeScreen').appendChild(dpad);
+  }
+  dpad.style.display = 'grid';
+}
+
+function dpadStyle() {
+  return 'background:rgba(255,255,255,0.12);border:2px solid rgba(255,255,255,0.2);border-radius:10px;color:white;font-size:1.1rem;cursor:pointer;width:44px;height:44px;';
+}
+
+function snakeDirBtn(x, y) {
+  if (x === 1 && snakeState.dir.x !== -1) snakeState.nextDir = {x:1,y:0};
+  if (x === -1 && snakeState.dir.x !== 1) snakeState.nextDir = {x:-1,y:0};
+  if (y === -1 && snakeState.dir.y !== 1) snakeState.nextDir = {x:0,y:-1};
+  if (y === 1 && snakeState.dir.y !== -1) snakeState.nextDir = {x:0,y:1};
+}
+
+function spawnSnakeFood() {
+  const s = snakeState;
+  let pos;
+  do {
+    pos = { x: Math.floor(Math.random() * s.cols), y: Math.floor(Math.random() * s.rows) };
+  } while (s.snake.some(seg => seg.x === pos.x && seg.y === pos.y));
+  const letter = s.letter = LETTER_GROUPS.snake[Math.floor(Math.random() * LETTER_GROUPS.snake.length)];
+  s.food = { ...pos, emoji: letter.wordEmoji };
+}
+
+function snakeTick() {
+  const s = snakeState;
+  if (s.paused) return;
+  s.dir = { ...s.nextDir };
+  const head = { x: s.snake[0].x + s.dir.x, y: s.snake[0].y + s.dir.y };
+
+  // Wall collision
+  if (head.x < 0 || head.x >= s.cols || head.y < 0 || head.y >= s.rows) { snakeDie(); return; }
+  // Self collision
+  if (s.snake.some(seg => seg.x === head.x && seg.y === head.y)) { snakeDie(); return; }
+
+  s.snake.unshift(head);
+
+  if (head.x === s.food.x && head.y === s.food.y) {
+    // Ate food — ask question
+    s.paused = true;
+    clearInterval(snakeLoop);
+    showSnakeQuestion();
+  } else {
+    s.snake.pop();
+  }
+  drawSnake();
+}
+
+function showSnakeQuestion() {
+  const s = snakeState;
+  const q = makeQuestion(s.letter);
+  const charEl = document.getElementById('snakeQChar');
+  const hintEl = document.getElementById('snakeQHint');
+  const choicesEl = document.getElementById('snakeChoices');
+  const feedbackEl = document.getElementById('snakeFeedback');
+  document.getElementById('snakeQPanel').style.display = 'flex';
+  renderQuestion(q, charEl, hintEl, choicesEl, feedbackEl, (correct) => {
+    document.getElementById('snakeQPanel').style.display = 'none';
+    if (correct) {
+      s.correct++;
+      s.score += 10;
+      document.getElementById('snakeScore').textContent = s.score;
+      // Grow — keep tail
+    } else {
+      s.wrong++;
+      s.snake.pop(); // Shrink
+      if (s.snake.length <= 1) { snakeGameOver(); return; }
+    }
+    spawnSnakeFood();
+    s.paused = false;
+    snakeLoop = setInterval(snakeTick, Math.max(80, s.speed - s.score * 2));
+    drawSnake();
+  });
+}
+
+function snakeDie() {
+  clearInterval(snakeLoop);
+  snakeGameOver();
+}
+
+function snakeGameOver() {
+  clearInterval(snakeLoop);
+  const s = snakeState;
+  const dpad = document.getElementById('snakeDpad');
+  if (dpad) dpad.style.display = 'none';
+  showResult('snake', s.score, s.correct, s.wrong);
+}
+
+function drawSnake() {
+  const s = snakeState;
+  const { ctx, canvas, CELL, snake, food } = s;
+  ctx.fillStyle = '#0a1628';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < s.cols; x++) { ctx.beginPath(); ctx.moveTo(x*CELL,0); ctx.lineTo(x*CELL,canvas.height); ctx.stroke(); }
+  for (let y = 0; y < s.rows; y++) { ctx.beginPath(); ctx.moveTo(0,y*CELL); ctx.lineTo(canvas.width,y*CELL); ctx.stroke(); }
+
+  // Food
+  ctx.font = `${CELL * 0.8}px serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(food.emoji, food.x * CELL + CELL/2, food.y * CELL + CELL/2);
+
+  // Snake
+  snake.forEach((seg, i) => {
+    const ratio = i / snake.length;
+    ctx.fillStyle = i === 0 ? '#06D6A0' : `hsl(${150 - ratio * 40}, 80%, ${40 + ratio * 10}%)`;
+    const pad = 2;
+    ctx.beginPath();
+    ctx.roundRect(seg.x*CELL+pad, seg.y*CELL+pad, CELL-pad*2, CELL-pad*2, 6);
+    ctx.fill();
+
+    // Eyes on head
+    if (i === 0) {
+      ctx.fillStyle = '#0a1628';
+      ctx.beginPath(); ctx.arc(seg.x*CELL+CELL*0.3, seg.y*CELL+CELL*0.35, CELL*0.12, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(seg.x*CELL+CELL*0.7, seg.y*CELL+CELL*0.35, CELL*0.12, 0, Math.PI*2); ctx.fill();
+    }
+  });
+
+  // Lives
+  ctx.font = '20px serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  ctx.fillText('❤️'.repeat(Math.max(0, 3 - s.wrong)), 10, 60);
+}
+
+// ══════════════════════════════════════════════════════
+// ✈️ JET GAME
+// ══════════════════════════════════════════════════════
+let jetLoop = null;
+let jetState = {};
+
+function initJet() {
+  document.getElementById('jetResult').classList.remove('show');
+  document.getElementById('jetStartPanel').style.display = 'flex';
+}
+
+function startJet() {
+  document.getElementById('jetStartPanel').style.display = 'none';
+  document.getElementById('jetResult').classList.remove('show');
+  document.getElementById('jetQPanel').style.display = 'none';
+
+  const canvas = document.getElementById('jetCanvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  jetState = {
+    canvas, ctx: canvas.getContext('2d'),
+    jetX: canvas.width / 2, jetY: canvas.height - 120,
+    bullets: [], targets: [], score: 0, correct: 0, wrong: 0,
+    paused: false, frameCount: 0, spawnRate: 90,
+    keys: {}
+  };
+
+  document.getElementById('jetScore').textContent = '0';
+
+  document.onkeydown = e => jetState.keys[e.key] = true;
+  document.onkeyup = e => jetState.keys[e.key] = false;
+
+  // Mobile controls
+  const screen = document.getElementById('jetScreen');
+  let touchX = null;
+  screen.ontouchstart = e => { touchX = e.touches[0].clientX; };
+  screen.ontouchmove = e => {
+    if (!jetState.paused) {
+      const dx = e.touches[0].clientX - touchX;
+      jetState.jetX = Math.max(30, Math.min(canvas.width - 30, jetState.jetX + dx));
+      touchX = e.touches[0].clientX;
+    }
+  };
+  screen.ontouchend = () => { if (!jetState.paused) jetShoot(); };
+
+  // Spawn initial targets
+  spawnJetTargets();
+
+  if (jetLoop) cancelAnimationFrame(jetLoop);
+  function loop() {
+    if (document.getElementById('jetScreen').classList.contains('active')) {
+      jetTick();
+      jetLoop = requestAnimationFrame(loop);
+    }
+  }
+  jetLoop = requestAnimationFrame(loop);
+}
+
+function spawnJetTargets() {
+  const s = jetState;
+  const letters = LETTER_GROUPS.jet;
+  const count = 4;
+  s.targets = [];
+  for (let i = 0; i < count; i++) {
+    const letter = letters[Math.floor(Math.random() * letters.length)];
+    s.targets.push({
+      x: (s.canvas.width / count) * i + s.canvas.width / (count * 2),
+      y: 80 + Math.random() * (s.canvas.height * 0.4),
+      letter, w: 70, h: 70, hit: false, opacity: 1
+    });
+  }
+}
+
+function jetShoot() {
+  jetState.bullets.push({ x: jetState.jetX, y: jetState.jetY - 30, speed: 12 });
+}
+
+function jetTick() {
+  const s = jetState;
+  if (s.paused) return;
+  s.frameCount++;
+
+  // Move jet
+  const speed = 5;
+  if (s.keys['ArrowLeft'] || s.keys['a']) s.jetX = Math.max(30, s.jetX - speed);
+  if (s.keys['ArrowRight'] || s.keys['d']) s.jetX = Math.min(s.canvas.width - 30, s.jetX + speed);
+  if (s.keys[' '] && s.frameCount % 15 === 0) jetShoot();
+
+  // Move bullets
+  s.bullets = s.bullets.filter(b => b.y > -10);
+  s.bullets.forEach(b => b.y -= b.speed);
+
+  // Check hits
+  s.bullets.forEach((b, bi) => {
+    s.targets.forEach((t, ti) => {
+      if (!t.hit && Math.abs(b.x - t.x) < t.w/2 && Math.abs(b.y - t.y) < t.h/2) {
+        t.hit = true;
+        s.bullets.splice(bi, 1);
+        s.paused = true;
+        showJetQuestion(t.letter, ti);
+      }
+    });
+  });
+
+  // Check if all targets gone
+  if (s.targets.every(t => t.hit)) {
+    setTimeout(() => { if (!s.paused) spawnJetTargets(); }, 500);
+  }
+
+  // End game after 20 questions
+  if (s.correct + s.wrong >= 20) { jetGameOver(); return; }
+
+  drawJet();
+}
+
+function showJetQuestion(letter, targetIdx) {
+  const s = jetState;
+  const q = makeQuestion(letter);
+  const charEl = document.getElementById('jetQChar');
+  const hintEl = document.getElementById('jetQHint');
+  const choicesEl = document.getElementById('jetChoices');
+  const feedbackEl = document.getElementById('jetFeedback');
+  document.getElementById('jetQPanel').style.display = 'flex';
+  renderQuestion(q, charEl, hintEl, choicesEl, feedbackEl, (correct) => {
+    document.getElementById('jetQPanel').style.display = 'none';
+    if (correct) {
+      s.correct++;
+      s.score += 15;
+      document.getElementById('jetScore').textContent = s.score;
+    } else {
+      s.wrong++;
+      s.score = Math.max(0, s.score - 5);
+      document.getElementById('jetScore').textContent = s.score;
+      // Respawn target
+      const letters = LETTER_GROUPS.jet;
+      s.targets[targetIdx] = {
+        x: Math.random() * (s.canvas.width - 80) + 40,
+        y: 80 + Math.random() * (s.canvas.height * 0.3),
+        letter: letters[Math.floor(Math.random() * letters.length)],
+        w: 70, h: 70, hit: false, opacity: 1
+      };
+    }
+    if (s.targets.every(t => t.hit)) spawnJetTargets();
+    s.paused = false;
+  });
+}
+
+function jetGameOver() {
+  cancelAnimationFrame(jetLoop);
+  jetLoop = null;
+  showResult('jet', jetState.score, jetState.correct, jetState.wrong);
+}
+
+function drawJet() {
+  const s = jetState;
+  const { ctx, canvas } = s;
+
+  // Sky background
+  const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  grad.addColorStop(0, '#000428'); grad.addColorStop(1, '#004e92');
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Stars
+  ctx.fillStyle = 'white';
+  for (let i = 0; i < 40; i++) {
+    const sx = ((i * 137 + s.frameCount * 0.2) % canvas.width);
+    const sy = ((i * 97) % (canvas.height * 0.5));
+    ctx.fillRect(sx, sy, 1.5, 1.5);
+  }
+
+  // Targets
+  s.targets.forEach(t => {
+    if (t.hit) return;
+    // Target box
+    ctx.fillStyle = 'rgba(255,107,53,0.2)';
+    ctx.strokeStyle = '#FF6B35';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(t.x - t.w/2, t.y - t.h/2, t.w, t.h, 12); ctx.fill(); ctx.stroke();
+    // Letter
+    ctx.fillStyle = 'white'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `bold 32px serif`; ctx.direction = 'rtl';
+    ctx.fillText(t.letter.char, t.x, t.y);
+    ctx.direction = 'ltr';
+    // Cross-hair
+    ctx.strokeStyle = 'rgba(255,107,53,0.5)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(t.x - t.w/2 - 8, t.y); ctx.lineTo(t.x + t.w/2 + 8, t.y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(t.x, t.y - t.h/2 - 8); ctx.lineTo(t.x, t.y + t.h/2 + 8); ctx.stroke();
+  });
+
+  // Bullets
+  s.bullets.forEach(b => {
+    ctx.fillStyle = '#FFD93D';
+    ctx.beginPath(); ctx.ellipse(b.x, b.y, 3, 8, 0, 0, Math.PI*2); ctx.fill();
+    // Glow
+    ctx.fillStyle = 'rgba(255,217,61,0.3)';
+    ctx.beginPath(); ctx.ellipse(b.x, b.y, 6, 14, 0, 0, Math.PI*2); ctx.fill();
+  });
+
+  // Jet
+  const jx = s.jetX, jy = s.jetY;
+  ctx.save(); ctx.translate(jx, jy);
+  // Body
+  ctx.fillStyle = '#4ECDC4';
+  ctx.beginPath(); ctx.moveTo(0,-30); ctx.lineTo(14,10); ctx.lineTo(-14,10); ctx.closePath(); ctx.fill();
+  // Wings
+  ctx.fillStyle = '#2aada5';
+  ctx.beginPath(); ctx.moveTo(-14,5); ctx.lineTo(-34,20); ctx.lineTo(-10,10); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(14,5); ctx.lineTo(34,20); ctx.lineTo(10,10); ctx.closePath(); ctx.fill();
+  // Engine glow
+  ctx.fillStyle = `rgba(255,150,50,${0.5 + Math.sin(s.frameCount * 0.3) * 0.3})`;
+  ctx.beginPath(); ctx.ellipse(0, 14, 6, 10, 0, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+
+  // HUD info
+  ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '12px Nunito'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  ctx.fillText(`Soalan: ${s.correct + s.wrong}/20`, 10, 60);
+}
+
+// ══════════════════════════════════════════════════════
+// 🏃 LUMBA LARI
+// ══════════════════════════════════════════════════════
+let runLoop = null;
+let runState = {};
+
+function initRun() {
+  document.getElementById('runResult').classList.remove('show');
+  document.getElementById('runStartPanel').style.display = 'flex';
+}
+
+function startRun() {
+  document.getElementById('runStartPanel').style.display = 'none';
+  document.getElementById('runResult').classList.remove('show');
+  document.getElementById('runQPanel').style.display = 'none';
+
+  const canvas = document.getElementById('runCanvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const totalQ = 10;
+  runState = {
+    canvas, ctx: canvas.getContext('2d'),
+    playerPos: 0, cpuPos: 0,
+    score: 0, correct: 0, wrong: 0,
+    totalQ, questionsDone: 0,
+    paused: false, frameCount: 0,
+    cpuSpeed: 0.3, nextQ: 60,
+    particles: []
+  };
+
+  document.getElementById('runScore').textContent = '0';
+
+  // Touch to answer
+  canvas.onclick = () => { if (!runState.paused) askRunQuestion(); };
+
+  if (runLoop) cancelAnimationFrame(runLoop);
+  function loop() {
+    if (document.getElementById('runScreen').classList.contains('active')) {
+      runTick();
+      runLoop = requestAnimationFrame(loop);
+    }
+  }
+  runLoop = requestAnimationFrame(loop);
+
+  // Auto-ask first question
+  setTimeout(() => askRunQuestion(), 1500);
+}
+
+function askRunQuestion() {
+  const s = runState;
+  if (s.paused || s.questionsDone >= s.totalQ) return;
+  s.paused = true;
+  const letters = LETTER_GROUPS.run;
+  const letter = letters[Math.floor(Math.random() * letters.length)];
+  const q = makeQuestion(letter);
+  const charEl = document.getElementById('runQChar');
+  const hintEl = document.getElementById('runQHint');
+  const choicesEl = document.getElementById('runChoices');
+  const feedbackEl = document.getElementById('runFeedback');
+  document.getElementById('runQPanel').style.display = 'flex';
+  renderQuestion(q, charEl, hintEl, choicesEl, feedbackEl, (correct) => {
+    document.getElementById('runQPanel').style.display = 'none';
+    s.questionsDone++;
+    if (correct) {
+      s.correct++;
+      s.score += 10;
+      s.playerPos = Math.min(1, s.playerPos + 0.12);
+      document.getElementById('runScore').textContent = s.score;
+      // Particles
+      addRunParticles();
+    } else {
+      s.wrong++;
+      s.cpuPos = Math.min(1, s.cpuPos + 0.1);
+    }
+    s.paused = false;
+    if (s.questionsDone >= s.totalQ) {
+      setTimeout(() => runGameOver(), 1000);
+    } else {
+      setTimeout(() => askRunQuestion(), 2000);
+    }
+  });
+}
+
+function addRunParticles() {
+  const s = runState;
+  for (let i = 0; i < 8; i++) {
+    s.particles.push({
+      x: s.canvas.width * 0.15,
+      y: s.canvas.height * 0.55,
+      vx: (Math.random() - 0.5) * 4,
+      vy: -Math.random() * 4 - 2,
+      life: 1, color: ['#FFD93D','#06D6A0','#FF6B35'][Math.floor(Math.random()*3)]
+    });
+  }
+}
+
+function runTick() {
+  const s = runState;
+  s.frameCount++;
+  // CPU slowly advances
+  if (!s.paused && s.questionsDone < s.totalQ) {
+    s.cpuPos = Math.min(1, s.cpuPos + 0.0008);
+  }
+  // Update particles
+  s.particles = s.particles.filter(p => p.life > 0);
+  s.particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.life -= 0.04; });
+  drawRun();
+}
+
+function runGameOver() {
+  cancelAnimationFrame(runLoop);
+  runLoop = null;
+  const s = runState;
+  const won = s.playerPos > s.cpuPos;
+  if (won) s.score += 20;
+  showResult('run', s.score, s.correct, s.wrong);
+}
+
+function drawRun() {
+  const s = runState;
+  const { ctx, canvas } = s;
+  const W = canvas.width, H = canvas.height;
+
+  // Sky
+  const skyGrad = ctx.createLinearGradient(0,0,0,H);
+  skyGrad.addColorStop(0,'#87CEEB'); skyGrad.addColorStop(1,'#E0F4FF');
+  ctx.fillStyle = skyGrad; ctx.fillRect(0,0,W,H);
+
+  // Clouds
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  [[W*0.2,H*0.15,60],[W*0.6,H*0.1,80],[W*0.85,H*0.2,50]].forEach(([cx,cy,r]) => {
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx+r*0.6,cy+r*0.1,r*0.7,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx-r*0.5,cy+r*0.1,r*0.6,0,Math.PI*2); ctx.fill();
+  });
+
+  // Track
+  const trackY = H * 0.5;
+  const trackH = H * 0.18;
+  ctx.fillStyle = '#c8a96e'; ctx.fillRect(0, trackY, W, trackH);
+  ctx.fillStyle = '#b8904f'; ctx.fillRect(0, trackY, W, 4);
+  ctx.fillStyle = '#b8904f'; ctx.fillRect(0, trackY + trackH - 4, W, 4);
+  // Lane lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 3; ctx.setLineDash([30,20]);
+  ctx.beginPath(); ctx.moveTo(0, trackY + trackH/2); ctx.lineTo(W, trackY + trackH/2); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Finish line
+  const finX = W * 0.88;
+  for (let i = 0; i < 8; i++) {
+    ctx.fillStyle = i%2===0 ? 'black' : 'white';
+    ctx.fillRect(finX, trackY + i*(trackH/8), 16, trackH/8);
+  }
+  ctx.fillStyle = '#EF476F'; ctx.fillRect(finX, trackY - 40, 4, 40);
+  ctx.fillStyle = '#EF476F'; ctx.font = 'bold 14px Nunito'; ctx.textAlign = 'center';
+  ctx.fillText('PENAMAT', finX + 8, trackY - 48);
+
+  // Progress bars at top
+  const barW = W * 0.7, barX = W * 0.15, barY = 80;
+  ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.roundRect(barX, barY, barW, 20, 10); ctx.fill();
+  ctx.fillStyle = '#06D6A0'; ctx.beginPath(); ctx.roundRect(barX, barY, barW * s.playerPos, 20, 10); ctx.fill();
+
+  ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.roundRect(barX, barY+28, barW, 20, 10); ctx.fill();
+  ctx.fillStyle = '#EF476F'; ctx.beginPath(); ctx.roundRect(barX, barY+28, barW * s.cpuPos, 20, 10); ctx.fill();
+
+  ctx.font = 'bold 13px Nunito'; ctx.textAlign = 'right'; ctx.fillStyle = 'white';
+  ctx.fillText('🟢 Kamu', barX - 8, barY + 15);
+  ctx.fillText('🔴 Lawan', barX - 8, barY + 43);
+
+  // Player runner (lane 1)
+  const pX = W * 0.1 + (finX - W * 0.1) * s.playerPos;
+  drawRunner(ctx, pX, trackY + trackH * 0.35, '#06D6A0', s.frameCount, 1);
+
+  // CPU runner (lane 2)
+  const cX = W * 0.1 + (finX - W * 0.1) * s.cpuPos;
+  drawRunner(ctx, cX, trackY + trackH * 0.75, '#EF476F', s.frameCount * 0.8, -1);
+
+  // Particles
+  s.particles.forEach(p => {
+    ctx.globalAlpha = p.life;
+    ctx.fillStyle = p.color;
+    ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+
+  // Tap hint
+  if (!s.paused && s.questionsDone < s.totalQ) {
+    ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '13px Nunito'; ctx.textAlign = 'center';
+    ctx.fillText('Soalan seterusnya akan muncul sebentar lagi...', W/2, H * 0.78);
+  }
+}
+
+function drawRunner(ctx, x, y, color, frame, dir) {
+  const t = frame * 0.18;
+  const bodyH = 28, legLen = 16;
+  ctx.fillStyle = color;
+  // Head
+  ctx.beginPath(); ctx.arc(x, y - bodyH - 10, 10, 0, Math.PI*2); ctx.fill();
+  // Body
+  ctx.fillRect(x - 5, y - bodyH, 10, bodyH);
+  // Legs
+  ctx.strokeStyle = color; ctx.lineWidth = 4; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x, y);
+  ctx.lineTo(x + Math.sin(t) * legLen * dir, y + legLen); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x, y);
+  ctx.lineTo(x - Math.sin(t) * legLen * dir, y + legLen); ctx.stroke();
+  // Arms
+  ctx.beginPath(); ctx.moveTo(x, y - bodyH * 0.6);
+  ctx.lineTo(x + Math.cos(t) * 14 * dir, y - bodyH * 0.3); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x, y - bodyH * 0.6);
+  ctx.lineTo(x - Math.cos(t) * 14 * dir, y - bodyH * 0.3); ctx.stroke();
+}
+
+// ══════════════════════════════════════════════════════
+// 🏎️ LUMBA KERETA
+// ══════════════════════════════════════════════════════
+let carLoop = null;
+let carState = {};
+
+function initCar() {
+  document.getElementById('carResult').classList.remove('show');
+  document.getElementById('carStartPanel').style.display = 'flex';
+}
+
+function startCar() {
+  document.getElementById('carStartPanel').style.display = 'none';
+  document.getElementById('carResult').classList.remove('show');
+  document.getElementById('carQPanel').style.display = 'none';
+
+  const canvas = document.getElementById('carCanvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const totalQ = 10;
+  carState = {
+    canvas, ctx: canvas.getContext('2d'),
+    playerLap: 0, cpuLap: 0,
+    playerAngle: Math.PI, cpuAngle: Math.PI + 0.3,
+    score: 0, correct: 0, wrong: 0,
+    totalQ, questionsDone: 0,
+    paused: false, frameCount: 0,
+    cpuSpeed: 0.008
+  };
+
+  document.getElementById('carScore').textContent = '0';
+  canvas.onclick = () => { if (!carState.paused) askCarQuestion(); };
+
+  if (carLoop) cancelAnimationFrame(carLoop);
+  function loop() {
+    if (document.getElementById('carScreen').classList.contains('active')) {
+      carTick();
+      carLoop = requestAnimationFrame(loop);
+    }
+  }
+  carLoop = requestAnimationFrame(loop);
+  setTimeout(() => askCarQuestion(), 2000);
+}
+
+function askCarQuestion() {
+  const s = carState;
+  if (s.paused || s.questionsDone >= s.totalQ) return;
+  s.paused = true;
+  const letters = LETTER_GROUPS.car;
+  const letter = letters[Math.floor(Math.random() * letters.length)];
+  const q = makeQuestion(letter);
+  const charEl = document.getElementById('carQChar');
+  const hintEl = document.getElementById('carQHint');
+  const choicesEl = document.getElementById('carChoices');
+  const feedbackEl = document.getElementById('carFeedback');
+  document.getElementById('carQPanel').style.display = 'flex';
+  renderQuestion(q, charEl, hintEl, choicesEl, feedbackEl, (correct) => {
+    document.getElementById('carQPanel').style.display = 'none';
+    s.questionsDone++;
+    if (correct) {
+      s.correct++;
+      s.score += 10;
+      s.playerAngle += 0.35;
+      document.getElementById('carScore').textContent = s.score;
+    } else {
+      s.wrong++;
+      s.cpuAngle += 0.28;
+    }
+    s.paused = false;
+    if (s.questionsDone >= s.totalQ) {
+      setTimeout(() => carGameOver(), 1500);
+    } else {
+      setTimeout(() => askCarQuestion(), 2200);
+    }
+  });
+}
+
+function carTick() {
+  const s = carState;
+  s.frameCount++;
+  if (!s.paused) {
+    s.cpuAngle += s.cpuSpeed;
+    s.playerAngle += s.cpuSpeed * 0.6;
+  }
+  drawCar();
+}
+
+function carGameOver() {
+  cancelAnimationFrame(carLoop);
+  carLoop = null;
+  const s = carState;
+  const playerLaps = Math.floor(s.playerAngle / (Math.PI * 2));
+  const cpuLaps = Math.floor(s.cpuAngle / (Math.PI * 2));
+  if (playerLaps >= cpuLaps) s.score += 20;
+  showResult('car', s.score, s.correct, s.wrong);
+}
+
+function drawCar() {
+  const s = carState;
+  const { ctx, canvas } = s;
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2;
+  const rx = Math.min(W * 0.35, 180), ry = Math.min(H * 0.28, 120);
+
+  // Background
+  const bgGrad = ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H));
+  bgGrad.addColorStop(0,'#1a1a2e'); bgGrad.addColorStop(1,'#0d0d1a');
+  ctx.fillStyle = bgGrad; ctx.fillRect(0,0,W,H);
+
+  // Track outer
+  ctx.strokeStyle = '#888'; ctx.lineWidth = 50; ctx.setLineDash([]);
+  ctx.beginPath(); ctx.ellipse(cx, cy, rx + 25, ry + 25, 0, 0, Math.PI*2); ctx.stroke();
+
+  // Track inner
+  ctx.fillStyle = bgGrad;
+  ctx.beginPath(); ctx.ellipse(cx, cy, rx - 25, ry - 25, 0, 0, Math.PI*2); ctx.fill();
+
+  // Lane markings
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 2; ctx.setLineDash([20,15]);
+  ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Start line
+  ctx.strokeStyle = 'white'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(cx + rx - 25, cy); ctx.lineTo(cx + rx + 25, cy); ctx.stroke();
+
+  // Lap info
+  const playerLaps = Math.floor(s.playerAngle / (Math.PI*2));
+  const cpuLaps = Math.floor(s.cpuAngle / (Math.PI*2));
+  ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = 'bold 14px Nunito'; ctx.textAlign = 'center';
+  ctx.fillText(`🟢 Pusingan kamu: ${playerLaps}`, cx, H * 0.12);
+  ctx.fillText(`🔴 Pusingan lawan: ${cpuLaps}`, cx, H * 0.17);
+
+  // CPU car (red)
+  const cpA = s.cpuAngle;
+  const cpX = cx + Math.cos(cpA) * rx;
+  const cpY = cy + Math.sin(cpA) * (ry + 8);
+  drawCarShape(ctx, cpX, cpY, cpA + Math.PI/2, '#EF476F', '🔴');
+
+  // Player car (green)
+  const plA = s.playerAngle;
+  const plX = cx + Math.cos(plA) * (rx - 12);
+  const plY = cy + Math.sin(plA) * (ry - 4);
+  drawCarShape(ctx, plX, plY, plA + Math.PI/2, '#06D6A0', '🟢');
+
+  // Q counter
+  ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '12px Nunito'; ctx.textAlign = 'left';
+  ctx.fillText(`Soalan: ${s.questionsDone}/${s.totalQ}`, 10, 60);
+}
+
+function drawCarShape(ctx, x, y, angle, color, emoji) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  // Car body
+  ctx.fillStyle = color;
+  ctx.beginPath(); ctx.roundRect(-10, -18, 20, 36, 6); ctx.fill();
+  // Windshield
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.beginPath(); ctx.roundRect(-7, -14, 14, 10, 3); ctx.fill();
+  // Wheels
+  ctx.fillStyle = '#333';
+  [[-10,-12],[10,-12],[-10,10],[10,10]].forEach(([wx,wy]) => {
+    ctx.beginPath(); ctx.ellipse(wx, wy, 4, 5, 0, 0, Math.PI*2); ctx.fill();
+  });
+  ctx.restore();
+}
+
+// ══════════════════════════════════════════════════════
+// SWIPE CONTROLS
+// ══════════════════════════════════════════════════════
+function addSwipeControls(el, callback) {
+  let sx, sy;
+  el.addEventListener('touchstart', e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, {passive:true});
+  el.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) > Math.abs(dy)) callback(dx > 0 ? 'right' : 'left');
+    else callback(dy > 0 ? 'down' : 'up');
+  }, {passive:true});
+}
+
+// ── INIT ──
+showHub();
+</script>
+</body>
+</html>
