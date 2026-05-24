@@ -784,8 +784,10 @@ let currentStudentData = null;
 async function initAuth() {
   // Cek guru session
   if (sb) {
-    const { data:{ session } } = await sb.auth.getSession();
-    if (session) { window.location.href = 'dashboard.html'; return; }
+    try {
+      const { data:{ session } } = await sb.auth.getSession();
+      if (session) { window.location.href = 'dashboard.html'; return; }
+    } catch(e) { console.warn('Session check:', e.message); }
   }
   // Cek murid session
   const raw = localStorage.getItem('jawikids_student');
@@ -794,7 +796,13 @@ async function initAuth() {
       currentStudentData = JSON.parse(raw);
       document.getElementById('userBadge').style.display = 'flex';
       document.getElementById('ubName').textContent = currentStudentData.nama;
-    } catch(e) {}
+    } catch(e) {
+      localStorage.removeItem('jawikids_student');
+      window.location.href = 'auth.html';
+    }
+  } else {
+    // Tiada session — redirect ke halaman login
+    window.location.href = 'auth.html';
   }
 }
 
