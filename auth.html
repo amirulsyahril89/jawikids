@@ -4,12 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JawiKids — Log Masuk</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #FFF8F0;
   --primary: #FF6B35;
-  --primary-dark: #e85520;
   --purple: #9B5DE5;
   --purple-light: #EDE0FF;
   --green: #06D6A0;
@@ -18,9 +17,8 @@
   --text: #2D2D2D;
   --text-light: #7A7A7A;
   --card: #FFFFFF;
-  --border: #F0F0F0;
+  --border: #EEEEEE;
   --shadow: 0 8px 32px rgba(0,0,0,0.10);
-  --radius: 20px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -32,256 +30,79 @@ body {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  position: relative;
-  overflow: hidden;
 }
-body::before {
-  content: '';
-  position: fixed; top: -150px; right: -150px;
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, #FFD93D33, transparent 70%);
-  pointer-events: none;
-}
-body::after {
-  content: '';
-  position: fixed; bottom: -100px; left: -100px;
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, #9B5DE522, transparent 70%);
-  pointer-events: none;
-}
-
-/* ── HEADER ── */
-.brand {
-  text-align: center;
-  margin-bottom: 28px;
-  position: relative; z-index: 1;
-}
-.brand-logo {
-  font-family: 'Fredoka One', cursive;
-  font-size: 2.4rem;
-  color: var(--primary);
-  line-height: 1;
-}
+.brand { text-align: center; margin-bottom: 24px; }
+.brand-logo { font-family: 'Fredoka One', cursive; font-size: 2.2rem; color: var(--primary); }
 .brand-logo span { color: var(--purple); }
-.brand-sub {
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  color: var(--text-light);
-  margin-top: 3px;
-}
+.brand-sub { font-size: 0.65rem; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-light); margin-top: 2px; }
 
-/* ── ROLE TABS ── */
 .role-tabs {
-  display: flex;
-  background: var(--card);
-  border-radius: 16px;
-  padding: 6px;
-  gap: 6px;
-  margin-bottom: 24px;
-  width: 100%;
-  max-width: 400px;
-  box-shadow: var(--shadow);
-  position: relative; z-index: 1;
-}
-.role-tab {
-  flex: 1; padding: 12px 8px;
-  border: none; border-radius: 12px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.95rem; font-weight: 800;
-  cursor: pointer; transition: all 0.2s;
-  background: transparent; color: var(--text-light);
-}
-.role-tab.active {
-  color: white;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-.role-tab.active.guru { background: var(--purple); }
-.role-tab.active.murid { background: var(--primary); }
-
-/* ── CARD ── */
-.auth-card {
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 28px 24px;
+  display: flex; background: var(--card); border-radius: 16px;
+  padding: 6px; gap: 6px; margin-bottom: 20px;
   width: 100%; max-width: 400px;
   box-shadow: var(--shadow);
-  position: relative; z-index: 1;
 }
-.card-title {
-  font-family: 'Fredoka One', cursive;
-  font-size: 1.4rem;
-  margin-bottom: 4px;
+.role-tab {
+  flex: 1; padding: 11px 8px; border: none; border-radius: 12px;
+  font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 800;
+  cursor: pointer; transition: all 0.2s; background: transparent; color: var(--text-light);
 }
-.card-sub {
-  font-size: 0.82rem;
-  color: var(--text-light);
-  font-weight: 600;
-  margin-bottom: 24px;
-}
+.role-tab.active { color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.role-tab.murid.active { background: var(--primary); }
+.role-tab.guru.active  { background: var(--purple); }
 
-/* ── FORM ── */
-.field { margin-bottom: 16px; }
-.field label {
-  display: block;
-  font-size: 0.78rem;
-  font-weight: 800;
-  color: var(--text-light);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 6px;
+.card {
+  background: var(--card); border-radius: 20px; padding: 26px 22px;
+  width: 100%; max-width: 400px; box-shadow: var(--shadow);
 }
+.card-title { font-family: 'Fredoka One', cursive; font-size: 1.35rem; margin-bottom: 4px; }
+.card-sub { font-size: 0.8rem; color: var(--text-light); font-weight: 600; margin-bottom: 22px; }
+
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 0.75rem; font-weight: 800; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
 .field input {
-  width: 100%;
-  padding: 14px 16px;
-  border: 2px solid var(--border);
-  border-radius: 14px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text);
-  background: var(--bg);
-  transition: border-color 0.2s;
-  outline: none;
+  width: 100%; padding: 13px 15px; border: 2px solid var(--border);
+  border-radius: 13px; font-family: 'Nunito', sans-serif; font-size: 0.95rem;
+  font-weight: 700; color: var(--text); background: var(--bg);
+  outline: none; transition: border-color 0.2s;
 }
 .field input:focus { border-color: var(--primary); background: white; }
-.field input.error { border-color: var(--red); }
-.field .input-hint {
-  font-size: 0.72rem;
-  color: var(--text-light);
-  font-weight: 600;
-  margin-top: 4px;
-}
+.input-hint { font-size: 0.7rem; color: var(--text-light); font-weight: 600; margin-top: 4px; }
 
-/* Kod kelas display */
-.kod-display {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-.kod-display input { flex: 1; letter-spacing: 4px; font-size: 1.2rem; text-transform: uppercase; }
-.kod-badge {
-  background: var(--primary);
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 800;
-  padding: 4px 10px;
-  border-radius: 8px;
-  white-space: nowrap;
-}
-
-/* ── BUTTONS ── */
 .btn-submit {
-  width: 100%;
-  padding: 16px;
-  border: none;
-  border-radius: 14px;
-  font-family: 'Fredoka One', cursive;
-  font-size: 1.15rem;
-  color: white;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(.34,1.56,.64,1);
-  margin-top: 8px;
-  position: relative;
-  overflow: hidden;
+  width: 100%; padding: 15px; border: none; border-radius: 13px;
+  font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: white;
+  cursor: pointer; transition: all 0.18s; margin-top: 6px;
 }
-.btn-submit.guru-btn {
-  background: var(--purple);
-  box-shadow: 0 6px 20px rgba(155,93,229,0.35);
-}
-.btn-submit.murid-btn {
-  background: var(--primary);
-  box-shadow: 0 6px 20px rgba(255,107,53,0.35);
-}
-.btn-submit:hover { transform: translateY(-2px) scale(1.02); }
-.btn-submit:active { transform: scale(0.98); }
+.btn-murid { background: var(--primary); box-shadow: 0 6px 20px rgba(255,107,53,0.35); }
+.btn-guru  { background: var(--purple); box-shadow: 0 6px 20px rgba(155,93,229,0.35); }
+.btn-submit:hover { transform: translateY(-2px); opacity: 0.93; }
 .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-.btn-submit .spinner {
-  display: none;
-  width: 20px; height: 20px;
-  border: 3px solid rgba(255,255,255,0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto;
-}
-.btn-submit.loading .btn-text { display: none; }
-.btn-submit.loading .spinner { display: block; }
-@keyframes spin { to { transform: rotate(360deg); } }
 
-.btn-link {
-  background: none; border: none;
-  color: var(--primary); font-family: 'Nunito', sans-serif;
-  font-size: 0.85rem; font-weight: 800;
-  cursor: pointer; text-decoration: underline;
-  padding: 0;
-}
-.btn-link.purple { color: var(--purple); }
+.divider { display: flex; align-items: center; gap: 10px; margin: 16px 0; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.divider span { font-size: 0.72rem; font-weight: 700; color: var(--text-light); }
 
-/* Divider */
-.divider {
-  display: flex; align-items: center; gap: 10px;
-  margin: 18px 0;
-}
-.divider::before, .divider::after {
-  content: ''; flex: 1; height: 1px; background: var(--border);
-}
-.divider span { font-size: 0.75rem; font-weight: 700; color: var(--text-light); }
+.btn-link { background: none; border: none; color: var(--purple); font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 800; cursor: pointer; text-decoration: underline; }
 
-/* ── ALERT ── */
-.alert {
-  padding: 12px 14px;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  margin-bottom: 16px;
-  display: none;
-}
-.alert.error { background: #FDDDE6; color: var(--red); display: block; }
-.alert.success { background: #D0F7EE; color: #04a87d; display: block; }
-.alert.info { background: var(--purple-light); color: var(--purple); display: block; }
+.alert { padding: 11px 14px; border-radius: 11px; font-size: 0.82rem; font-weight: 700; margin-bottom: 14px; display: none; }
+.alert.error   { background: #FDDDE6; color: var(--red);   display: block; }
+.alert.success { background: #D0F7EE; color: #04a87d;      display: block; }
 
-/* ── VERIFY EMAIL NOTICE ── */
-.verify-notice {
-  text-align: center;
-  padding: 24px;
-  display: none;
-}
-.verify-notice.show { display: block; }
-.verify-icon { font-size: 3rem; margin-bottom: 12px; }
-.verify-title { font-family: 'Fredoka One', cursive; font-size: 1.4rem; margin-bottom: 8px; }
-.verify-sub { font-size: 0.85rem; color: var(--text-light); font-weight: 600; line-height: 1.5; }
+.student-found { background: #D0F7EE; border-radius: 10px; padding: 10px 13px; margin: 8px 0 12px; font-size: 0.82rem; font-weight: 700; color: #04a87d; display: none; }
+.student-found.show { display: block; }
 
-/* ── STUDENT FOUND ── */
-.student-found {
-  background: #D0F7EE;
-  border-radius: 12px;
-  padding: 12px 14px;
-  margin-top: 10px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #04a87d;
-  display: none;
-  align-items: center;
-  gap: 8px;
-}
-.student-found.show { display: flex; }
+/* Sub-panel dalam guru (login/daftar/reset/verify) */
+.sub-panel { display: none; }
+.sub-panel.active { display: block; }
 
-/* ── FOOTER ── */
-.auth-footer {
-  margin-top: 20px;
-  text-align: center;
-  font-size: 0.72rem;
-  color: var(--text-light);
-  font-weight: 600;
-  position: relative; z-index: 1;
-}
-.auth-footer strong { color: var(--primary); }
+.verify-box { text-align: center; padding: 10px 0; }
+.verify-box .v-icon { font-size: 3rem; margin-bottom: 10px; }
+.verify-box .v-title { font-family: 'Fredoka One', cursive; font-size: 1.3rem; margin-bottom: 8px; }
+.verify-box .v-sub { font-size: 0.82rem; color: var(--text-light); font-weight: 600; line-height: 1.6; }
 
-/* ── SCREENS ── */
-.pane { display: none; }
-.pane.active { display: block; }
+.footer { margin-top: 20px; text-align: center; font-size: 0.7rem; color: var(--text-light); font-weight: 600; }
+.footer strong { color: var(--primary); }
 </style>
 </head>
 <body>
@@ -291,229 +112,168 @@ body::after {
   <div class="brand-sub">Huruf Jawi Tunggal</div>
 </div>
 
-<!-- Role tabs -->
+<!-- Tab pilihan -->
 <div class="role-tabs">
   <button class="role-tab murid active" onclick="switchRole('murid')">🎒 Murid</button>
-  <button class="role-tab guru" onclick="switchRole('guru')">👩‍🏫 Guru</button>
+  <button class="role-tab guru"         onclick="switchRole('guru')">👩‍🏫 Guru</button>
 </div>
 
-<!-- ══════════ MURID PANE ══════════ -->
-<div class="auth-card" id="muridPane">
+<!-- ═══ KAD MURID ═══ -->
+<div class="card" id="muridCard">
   <div class="card-title">👋 Hai, Murid!</div>
   <div class="card-sub">Taip nama dan kod kelas untuk masuk</div>
-
   <div class="alert" id="muridAlert"></div>
-
   <div class="field">
     <label>Nama Penuh Kamu</label>
     <input type="text" id="muridNama" placeholder="cth: Ahmad bin Ali" autocomplete="off">
   </div>
-
   <div class="field">
     <label>Kod Kelas</label>
-    <div class="kod-display">
-      <input type="text" id="muridKod" placeholder="cth: JAWI-3B-X7K2" maxlength="15" autocomplete="off"
-             oninput="this.value=this.value.toUpperCase(); verifyKodKelas()">
-    </div>
+    <input type="text" id="muridKod" placeholder="cth: ARIF-X7K2" maxlength="15" autocomplete="off"
+           oninput="this.value=this.value.toUpperCase();cariKelas()">
     <div class="input-hint">Tanya guru kamu untuk kod kelas</div>
   </div>
-
-  <div class="student-found" id="studentFound">
-    <span>✅</span>
-    <span id="studentFoundMsg">Selamat kembali!</span>
-  </div>
-
-  <button class="btn-submit murid-btn" id="muridSubmit" onclick="muridLogin()">
-    <span class="btn-text">🚀 Mula Belajar!</span>
-    <div class="spinner"></div>
-  </button>
+  <div class="student-found" id="kelasFound"></div>
+  <button class="btn-submit btn-murid" id="muridBtn" onclick="muridLogin()">🚀 Mula Belajar!</button>
 </div>
 
-<!-- ══════════ GURU PANE ══════════ -->
-<div class="auth-card pane" id="guruPane">
+<!-- ═══ KAD GURU ═══ -->
+<div class="card" id="guruCard" style="display:none;">
 
-  <!-- Login form -->
-  <div id="guruLoginForm" class="pane active">
+  <!-- Log Masuk -->
+  <div class="sub-panel active" id="panelLogin">
     <div class="card-title">👩‍🏫 Log Masuk Guru</div>
     <div class="card-sub">Masuk dengan akaun guru anda</div>
-
-    <div class="alert" id="guruLoginAlert"></div>
-
+    <div class="alert" id="loginAlert"></div>
     <div class="field">
       <label>Emel</label>
-      <input type="email" id="guruLoginEmail" placeholder="guru@sekolah.edu.my" autocomplete="email">
+      <input type="email" id="loginEmail" placeholder="guru@sekolah.edu.my" autocomplete="email">
     </div>
     <div class="field">
       <label>Kata Laluan</label>
-      <input type="password" id="guruLoginPassword" placeholder="••••••••" autocomplete="current-password">
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
     </div>
-
-    <button class="btn-submit guru-btn" id="guruLoginSubmit" onclick="guruLogin()">
-      <span class="btn-text">🔐 Log Masuk</span>
-      <div class="spinner"></div>
-    </button>
-
+    <button class="btn-submit btn-guru" id="loginBtn" onclick="guruLogin()">🔐 Log Masuk</button>
     <div class="divider"><span>atau</span></div>
-    <div style="text-align:center;font-size:0.85rem;font-weight:700;color:var(--text-light);">
-      Belum ada akaun?
-      <button class="btn-link purple" onclick="showPane('guruRegisterForm')">Daftar sekarang</button>
+    <div style="text-align:center;font-size:0.83rem;font-weight:700;color:var(--text-light);">
+      Belum ada akaun? <button class="btn-link" onclick="tunjuk('panelDaftar')">Daftar sekarang</button>
     </div>
-    <div style="text-align:center;margin-top:10px;font-size:0.82rem;font-weight:700;color:var(--text-light);">
-      <button class="btn-link purple" onclick="showResetPassword()">Lupa kata laluan?</button>
+    <div style="text-align:center;margin-top:10px;">
+      <button class="btn-link" onclick="tunjuk('panelReset')">Lupa kata laluan?</button>
     </div>
   </div>
 
-  <!-- Register form -->
-  <div id="guruRegisterForm" class="pane">
+  <!-- Daftar -->
+  <div class="sub-panel" id="panelDaftar">
     <div class="card-title">✨ Daftar Guru</div>
-    <div class="card-sub">Cipta akaun guru baru — pengesahan emel diperlukan</div>
-
-    <div class="alert" id="guruRegisterAlert"></div>
-
+    <div class="card-sub">Cipta akaun guru baru</div>
+    <div class="alert" id="daftarAlert"></div>
     <div class="field">
       <label>Nama Penuh</label>
-      <input type="text" id="guruRegisterNama" placeholder="cth: Ustaz Wan Mohd">
+      <input type="text" id="daftarNama" placeholder="cth: Ustaz Wan">
     </div>
     <div class="field">
       <label>Emel</label>
-      <input type="email" id="guruRegisterEmail" placeholder="guru@sekolah.edu.my">
+      <input type="email" id="daftarEmail" placeholder="guru@sekolah.edu.my">
     </div>
     <div class="field">
       <label>Kata Laluan</label>
-      <input type="password" id="guruRegisterPassword" placeholder="Minimum 8 aksara">
-      <div class="input-hint">Minimum 8 aksara, gabungkan huruf dan nombor</div>
+      <input type="password" id="daftarPass" placeholder="Minimum 8 aksara">
+      <div class="input-hint">Minimum 8 aksara</div>
     </div>
     <div class="field">
       <label>Sahkan Kata Laluan</label>
-      <input type="password" id="guruRegisterPassword2" placeholder="Taip semula kata laluan">
+      <input type="password" id="daftarPass2" placeholder="Taip semula">
     </div>
-
-    <button class="btn-submit guru-btn" id="guruRegisterSubmit" onclick="guruRegister()">
-      <span class="btn-text">📧 Hantar Pengesahan Emel</span>
-      <div class="spinner"></div>
-    </button>
-
+    <button class="btn-submit btn-guru" id="daftarBtn" onclick="guruDaftar()">📧 Hantar Pengesahan Emel</button>
     <div class="divider"><span>atau</span></div>
-    <div style="text-align:center;font-size:0.85rem;font-weight:700;color:var(--text-light);">
-      Sudah ada akaun?
-      <button class="btn-link purple" onclick="showPane('guruLoginForm')">Log masuk</button>
+    <div style="text-align:center;font-size:0.83rem;font-weight:700;color:var(--text-light);">
+      Sudah ada akaun? <button class="btn-link" onclick="tunjuk('panelLogin')">Log masuk</button>
     </div>
   </div>
 
-  <!-- Verify email notice -->
-  <div id="guruVerifyNotice" class="pane">
-    <div class="verify-notice show">
-      <div class="verify-icon">📧</div>
-      <div class="verify-title">Semak Emel Anda!</div>
-      <div class="verify-sub" id="verifySubText">
-        Kami telah hantar emel pengesahan ke alamat anda.<br><br>
-        Klik pautan dalam emel untuk aktifkan akaun, kemudian log masuk semula.
-      </div>
-      <div style="margin-top:20px;">
-        <button class="btn-link purple" onclick="showPane('guruLoginForm')">← Kembali ke Log Masuk</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Reset password -->
-  <div id="guruResetForm" class="pane">
+  <!-- Reset -->
+  <div class="sub-panel" id="panelReset">
     <div class="card-title">🔑 Reset Kata Laluan</div>
     <div class="card-sub">Masukkan emel untuk pautan reset</div>
-    <div class="alert" id="guruResetAlert"></div>
+    <div class="alert" id="resetAlert"></div>
     <div class="field">
       <label>Emel</label>
-      <input type="email" id="guruResetEmail" placeholder="guru@sekolah.edu.my">
+      <input type="email" id="resetEmail" placeholder="guru@sekolah.edu.my">
     </div>
-    <button class="btn-submit guru-btn" id="guruResetSubmit" onclick="guruResetPassword()">
-      <span class="btn-text">📨 Hantar Pautan Reset</span>
-      <div class="spinner"></div>
-    </button>
+    <button class="btn-submit btn-guru" id="resetBtn" onclick="guruReset()">📨 Hantar Pautan Reset</button>
     <div style="text-align:center;margin-top:14px;">
-      <button class="btn-link purple" onclick="showPane('guruLoginForm')">← Kembali</button>
+      <button class="btn-link" onclick="tunjuk('panelLogin')">← Kembali</button>
+    </div>
+  </div>
+
+  <!-- Verify -->
+  <div class="sub-panel" id="panelVerify">
+    <div class="verify-box">
+      <div class="v-icon">📧</div>
+      <div class="v-title">Semak Emel Anda!</div>
+      <div class="v-sub" id="verifyMsg">Emel pengesahan telah dihantar.</div>
+      <div style="margin-top:20px;">
+        <button class="btn-link" onclick="tunjuk('panelLogin')">← Kembali Log Masuk</button>
+      </div>
     </div>
   </div>
 
 </div>
 
-<div class="auth-footer">
-  JawiKids · <strong>Direka oleh Ustaz Wan</strong><br>
-  <span style="opacity:0.6;">© 2025 Hak Cipta Terpelihara</span>
+<div class="footer">
+  JawiKids · <strong>Direka oleh Ustaz Wan</strong>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL     = 'https://purjcpdckxvbcselbhby.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1cmpjcGRja3h2YmNzZWxiaGJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MjgxNTQsImV4cCI6MjA5NTIwNDE1NH0.pS8Ml1YP2o4xkBxfhrD49oEjGNuNghd3hj5Q-TqgwbQ';
+// ── SUPABASE ──
+const SUPA_URL = 'https://purjcpdckxvbcselbhby.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1cmpjcGRja3h2YmNzZWxiaGJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MjgxNTQsImV4cCI6MjA5NTIwNDE1NH0.pS8Ml1YP2o4xkBxfhrD49oEjGNuNghd3hj5Q-TqgwbQ';
+const db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
-let supabase;
-try {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-} catch(e) {
-  console.error('Supabase init error:', e);
+// ── NAVIGATION ──
+function switchRole(role) {
+  document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.role-tab.' + role).classList.add('active');
+  document.getElementById('muridCard').style.display = role === 'murid' ? 'block' : 'none';
+  document.getElementById('guruCard').style.display  = role === 'guru'  ? 'block' : 'none';
+}
+
+function tunjuk(panelId) {
+  document.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
 }
 
 // ── HELPERS ──
-function setLoading(btnId, loading) {
-  const btn = document.getElementById(btnId);
-  if (!btn) return;
-  btn.disabled = loading;
-  btn.classList.toggle('loading', loading);
-}
-
-function showAlert(id, msg, type = 'error') {
+function showAlert(id, msg, type) {
   const el = document.getElementById(id);
-  if (!el) return;
   el.textContent = msg;
-  el.className = `alert ${type}`;
+  el.className = 'alert ' + (type || 'error');
+}
+function clearAlert(id) { document.getElementById(id).className = 'alert'; }
+
+function setLoading(btnId, loading, text) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  if (text) btn.textContent = loading ? '⏳ Tunggu...' : text;
 }
 
-function clearAlert(id) {
-  const el = document.getElementById(id);
-  if (el) el.className = 'alert';
-}
-
-function showPane(paneId) {
-  document.querySelectorAll('#guruPane .pane').forEach(p => p.classList.remove('active'));
-  const el = document.getElementById(paneId);
-  if (el) el.classList.add('active');
-}
-
-function showResetPassword() { showPane('guruResetForm'); }
-
-// ── ROLE SWITCH ──
-function switchRole(role) {
-  document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
-  document.querySelector(`.role-tab.${role}`).classList.add('active');
-  document.getElementById('muridPane').style.display = role === 'murid' ? 'block' : 'none';
-  document.getElementById('guruPane').style.display = role === 'guru' ? 'block' : 'none';
-}
-
-// ── KOD KELAS VERIFICATION ──
-let kodVerifyTimer = null;
-let classData = null;
-
-async function verifyKodKelas() {
-  clearTimeout(kodVerifyTimer);
-  const kod = document.getElementById('muridKod').value.trim().toUpperCase();
-  const foundEl = document.getElementById('studentFound');
-  foundEl.classList.remove('show');
-  if (kod.length < 6) return;
-
-  kodVerifyTimer = setTimeout(async () => {
-    const { data, error } = await supabase
-      .from('classes')
-      .select('id, nama_kelas, kod_kelas')
-      .eq('kod_kelas', kod)
-      .single();
-
+// ── CARI KELAS (murid taip kod) ──
+let kelasData = null;
+let cariTimer = null;
+function cariKelas() {
+  clearTimeout(cariTimer);
+  const kod = document.getElementById('muridKod').value.trim();
+  document.getElementById('kelasFound').classList.remove('show');
+  kelasData = null;
+  if (kod.length < 4) return;
+  cariTimer = setTimeout(async () => {
+    const { data } = await db.from('classes').select('id,nama_kelas,kod_kelas').eq('kod_kelas', kod).maybeSingle();
     if (data) {
-      classData = data;
-      document.getElementById('studentFoundMsg').textContent = `✅ Kelas: ${data.nama_kelas}`;
-      foundEl.classList.add('show');
-      clearAlert('muridAlert');
-    } else {
-      classData = null;
-      foundEl.classList.remove('show');
+      kelasData = data;
+      document.getElementById('kelasFound').textContent = '✅ Kelas: ' + data.nama_kelas;
+      document.getElementById('kelasFound').classList.add('show');
     }
   }, 600);
 }
@@ -522,184 +282,138 @@ async function verifyKodKelas() {
 async function muridLogin() {
   clearAlert('muridAlert');
   const nama = document.getElementById('muridNama').value.trim();
-  const kod = document.getElementById('muridKod').value.trim().toUpperCase();
-
+  const kod  = document.getElementById('muridKod').value.trim().toUpperCase();
   if (!nama) { showAlert('muridAlert', '⚠️ Sila masukkan nama penuh kamu.'); return; }
-  if (!kod) { showAlert('muridAlert', '⚠️ Sila masukkan kod kelas.'); return; }
-  if (!classData) {
-    // Try verify once more
-    const { data } = await supabase.from('classes').select('id, nama_kelas').eq('kod_kelas', kod).single();
-    if (!data) { showAlert('muridAlert', '❌ Kod kelas tidak sah. Semak semula dengan guru kamu.'); return; }
-    classData = data;
-  }
+  if (!kod)  { showAlert('muridAlert', '⚠️ Sila masukkan kod kelas.'); return; }
 
-  setLoading('muridSubmit', true);
+  setLoading('muridBtn', true, '🚀 Mula Belajar!');
 
   try {
-    // Cari atau cipta rekod murid
-    let { data: student, error } = await supabase
-      .from('students')
-      .select('id, nama, class_id')
-      .eq('nama', nama)
-      .eq('class_id', classData.id)
-      .single();
-
-    if (error && error.code === 'PGRST116') {
-      // Murid baru — cipta rekod
-      const { data: newStudent, error: insertErr } = await supabase
-        .from('students')
-        .insert({ nama, class_id: classData.id })
-        .select()
-        .single();
-
-      if (insertErr) throw insertErr;
-      student = newStudent;
-    } else if (error) {
-      throw error;
+    // Semak kod kelas
+    if (!kelasData) {
+      const { data } = await db.from('classes').select('id,nama_kelas,kod_kelas').eq('kod_kelas', kod).maybeSingle();
+      if (!data) { showAlert('muridAlert', '❌ Kod kelas tidak sah. Semak semula.'); return; }
+      kelasData = data;
     }
 
-    // Simpan dalam localStorage
+    // Cari atau cipta murid
+    let { data: murid, error } = await db.from('students')
+      .select('id,nama,class_id').eq('nama', nama).eq('class_id', kelasData.id).maybeSingle();
+
+    if (!murid) {
+      const { data: baru, error: err2 } = await db.from('students')
+        .insert({ nama, class_id: kelasData.id }).select().single();
+      if (err2) throw err2;
+      murid = baru;
+    }
+
     localStorage.setItem('jawikids_student', JSON.stringify({
-      id: student.id,
-      nama: student.nama,
-      class_id: classData.id,
-      nama_kelas: classData.nama_kelas,
-      kod_kelas: kod,
-      role: 'murid'
+      id: murid.id, nama: murid.nama,
+      class_id: kelasData.id, nama_kelas: kelasData.nama_kelas,
+      kod_kelas: kod, role: 'murid'
     }));
 
-    // Redirect ke app utama
     window.location.href = 'index.html';
 
-  } catch (err) {
-    showAlert('muridAlert', '❌ Ralat: ' + (err.message || 'Cuba lagi.'));
+  } catch(e) {
+    showAlert('muridAlert', '❌ ' + (e.message || 'Cuba lagi.'));
   } finally {
-    setLoading('muridSubmit', false);
+    setLoading('muridBtn', false, '🚀 Mula Belajar!');
   }
 }
 
 // ── GURU LOGIN ──
 async function guruLogin() {
-  clearAlert('guruLoginAlert');
-  const email = document.getElementById('guruLoginEmail').value.trim();
-  const password = document.getElementById('guruLoginPassword').value;
+  clearAlert('loginAlert');
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  if (!email) { showAlert('loginAlert', '⚠️ Sila masukkan emel.'); return; }
+  if (!pass)  { showAlert('loginAlert', '⚠️ Sila masukkan kata laluan.'); return; }
 
-  if (!email) { showAlert('guruLoginAlert', '⚠️ Sila masukkan emel.'); return; }
-  if (!password) { showAlert('guruLoginAlert', '⚠️ Sila masukkan kata laluan.'); return; }
-
-  setLoading('guruLoginSubmit', true);
-
+  setLoading('loginBtn', true, '🔐 Log Masuk');
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
     if (error) throw error;
-
-    localStorage.setItem('jawikids_guru', JSON.stringify({
-      id: data.user.id,
-      email: data.user.email,
-      role: 'guru'
-    }));
-
+    localStorage.setItem('jawikids_guru', JSON.stringify({ id: data.user.id, email: data.user.email, role: 'guru' }));
     window.location.href = 'dashboard.html';
-
-  } catch (err) {
-    const msg = err.message.includes('Invalid login')
-      ? '❌ Emel atau kata laluan salah.'
-      : err.message.includes('Email not confirmed')
-      ? '📧 Sila sahkan emel anda dahulu. Semak inbox/spam.'
-      : '❌ ' + err.message;
-    showAlert('guruLoginAlert', msg);
+  } catch(e) {
+    const msg = e.message.includes('Invalid') ? '❌ Emel atau kata laluan salah.'
+              : e.message.includes('confirmed') ? '📧 Sila sahkan emel dahulu. Semak inbox/spam.'
+              : '❌ ' + e.message;
+    showAlert('loginAlert', msg);
   } finally {
-    setLoading('guruLoginSubmit', false);
+    setLoading('loginBtn', false, '🔐 Log Masuk');
   }
 }
 
-// ── GURU REGISTER ──
-async function guruRegister() {
-  clearAlert('guruRegisterAlert');
-  const nama = document.getElementById('guruRegisterNama').value.trim();
-  const email = document.getElementById('guruRegisterEmail').value.trim();
-  const pass = document.getElementById('guruRegisterPassword').value;
-  const pass2 = document.getElementById('guruRegisterPassword2').value;
+// ── GURU DAFTAR ──
+async function guruDaftar() {
+  clearAlert('daftarAlert');
+  const nama  = document.getElementById('daftarNama').value.trim();
+  const email = document.getElementById('daftarEmail').value.trim();
+  const pass  = document.getElementById('daftarPass').value;
+  const pass2 = document.getElementById('daftarPass2').value;
 
-  if (!nama) { showAlert('guruRegisterAlert', '⚠️ Sila masukkan nama penuh.'); return; }
-  if (!email) { showAlert('guruRegisterAlert', '⚠️ Sila masukkan emel.'); return; }
-  if (pass.length < 8) { showAlert('guruRegisterAlert', '⚠️ Kata laluan minimum 8 aksara.'); return; }
-  if (pass !== pass2) { showAlert('guruRegisterAlert', '⚠️ Kata laluan tidak sepadan.'); return; }
+  if (!nama)           { showAlert('daftarAlert', '⚠️ Sila masukkan nama.'); return; }
+  if (!email)          { showAlert('daftarAlert', '⚠️ Sila masukkan emel.'); return; }
+  if (pass.length < 8) { showAlert('daftarAlert', '⚠️ Kata laluan minimum 8 aksara.'); return; }
+  if (pass !== pass2)  { showAlert('daftarAlert', '⚠️ Kata laluan tidak sepadan.'); return; }
 
-  setLoading('guruRegisterSubmit', true);
-
+  setLoading('daftarBtn', true, '📧 Hantar Pengesahan Emel');
   try {
-    const { data, error } = await supabase.auth.signUp({
-      email, password: pass,
-      options: { data: { nama, role: 'guru' } }
-    });
+    const { error } = await db.auth.signUp({ email, password: pass, options: { data: { nama } } });
     if (error) throw error;
-
-    document.getElementById('verifySubText').innerHTML =
-      `Emel pengesahan telah dihantar ke:<br><strong>${email}</strong><br><br>
-       Klik pautan dalam emel untuk aktifkan akaun, kemudian log masuk semula.<br><br>
-       <span style="opacity:0.7;font-size:0.8rem;">Jika tidak nampak dalam inbox, semak folder Spam.</span>`;
-
-    showPane('guruVerifyNotice');
-
-  } catch (err) {
-    const msg = err.message.includes('already registered')
-      ? '❌ Emel ini sudah didaftarkan. Cuba log masuk.'
-      : '❌ ' + err.message;
-    showAlert('guruRegisterAlert', msg);
+    document.getElementById('verifyMsg').innerHTML =
+      'Emel pengesahan dihantar ke:<br><strong>' + email + '</strong><br><br>' +
+      'Klik pautan dalam emel, kemudian log masuk.<br>' +
+      '<small style="opacity:0.7">Semak folder Spam jika tidak nampak.</small>';
+    tunjuk('panelVerify');
+  } catch(e) {
+    const msg = e.message.includes('already') ? '❌ Emel ini sudah didaftarkan. Cuba log masuk.' : '❌ ' + e.message;
+    showAlert('daftarAlert', msg);
   } finally {
-    setLoading('guruRegisterSubmit', false);
+    setLoading('daftarBtn', false, '📧 Hantar Pengesahan Emel');
   }
 }
 
-// ── GURU RESET PASSWORD ──
-async function guruResetPassword() {
-  clearAlert('guruResetAlert');
-  const email = document.getElementById('guruResetEmail').value.trim();
-  if (!email) { showAlert('guruResetAlert', '⚠️ Sila masukkan emel.'); return; }
-
-  setLoading('guruResetSubmit', true);
+// ── GURU RESET ──
+async function guruReset() {
+  clearAlert('resetAlert');
+  const email = document.getElementById('resetEmail').value.trim();
+  if (!email) { showAlert('resetAlert', '⚠️ Sila masukkan emel.'); return; }
+  setLoading('resetBtn', true, '📨 Hantar Pautan Reset');
   try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/auth.html'
-    });
+    const { error } = await db.auth.resetPasswordForEmail(email);
     if (error) throw error;
-    showAlert('guruResetAlert', '📧 Pautan reset telah dihantar. Semak inbox anda.', 'success');
-  } catch (err) {
-    showAlert('guruResetAlert', '❌ ' + err.message);
+    showAlert('resetAlert', '✅ Pautan reset dihantar. Semak inbox.', 'success');
+  } catch(e) {
+    showAlert('resetAlert', '❌ ' + e.message);
   } finally {
-    setLoading('guruResetSubmit', false);
+    setLoading('resetBtn', false, '📨 Hantar Pautan Reset');
   }
 }
 
 // ── ENTER KEY ──
 document.addEventListener('keydown', e => {
   if (e.key !== 'Enter') return;
-  const muridActive = document.getElementById('muridPane').style.display !== 'none';
-  if (muridActive) muridLogin();
-  else {
-    const activePane = document.querySelector('#guruPane .pane.active');
-    if (activePane?.id === 'guruLoginForm') guruLogin();
-    else if (activePane?.id === 'guruRegisterForm') guruRegister();
-  }
+  const guruVisible = document.getElementById('guruCard').style.display !== 'none';
+  if (!guruVisible) { muridLogin(); return; }
+  const aktif = document.querySelector('.sub-panel.active');
+  if (aktif?.id === 'panelLogin')  guruLogin();
+  if (aktif?.id === 'panelDaftar') guruDaftar();
+  if (aktif?.id === 'panelReset')  guruReset();
 });
 
-// ── INIT — tunjuk halaman dulu, semak session dalam latar ──
-switchRole('murid'); // tunjuk halaman segera
+// ── INIT — tunjuk halaman dulu, semak session latar ──
+switchRole('murid');
 
 (async () => {
-  if (!supabase) return;
   try {
-    // Cek murid session dulu (pantas — localStorage)
-    const muridData = localStorage.getItem('jawikids_student');
-    if (muridData) { window.location.href = 'index.html'; return; }
-
-    // Cek guru session (perlukan network call)
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) { window.location.href = 'dashboard.html'; return; }
-  } catch(e) {
-    console.warn('Session check error:', e.message);
-  }
+    const raw = localStorage.getItem('jawikids_student');
+    if (raw) { window.location.href = 'index.html'; return; }
+    const { data: { session } } = await db.auth.getSession();
+    if (session) { window.location.href = 'dashboard.html'; }
+  } catch(e) { console.warn('Session check:', e.message); }
 })();
 </script>
 </body>
