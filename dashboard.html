@@ -390,10 +390,12 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 // ══════════════════════════════════════════
 // ⚠️ GANTI DENGAN CREDENTIALS SUPABASE ANDA
 // ══════════════════════════════════════════
-const SUPABASE_URL  = 'https://purjcpdckxvbcselbhby.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1cmpjcGRja3h2YmNzZWxiaGJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MjgxNTQsImV4cCI6MjA5NTIwNDE1NH0.pS8Ml1YP2o4xkBxfhrD49oEjGNuNghd3hj5Q-TqgwbQ';
+const SUPABASE_URL      = 'https://purjcpdckxvbcselbhby.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1cmpjcGRja3h2YmNzZWxiaGJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MjgxNTQsImV4cCI6MjA5NTIwNDE1NH0.pS8Ml1YP2o4xkBxfhrD49oEjGNuNghd3hj5Q-TqgwbQ';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+let supabase;
+try { supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
+catch(e) { console.error('Supabase init error:', e); }
 
 let guruData = null;
 let allClasses = [];

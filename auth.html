@@ -330,7 +330,7 @@ body::after {
 </div>
 
 <!-- ══════════ GURU PANE ══════════ -->
-<div class="auth-card pane" id="guruPane" style="display:none;">
+<div class="auth-card pane" id="guruPane">
 
   <!-- Login form -->
   <div id="guruLoginForm" class="pane active">
@@ -442,13 +442,15 @@ body::after {
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ══════════════════════════════════════════
-// ⚠️ GANTI DENGAN CREDENTIALS SUPABASE ANDA
-// ══════════════════════════════════════════
-const SUPABASE_URL  = 'https://purjcpdckxvbcselbhby.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1cmpjcGRja3h2YmNzZWxiaGJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MjgxNTQsImV4cCI6MjA5NTIwNDE1NH0.pS8Ml1YP2o4xkBxfhrD49oEjGNuNghd3hj5Q-TqgwbQ';
+const SUPABASE_URL     = 'https://purjcpdckxvbcselbhby.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1cmpjcGRja3h2YmNzZWxiaGJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MjgxNTQsImV4cCI6MjA5NTIwNDE1NH0.pS8Ml1YP2o4xkBxfhrD49oEjGNuNghd3hj5Q-TqgwbQ';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+let supabase;
+try {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch(e) {
+  console.error('Supabase init error:', e);
+}
 
 // ── HELPERS ──
 function setLoading(btnId, loading) {
@@ -682,20 +684,23 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ── INIT ──
-// Semak jika sudah log masuk
+// ── INIT — tunjuk halaman dulu, semak session dalam latar ──
+switchRole('murid'); // tunjuk halaman segera
+
 (async () => {
-  // Cek guru session
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session) { window.location.href = 'dashboard.html'; return; }
+  if (!supabase) return;
+  try {
+    // Cek murid session dulu (pantas — localStorage)
+    const muridData = localStorage.getItem('jawikids_student');
+    if (muridData) { window.location.href = 'index.html'; return; }
 
-  // Cek murid session
-  const muridData = localStorage.getItem('jawikids_student');
-  if (muridData) { window.location.href = 'index.html'; return; }
+    // Cek guru session (perlukan network call)
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) { window.location.href = 'dashboard.html'; return; }
+  } catch(e) {
+    console.warn('Session check error:', e.message);
+  }
 })();
-
-// Default: tunjuk murid pane
-switchRole('murid');
 </script>
 </body>
 </html>
