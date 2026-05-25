@@ -1,27 +1,22 @@
 // ══════════════════════════════════════════
 // JawiKids Service Worker
-// Versi cache — ubah nombor ini bila deploy baru
+// Ubah CACHE_NAME bila deploy versi baru
 // ══════════════════════════════════════════
 const CACHE_NAME = 'jawikids-v1';
 
-// Fail yang dicache untuk guna offline
 const PRECACHE = [
   '/',
   '/auth.html',
   '/index.html',
-  '/dashboard.html',
-  'https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap',
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
+  '/dashboard.html'
 ];
 
-// ── INSTALL — cache semua fail penting ──
+// ── INSTALL ──
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      // Cache fail lokal sahaja (external mungkin gagal)
-      return cache.addAll(['/', '/auth.html', '/index.html', '/dashboard.html'])
-        .catch(err => console.warn('Cache install error:', err));
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(PRECACHE))
+      .catch(err => console.warn('Cache install error:', err))
   );
   self.skipWaiting();
 });
@@ -36,7 +31,7 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// ── FETCH — strategi: Network dulu, cache sebagai backup ──
+// ── FETCH — Network dulu, cache sebagai backup ──
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
@@ -52,21 +47,18 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     fetch(e.request)
       .then(res => {
-        // Simpan salinan dalam cache
         if (res && res.status === 200 && res.type !== 'opaque') {
           const clone = res.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
         }
         return res;
       })
-      .catch(() => {
-        // Offline — guna cache
-        return caches.match(e.request).then(cached => {
+      .catch(() =>
+        caches.match(e.request).then(cached => {
           if (cached) return cached;
-          // Fallback ke auth.html untuk navigasi
           if (e.request.mode === 'navigate') return caches.match('/auth.html');
           return new Response('Tiada sambungan internet', { status: 503 });
-        });
-      })
+        })
+      )
   );
 });
