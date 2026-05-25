@@ -2,7 +2,8 @@
   "name": "JawiKids — Huruf Jawi Tunggal",
   "short_name": "JawiKids",
   "description": "Aplikasi pembelajaran huruf Jawi tunggal untuk murid sekolah rendah",
-  "start_url": "/",
+  "start_url": "/auth.html",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#FFF8F0",
@@ -13,13 +14,25 @@
       "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "categories": ["education", "kids"],
@@ -27,14 +40,14 @@
     {
       "name": "Belajar Sekarang",
       "short_name": "Belajar",
-      "url": "/",
-      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+      "url": "/auth.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "Dashboard Guru",
       "short_name": "Dashboard",
-      "url": "/dashboard",
-      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+      "url": "/dashboard.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }
