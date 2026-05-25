@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#FF6B35">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="JawiKids">
+  <link rel="apple-touch-icon" href="/icons/icon.svg">
 <title>JawiKids — Huruf Jawi Tunggal</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -311,8 +318,8 @@ header { width:100%; padding:16px 20px; display:flex; align-items:center; justif
 
     <footer class="app-footer">
       <div class="footer-brand">Jawi<span>Kids</span></div>
-      <div class="footer-sig">✦ Direka oleh Ustaz Wan Amirul (SK Bohor Baharu) ✦</div>
-      <div class="footer-copy">© 2026 JawiKids · Hak Cipta Terpelihara</div>
+      <div class="footer-sig">✦ Direka oleh Ustaz Wan ✦</div>
+      <div class="footer-copy">© 2025 JawiKids · Hak Cipta Terpelihara</div>
     </footer>
   </div>
 </div>
@@ -441,7 +448,7 @@ const GROUPS = {
     ]},
     { id:'B-B', name:'Kumpulan B', subtitle:'Bentuk "Kail"', emoji:'🪝', letters:[
       {char:'ج',name:'Jim',dots:'Satu titik bawah',word:'Jambu',wordEmoji:'🍓'},
-      {char:'ح',name:'Ha',dots:'Tiada titik',word:'Harimau',wordEmoji:'🐯'},
+      {char:'ح',name:'Ha (besar)',dots:'Tiada titik',word:'Harimau',wordEmoji:'🐯'},
       {char:'خ',name:'Kha',dots:'Satu titik atas',word:'Khemah',wordEmoji:'⛺'},
     ]},
     { id:'B-C', name:'Kumpulan C', subtitle:'Bentuk "Lengkung"', emoji:'🌙', letters:[
@@ -468,7 +475,7 @@ const GROUPS = {
       {char:'ل',name:'Lam',dots:'Tiada titik',word:'Lampu',wordEmoji:'💡'},
       {char:'م',name:'Mim',dots:'Tiada titik',word:'Meja',wordEmoji:'🪑'},
       {char:'ك',name:'Kaf',dots:'Tiada titik',word:'Kapal',wordEmoji:'🚢'},
-      {char:'ه',name:'Ha',dots:'Tiada titik',word:'Hujan',wordEmoji:'🌧️'},
+      {char:'ه',name:'Ha (kecil)',dots:'Tiada titik',word:'Hujan',wordEmoji:'🌧️'},
       {char:'ة',name:'Ta Marbutah',dots:'Dua titik atas',word:'Madrasah',wordEmoji:'🏫'},
     ]},
     { id:'B-G', name:'Kumpulan G', subtitle:'Huruf Khas Melayu', emoji:'🌺', letters:[
@@ -488,7 +495,7 @@ const GROUPS = {
     ]},
     { id:'N-2', name:'Kumpulan 2', subtitle:'Bunyi Tekak', emoji:'🗣️', letters:[
       {char:'ج',name:'Jim',dots:'Satu titik bawah',word:'Jambu',wordEmoji:'🍓'},
-      {char:'ح',name:'Ha',dots:'Tiada titik',word:'Harimau',wordEmoji:'🐯'},
+      {char:'ح',name:'Ha (besar)',dots:'Tiada titik',word:'Harimau',wordEmoji:'🐯'},
       {char:'خ',name:'Kha',dots:'Satu titik atas',word:'Khemah',wordEmoji:'⛺'},
       {char:'ع',name:'Ain',dots:'Tiada titik',word:'Amal',wordEmoji:'🤲'},
       {char:'غ',name:'Ghain',dots:'Satu titik atas',word:'Ghaib',wordEmoji:'👻'},
@@ -524,12 +531,12 @@ const GROUPS = {
 
 const ALL_LETTERS = [
   {char:'ا',name:'Alif'},{char:'ب',name:'Ba'},{char:'ت',name:'Ta'},{char:'ث',name:'Tha'},
-  {char:'ج',name:'Jim'},{char:'ح',name:'Ha'},{char:'خ',name:'Kha'},{char:'د',name:'Dal'},
+  {char:'ج',name:'Jim'},{char:'ح',name:'Ha (besar)'},{char:'خ',name:'Kha'},{char:'د',name:'Dal'},
   {char:'ذ',name:'Zal'},{char:'ر',name:'Ra'},{char:'ز',name:'Zai'},{char:'س',name:'Sin'},
   {char:'ش',name:'Syin'},{char:'ص',name:'Sad'},{char:'ض',name:'Dad'},{char:'ط',name:'Ta (tebal)'},
   {char:'ظ',name:'Zha'},{char:'ع',name:'Ain'},{char:'غ',name:'Ghain'},{char:'ف',name:'Fa'},
   {char:'ق',name:'Qaf'},{char:'ك',name:'Kaf'},{char:'ل',name:'Lam'},{char:'م',name:'Mim'},
-  {char:'ن',name:'Nun'},{char:'ه',name:'Ha'},{char:'و',name:'Wau'},{char:'ي',name:'Ya'},
+  {char:'ن',name:'Nun'},{char:'ه',name:'Ha (kecil)'},{char:'و',name:'Wau'},{char:'ي',name:'Ya'},
   {char:'ة',name:'Ta Marbutah'},{char:'چ',name:'Ca'},{char:'ڠ',name:'Nga'},
   {char:'ڤ',name:'Pa'},{char:'ݢ',name:'Ga'},{char:'ڽ',name:'Nya'},{char:'ۏ',name:'Va'},
 ];
@@ -540,7 +547,7 @@ const ALL_LETTERS = [
 const AUDIO_FOLDER = 'audio/';
 const AUDIO_EXT    = '.m4a';
 const AUDIO_MAP = {
-  'Alif':'alif','Ba':'ba','Ta':'ta','Tha':'tha','Jim':'jim','Ha':'ha','Kha':'kha',
+  'Alif':'alif','Ba':'ba','Ta':'ta','Tha':'tha','Jim':'jim','Ha (besar)':'ha-besar','Ha (kecil)':'ha-kecil','Kha':'kha',
   'Dal':'dal','Zal':'zal','Ra':'ra','Zai':'zai','Sin':'sin','Syin':'syin','Sad':'sad',
   'Dad':'dad','Ta (tebal)':'ta-tebal','Zha':'zha','Ain':'ain','Ghain':'ghain','Fa':'fa',
   'Qaf':'qaf','Kaf':'kaf','Lam':'lam','Mim':'mim','Nun':'nun','Wau':'wau','Ya':'ya',
@@ -1165,5 +1172,18 @@ function launchConfetti() {
 initAuth();
 renderGroups();
 </script>
+    <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+          .then(r => {
+            console.log('SW registered, scope:', r.scope);
+          })
+          .catch(e => {
+            console.error('SW error:', e.message);
+          });
+      });
+    }
+  </script>
 </body>
 </html>
