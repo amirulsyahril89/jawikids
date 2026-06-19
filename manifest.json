@@ -1,7 +1,7 @@
 {
-  "name": "JawiKids — Huruf Jawi Tunggal",
+  "name": "JawiKids — Platform Pembelajaran Jawi",
   "short_name": "JawiKids",
-  "description": "Aplikasi pembelajaran huruf Jawi tunggal untuk murid sekolah rendah",
+  "description": "Aplikasi pembelajaran Jawi untuk murid sekolah rendah — huruf tunggal, huruf bersambung, dan suku kata terbuka",
   "start_url": "/auth.html",
   "scope": "/",
   "display": "standalone",

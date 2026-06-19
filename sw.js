@@ -2,12 +2,14 @@
 // JawiKids Service Worker
 // Ubah CACHE_NAME bila deploy versi baru
 // ══════════════════════════════════════════
-const CACHE_NAME = 'jawikids-v1';
+const CACHE_NAME = 'jawikids-v2';
 
 const PRECACHE = [
   '/',
   '/auth.html',
   '/index.html',
+  '/sambung.html',
+  '/sukukata.html',
   '/dashboard.html'
 ];
 

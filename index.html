@@ -12,6 +12,163 @@
   <link rel="apple-touch-icon" href="/icons/icon.svg">
 <title>JawiKids — Huruf Jawi Tunggal</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style id="sidebar-styles">
+/* ══════════════════════════════════════════
+   JawiKids — Shared Sidebar
+   Tema: Hijau (#06D6A0) + Purple (#9B5DE5)
+   ══════════════════════════════════════════ */
+
+:root {
+  --sb-width: 240px;
+  --sb-bg: #1a1a2e;
+  --sb-border: rgba(255,255,255,0.06);
+  --sb-text: rgba(255,255,255,0.65);
+  --sb-text-active: #ffffff;
+  --sb-green: #06D6A0;
+  --sb-purple: #9B5DE5;
+  --sb-hover: rgba(255,255,255,0.06);
+  --sb-active-bg: rgba(6,214,160,0.15);
+  --sb-radius: 12px;
+}
+
+/* ── OVERLAY (mobile) ── */
+.sb-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 200;
+  backdrop-filter: blur(2px);
+}
+.sb-overlay.open { display: block; }
+
+/* ── SIDEBAR ── */
+.sb-sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0;
+  width: var(--sb-width);
+  background: var(--sb-bg);
+  z-index: 210;
+  display: flex; flex-direction: column;
+  transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  box-shadow: 4px 0 24px rgba(0,0,0,0.3);
+}
+
+/* ── BRAND ── */
+.sb-brand {
+  padding: 22px 18px 18px;
+  border-bottom: 1px solid var(--sb-border);
+  flex-shrink: 0;
+}
+.sb-logo {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.7rem; line-height: 1;
+  background: linear-gradient(135deg, var(--sb-green), var(--sb-purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.sb-tagline {
+  font-size: 0.62rem; font-weight: 700;
+  color: var(--sb-text); letter-spacing: 1.5px;
+  text-transform: uppercase; margin-top: 3px;
+}
+
+/* ── NAV ── */
+.sb-nav {
+  flex: 1; overflow-y: auto; padding: 12px 10px;
+  scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+.sb-section-label {
+  font-size: 0.58rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 1.8px; color: rgba(255,255,255,0.3);
+  padding: 10px 10px 4px;
+}
+.sb-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--sb-radius);
+  margin-bottom: 2px; cursor: pointer; border: none;
+  background: none; width: 100%; text-align: left;
+  color: var(--sb-text); font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem; font-weight: 700;
+  transition: all 0.15s; text-decoration: none;
+}
+.sb-item:hover { background: var(--sb-hover); color: var(--sb-text-active); }
+.sb-item.active {
+  background: var(--sb-active-bg);
+  color: var(--sb-green);
+  font-weight: 800;
+}
+.sb-item.active .sb-icon { color: var(--sb-green); }
+.sb-item.coming {
+  opacity: 0.4; cursor: not-allowed; pointer-events: none;
+}
+.sb-icon {
+  font-size: 1.1rem; width: 22px; text-align: center;
+  flex-shrink: 0; direction: rtl;
+}
+.sb-label { flex: 1; }
+.sb-badge {
+  font-size: 0.58rem; font-weight: 800; padding: 2px 7px;
+  border-radius: 99px; background: rgba(6,214,160,0.2);
+  color: var(--sb-green); flex-shrink: 0;
+}
+.sb-badge.soon {
+  background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.3);
+}
+
+/* ── FOOTER ── */
+.sb-footer {
+  padding: 14px 18px 20px;
+  border-top: 1px solid var(--sb-border);
+  flex-shrink: 0;
+}
+.sb-footer-sig {
+  font-size: 0.68rem; font-weight: 700;
+  color: rgba(255,255,255,0.3); text-align: center; line-height: 1.5;
+}
+.sb-footer-sig span { color: var(--sb-green); }
+
+/* ── HAMBURGER ── */
+.sb-hamburger {
+  display: none;
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 5px; width: 40px; height: 40px; cursor: pointer;
+  background: rgba(6,214,160,0.12); border: none;
+  border-radius: 10px; transition: all 0.15s;
+}
+.sb-hamburger:hover { background: rgba(6,214,160,0.25); }
+.sb-hamburger span {
+  width: 18px; height: 2px; border-radius: 99px;
+  background: var(--sb-green); display: block;
+}
+
+/* ── MAIN CONTENT OFFSET ── */
+.sb-main { margin-left: var(--sb-width); }
+
+/* ── TOPBAR (mobile) ── */
+.sb-topbar {
+  display: none;
+  align-items: center; gap: 12px;
+  padding: 12px 16px;
+  background: var(--sb-bg);
+  border-bottom: 1px solid var(--sb-border);
+  position: sticky; top: 0; z-index: 100;
+}
+.sb-topbar-logo {
+  font-family: 'Fredoka One', cursive; font-size: 1.3rem;
+  background: linear-gradient(135deg, var(--sb-green), var(--sb-purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 860px) {
+  .sb-sidebar { transform: translateX(-100%); }
+  .sb-sidebar.open { transform: translateX(0); }
+  .sb-main { margin-left: 0; }
+  .sb-hamburger { display: flex; }
+  .sb-topbar { display: flex; }
+}
+
+</style>
 <style>
 :root {
   --bg: #FFF8F0;
@@ -38,6 +195,13 @@ body::after  { content:''; position:fixed; bottom:-100px; left:-100px; width:350
 
 .screen { display:none; min-height:100vh; position:relative; z-index:1; }
 .screen.active { display:flex; flex-direction:column; align-items:center; }
+/* Offset content dari sidebar */
+@media (min-width: 861px) {
+  .screen.active, .modal-overlay, .levelup-popup, .badge-popup { margin-left: 240px; }
+}
+@media (max-width: 860px) {
+  .screen.active, .modal-overlay, .levelup-popup, .badge-popup { margin-left: 0; }
+}
 
 /* ── HEADER ── */
 header { width:100%; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; max-width:700px; margin:0 auto; }
@@ -148,7 +312,7 @@ header { width:100%; padding:16px 20px; display:flex; align-items:center; justif
 .btn-ready:hover { transform:translateY(-3px) scale(1.02); }
 
 /* ── MODAL ── */
-.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:100; display:flex; align-items:flex-end; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.25s ease; }
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:200; display:flex; align-items:flex-end; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.25s ease; }
 .modal-overlay.open { opacity:1; pointer-events:all; }
 .modal-box { background:var(--card); border-radius:28px 28px 0 0; padding:10px 20px 40px; width:100%; max-width:580px; transform:translateY(100%); transition:transform 0.35s cubic-bezier(.34,1.2,.64,1); max-height:92vh; overflow-y:auto; }
 .modal-overlay.open .modal-box { transform:translateY(0); }
@@ -256,23 +420,359 @@ header { width:100%; padding:16px 20px; display:flex; align-items:center; justif
 .footer-sig { font-size:0.72rem; font-weight:700; color:var(--text-light); margin-bottom:2px; }
 .footer-copy { font-size:0.64rem; color:#ccc; font-weight:600; }
 
+
+
+/* Adjust main content when sidebar open on desktop */
+
+
+.btn-match {
+  width: 100%; padding: 16px; background: linear-gradient(135deg, #06D6A0, #04a87d);
+  color: white; border: none; border-radius: 20px;
+  font-family: 'Fredoka One', cursive; font-size: 1.15rem;
+  cursor: pointer; box-shadow: 0 8px 24px rgba(6,214,160,0.35);
+  transition: all 0.2s cubic-bezier(.34,1.56,.64,1);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.btn-match:hover { transform: translateY(-3px) scale(1.02); }
+
+/* Memory Match Grid */
+.match-hud {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px; padding: 10px 14px;
+  background: var(--bg); border-radius: 14px;
+}
+.match-hud-item { text-align: center; }
+.match-hud-num { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: var(--primary); }
+.match-hud-label { font-size: 0.65rem; font-weight: 800; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; }
+
+.match-grid {
+  display: grid; gap: 8px; margin-bottom: 14px;
+}
+.match-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.match-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+.match-card {
+  aspect-ratio: 1; border-radius: 14px; cursor: pointer;
+  position: relative; transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(.34,1.2,.64,1);
+  -webkit-tap-highlight-color: transparent;
+}
+.match-card.flipped  { transform: rotateY(180deg); }
+.match-card.matched  { transform: rotateY(180deg); pointer-events: none; }
+.match-card.matched .card-back { background: var(--green-light); border-color: var(--green); }
+.match-card.wrong-flash { animation: wrongShake 0.4s ease; }
+
+.card-front, .card-back {
+  position: absolute; inset: 0; border-radius: 14px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border: 3px solid transparent;
+}
+.card-front {
+  background: linear-gradient(135deg, var(--purple), #7a40c2);
+  font-size: 1.6rem; color: rgba(255,255,255,0.3);
+  user-select: none;
+}
+.card-back {
+  background: white; transform: rotateY(180deg);
+  border-color: #eee; gap: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.card-back .cb-char { font-size: 2rem; direction: rtl; line-height: 1; }
+.card-back .cb-emoji { font-size: 1.8rem; line-height: 1; }
+.card-back .cb-word { font-size: 0.6rem; font-weight: 800; color: var(--text-light); text-align: center; }
+
+/* Match result */
+.match-result-box {
+  background: linear-gradient(135deg, var(--green-light), white);
+  border: 2px solid var(--green); border-radius: 16px;
+  padding: 20px; text-align: center; display: none;
+}
+.match-result-box.show { display: block; animation: popIn 0.4s ease; }
+.match-result-title { font-family: 'Fredoka One', cursive; font-size: 1.4rem; margin-bottom: 6px; }
+.match-result-sub { font-size: 0.85rem; color: var(--text-light); font-weight: 700; }
+
+/* ── AKTIVITI MENULIS ── */
+.btn-tulis {
+  width: 100%; padding: 16px; background: linear-gradient(135deg, var(--purple), #7a40c2);
+  color: white; border: none; border-radius: 20px;
+  font-family: 'Fredoka One', cursive; font-size: 1.15rem;
+  cursor: pointer; box-shadow: 0 8px 24px rgba(155,93,229,0.35);
+  transition: all 0.2s cubic-bezier(.34,1.56,.64,1);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.btn-tulis:hover { transform: translateY(-3px) scale(1.02); }
+
+/* Modal menulis */
+.tulis-letter-display {
+  font-size: 5rem; direction: rtl; text-align: center;
+  margin: 8px 0; line-height: 1;
+  background: var(--purple-light); border-radius: 16px; padding: 12px;
+}
+.tulis-step-label {
+  font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--text-light); margin-bottom: 8px; text-align: center;
+}
+.tulis-steps { display: flex; gap: 6px; margin-bottom: 14px; justify-content: center; }
+.tulis-step-dot {
+  width: 28px; height: 6px; border-radius: 99px; background: #eee; transition: background 0.3s;
+}
+.tulis-step-dot.active { background: var(--purple); }
+.tulis-step-dot.done { background: var(--green); }
+
+/* Canvas area */
+.canvas-wrap {
+  position: relative; border-radius: 18px; overflow: hidden;
+  border: 3px solid var(--purple); background: white;
+  margin-bottom: 12px; touch-action: none;
+}
+.canvas-wrap canvas { display: block; width: 100%; }
+.trace-ghost {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8rem; direction: rtl;
+  opacity: 0.08; pointer-events: none; user-select: none;
+  font-family: 'Noto Naskh Arabic', 'Scheherazade New', serif;
+}
+.canvas-toolbar {
+  display: flex; gap: 8px; margin-bottom: 12px; align-items: center;
+}
+.btn-padam {
+  padding: 8px 16px; background: var(--red-light); color: var(--red);
+  border: none; border-radius: 10px; font-family: 'Nunito', sans-serif;
+  font-size: 0.82rem; font-weight: 800; cursor: pointer; transition: all 0.15s;
+}
+.btn-padam:hover { background: var(--red); color: white; }
+.pen-size-row { display: flex; gap: 6px; }
+.pen-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 2px solid #eee; background: white;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.pen-btn.active { border-color: var(--purple); background: var(--purple-light); }
+.pen-btn span { background: var(--text); border-radius: 50%; display: block; }
+.color-row { display: flex; gap: 5px; }
+.color-btn {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 3px solid transparent; cursor: pointer; transition: all 0.15s;
+}
+.color-btn.active { border-color: var(--text); transform: scale(1.15); }
+
+/* Semak sendiri */
+.semak-wrap {
+  background: var(--bg); border-radius: 16px; padding: 14px;
+  margin-bottom: 12px;
+}
+.semak-title { font-size: 0.78rem; font-weight: 800; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; text-align: center; }
+.semak-compare {
+  display: flex; gap: 12px; align-items: center; justify-content: center;
+}
+.semak-box {
+  flex: 1; text-align: center; background: white;
+  border-radius: 12px; padding: 10px; border: 2px solid #eee;
+}
+.semak-box .semak-label { font-size: 0.68rem; font-weight: 800; color: var(--text-light); margin-bottom: 4px; }
+.semak-box .semak-char { font-size: 4rem; direction: rtl; line-height: 1; }
+.semak-box canvas { border-radius: 8px; width: 100%; max-width: 120px; }
+.semak-arrow { font-size: 1.5rem; color: var(--text-light); }
+
+.semak-btn-row { display: flex; gap: 10px; margin-top: 12px; }
+.btn-betul-sendiri {
+  flex: 1; padding: 13px; background: var(--green-light); color: #04a87d;
+  border: 2px solid var(--green); border-radius: 14px;
+  font-family: 'Fredoka One', cursive; font-size: 1rem; cursor: pointer; transition: all 0.15s;
+}
+.btn-betul-sendiri:hover { background: var(--green); color: white; }
+.btn-cuba-lagi-tulis {
+  flex: 1; padding: 13px; background: var(--red-light); color: var(--red);
+  border: 2px solid var(--red); border-radius: 14px;
+  font-family: 'Fredoka One', cursive; font-size: 1rem; cursor: pointer; transition: all 0.15s;
+}
+.btn-cuba-lagi-tulis:hover { background: var(--red); color: white; }
+
+.tulis-feedback { font-size: 0.9rem; font-weight: 800; text-align: center; min-height: 22px; margin-bottom: 8px; }
+.tulis-feedback.ok { color: var(--green); }
+.tulis-feedback.retry { color: var(--primary); }
+.btn-tulis-next {
+  width: 100%; padding: 14px; background: var(--purple); color: white;
+  border: none; border-radius: 14px; font-family: 'Fredoka One', cursive;
+  font-size: 1.05rem; cursor: pointer; transition: all 0.18s; display: none;
+}
+.btn-tulis-next.show { display: block; animation: popIn 0.3s ease; }
+
+/* Animasi laluan trace */
+@keyframes traceGlow { 0%,100%{opacity:0.5;transform:scale(1)} 50%{opacity:1;transform:scale(1.3)} }
+.trace-dot {
+  position: absolute; width: 18px; height: 18px; border-radius: 50%;
+  background: var(--purple); transform: translate(-50%,-50%);
+  animation: traceGlow 1s ease-in-out infinite;
+  pointer-events: none; z-index: 5;
+  box-shadow: 0 0 8px rgba(155,93,229,0.6);
+}
+.trace-num {
+  position: absolute; font-size: 0.55rem; font-weight: 800; color: white;
+  width: 14px; height: 14px; background: var(--purple); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  transform: translate(-50%,-110%); pointer-events: none; z-index: 6;
+}
+
+/* ── DIAGRAM MULUT MAKHRAJ ── */
+.makhraj-wrap {
+  background: white; border-radius: 18px; padding: 14px 12px 10px;
+  margin-bottom: 10px; border: 2px solid #eee;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.makhraj-title {
+  font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--text-light);
+}
+.makhraj-svg-wrap { width: 100%; max-width: 320px; }
+.makhraj-legend {
+  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+}
+.makhraj-legend-item {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.65rem; font-weight: 700; color: var(--text-light);
+}
+.makhraj-legend-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+/* SVG highlight classes */
+.makhraj-area { transition: all 0.4s ease; }
+.makhraj-area.active { filter: brightness(0.85); }
+
+/* ── FLASHCARD PANEL ── */
+.fc-scene {
+  perspective: 1000px; cursor: pointer;
+  width: 100%; margin-bottom: 12px;
+}
+.fc-card {
+  width: 100%; height: 200px;
+  position: relative; transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(.4,.2,.2,1);
+  border-radius: 20px;
+}
+.fc-card.flipped { transform: rotateY(180deg); }
+
+.fc-front, .fc-back {
+  position: absolute; inset: 0; border-radius: 20px;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 16px;
+}
+.fc-front {
+  background: linear-gradient(135deg, #e8f4ff, #f0e8ff);
+  border: 2px solid #d0e8ff;
+}
+.fc-back {
+  background: linear-gradient(135deg, #fff8f0, #fff0e8);
+  border: 2px solid #FFD93D;
+  transform: rotateY(180deg);
+}
+.fc-front-char {
+  font-size: 5.5rem; direction: rtl; line-height: 1;
+  margin-bottom: 6px; color: var(--text);
+}
+.fc-front-name {
+  font-family: 'Fredoka One', cursive; font-size: 1.3rem;
+  color: var(--purple); margin-bottom: 4px;
+}
+.fc-back-emoji { font-size: 4rem; line-height: 1; margin-bottom: 6px; }
+.fc-back-word {
+  font-family: 'Fredoka One', cursive; font-size: 1.4rem;
+  color: var(--primary); margin-bottom: 10px;
+}
+.fc-audio-btn {
+  background: var(--purple-light); border: 2px solid var(--purple);
+  border-radius: 99px; padding: 7px 18px;
+  font-family: 'Nunito', sans-serif; font-size: 0.88rem;
+  font-weight: 800; color: var(--purple); cursor: pointer;
+  transition: all 0.15s; margin-bottom: 6px;
+}
+.fc-audio-btn:hover { background: var(--purple); color: white; }
+.fc-audio-btn.playing { background: var(--purple); color: white; animation: pulsAudio 0.5s ease infinite alternate; }
+.fc-tap-hint {
+  font-size: 0.62rem; font-weight: 700;
+  color: var(--text-light); opacity: 0.7; position: absolute; bottom: 10px;
+}
+.fc-nav {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+}
+.fc-nav-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--card-bg); border: 2px solid #eee;
+  font-size: 1.1rem; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: all 0.15s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.fc-nav-btn:hover { border-color: var(--purple); background: var(--purple-light); }
+.fc-nav-btn:disabled { opacity: 0.3; cursor: default; }
+.fc-dots { display: flex; gap: 5px; }
+.fc-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #ddd; transition: all 0.2s;
+}
+.fc-dot.active { background: var(--purple); transform: scale(1.3); }
+
 @media(max-width:480px){ .home-hero h1{font-size:1.8rem;} .jawi-display{font-size:5rem;} .groups-grid{gap:8px;} }
+
+
 </style>
 </head>
 <body>
 
+<!-- ══════════ SIDEBAR ══════════ -->
+<div class="sb-overlay" id="sbOverlay"></div>
+<div class="sb-sidebar" id="sbSidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">JawiKids</div>
+    <div class="sb-tagline">Platform Pembelajaran Jawi</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section-label">Kemahiran</div>
+    <a class="sb-item" data-page="index.html" href="index.html">
+      <span class="sb-icon">ب</span>
+      <span class="sb-label">Huruf Jawi Tunggal</span>
+    </a>
+    <a class="sb-item" data-page="sambung.html" href="sambung.html">
+      <span class="sb-icon">بـ</span>
+      <span class="sb-label">Huruf Bersambung</span>
+    </a>
+    <a class="sb-item coming" data-page="sukukata.html" href="sukukata.html">
+      <span class="sb-icon">با</span>
+      <span class="sb-label">Suku Kata Terbuka</span>
+      <span class="sb-badge soon">Segera</span>
+    </a>
+    <div class="sb-section-label" style="margin-top:8px;">Akaun</div>
+    <a class="sb-item" data-page="dashboard.html" href="dashboard.html">
+      <span class="sb-icon">📊</span>
+      <span class="sb-label">Dashboard Guru</span>
+    </a>
+    <a class="sb-item" data-page="auth.html" href="auth.html">
+      <span class="sb-icon">👤</span>
+      <span class="sb-label">Log Masuk</span>
+    </a>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-footer-sig">✦ Direka oleh <span>Ustaz Wan</span> ✦<br>© 2026 JawiKids</div>
+  </div>
+</div>
+
 <!-- ══════════ HOME ══════════ -->
+
 <div id="home" class="screen active">
-  <header>
-    <div>
-      <div class="logo">Jawi<span>Kids</span></div>
-      <div class="logo-sub">Huruf Jawi Tunggal</div>
-    </div>
-    <button class="user-badge" id="userBadge" style="display:none;" onclick="handleUserClick()">
-      <span>👤</span>
-      <span class="ub-name" id="ubName">—</span>
+  <!-- Topbar mobile -->
+  <div class="sb-topbar">
+    <button class="sb-hamburger" onclick="sbToggle()">
+      <span></span><span></span><span></span>
     </button>
-  </header>
+    <div class="sb-topbar-logo">JawiKids</div>
+    <button class="user-badge" id="userBadge" style="display:none;" onclick="handleUserClick()">
+      <span>👤</span><span class="ub-name" id="ubName">—</span>
+    </button>
+  </div>
 
   <div style="width:100%;max-width:660px;padding:0 20px;">
     <div class="home-hero">
@@ -309,10 +809,9 @@ header { width:100%; padding:16px 20px; display:flex; align-items:center; justif
       <div id="lbList"></div>
     </div>
 
-    <!-- Phase tabs -->
-    <div class="phase-tabs">
-      <button class="phase-tab active-tab" onclick="switchPhase('bentuk')">🔵 Kelompok Bentuk</button>
-      <button class="phase-tab" onclick="switchPhase('bunyi')">🟢 Kelompok Bunyi</button>
+    <!-- Kelompok Makhraj -->
+    <div style="margin-bottom:16px;font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--text);">
+      🗣️ Kelompok Makhraj Huruf
     </div>
     <div class="groups-grid" id="groupsGrid"></div>
 
@@ -335,14 +834,45 @@ header { width:100%; padding:16px 20px; display:flex; align-items:center; justif
       </div>
       <div style="text-align:right;">
         <div class="logo" style="font-size:1rem;">Jawi<span>Kids</span></div>
-        <div class="logo-sub">Huruf Jawi Tunggal</div>
       </div>
     </div>
 
-    <!-- Panel Huruf -->
+    <!-- Panel Huruf — Flashcard -->
     <div class="letter-ref-panel">
-      <div class="letter-ref-title">📖 Ingat huruf, gambar &amp; bunyinya — tekan 🔊 untuk dengar</div>
-      <div class="letter-ref-grid" id="letterRefGrid"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="letter-ref-title" style="margin:0;">📖 Ingat huruf, gambar &amp; bunyi</div>
+        <div style="font-size:0.72rem;font-weight:800;color:var(--text-light);">
+          <span id="fcCurrent">1</span> / <span id="fcTotal">1</span>
+        </div>
+      </div>
+
+      <!-- Flashcard flip -->
+      <div class="fc-scene" onclick="flipRefCard()">
+        <div class="fc-card" id="fcCard">
+          <!-- Depan: Huruf -->
+          <div class="fc-front">
+            <div class="fc-front-char" id="fcChar">ب</div>
+            <div class="fc-front-name" id="fcName">Ba</div>
+            <div class="fc-tap-hint">Ketuk untuk lihat gambar 👆</div>
+          </div>
+          <!-- Belakang: Gambar + Bunyi -->
+          <div class="fc-back">
+            <div class="fc-back-emoji" id="fcEmoji">👕</div>
+            <div class="fc-back-word" id="fcWord">Baju</div>
+            <button class="fc-audio-btn" id="fcAudioBtn" onclick="event.stopPropagation();playFcAudio()">
+              🔊 Dengar
+            </button>
+            <div class="fc-tap-hint">Ketuk untuk kembali 👆</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigasi -->
+      <div class="fc-nav">
+        <button class="fc-nav-btn" id="fcPrev" onclick="fcNav(-1)">←</button>
+        <div class="fc-dots" id="fcDots"></div>
+        <button class="fc-nav-btn" id="fcNext" onclick="fcNav(1)">→</button>
+      </div>
     </div>
 
     <!-- Pembahagi -->
@@ -352,7 +882,139 @@ header { width:100%; padding:16px 20px; display:flex; align-items:center; justif
   <!-- Butang mula -->
   <div class="ready-section">
     <div class="soalan-hint" id="soalanHint">Sudah ingat? Cuba jawab!</div>
+    <button class="btn-match" onclick="openMatchModal()">🃏 Memory Match — Padankan Huruf & Objek</button>
+    <button class="btn-tulis" onclick="openTulisModal()">✏️ Latihan Menulis Huruf</button>
     <button class="btn-ready" onclick="openModal()">💡 Saya Sudah Ingat — Jawab Soalan!</button>
+  </div>
+</div>
+
+<!-- ══════════ MODAL MEMORY MATCH ══════════ -->
+<div class="modal-overlay" id="matchOverlay">
+  <div class="modal-box" id="matchBox">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <button class="btn-close-modal" onclick="closeMatchModal()">← Tutup</button>
+      <div class="modal-title">🃏 Memory Match</div>
+      <button class="btn-close-modal" onclick="resetMatch()" style="background:var(--primary-light);color:var(--primary);">🔁 Baru</button>
+    </div>
+
+    <!-- HUD -->
+    <div class="match-hud">
+      <div class="match-hud-item">
+        <div class="match-hud-num" id="matchFlips">0</div>
+        <div class="match-hud-label">Flips</div>
+      </div>
+      <div class="match-hud-item">
+        <div class="match-hud-num" id="matchMatched">0</div>
+        <div class="match-hud-label">Padanan</div>
+      </div>
+      <div class="match-hud-item">
+        <div class="match-hud-num" id="matchTimer">0s</div>
+        <div class="match-hud-label">Masa</div>
+      </div>
+      <div class="match-hud-item">
+        <div class="match-hud-num" id="matchTotal">0</div>
+        <div class="match-hud-label">Jumlah</div>
+      </div>
+    </div>
+
+    <!-- Grid kad -->
+    <div class="match-grid cols-4" id="matchGrid"></div>
+
+    <!-- Keputusan -->
+    <div class="match-result-box" id="matchResult">
+      <div style="font-size:3rem;margin-bottom:8px;" id="matchResultEmoji">🏆</div>
+      <div class="match-result-title" id="matchResultTitle">Tahniah!</div>
+      <div class="match-result-sub" id="matchResultSub"></div>
+      <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;">
+        <button class="btn-primary" onclick="resetMatch()">🔁 Cuba Lagi</button>
+        <button class="btn-secondary" onclick="closeMatchModal()">✓ Selesai</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL MENULIS ══════════ -->
+<div class="modal-overlay" id="tulisOverlay">
+  <div class="modal-box" id="tulisBox">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <button class="btn-close-modal" onclick="closeTulisModal()">← Tutup</button>
+      <div class="modal-title">✏️ Latihan Menulis</div>
+      <div style="width:80px;"></div>
+    </div>
+
+    <!-- Progress dots -->
+    <div class="tulis-steps" id="tulisSteps"></div>
+
+    <!-- Huruf semasa -->
+    <div class="tulis-letter-display" id="tulisChar">ب</div>
+    <div style="text-align:center;font-size:0.8rem;font-weight:800;color:var(--text-light);margin-bottom:12px;" id="tulisLetterName">Ba — Satu titik bawah</div>
+
+    <!-- Fasa 1: Trace -->
+    <div id="fazaTrace">
+      <div class="tulis-step-label">📍 Fasa 1 — Ikut laluan huruf ini</div>
+      <div class="canvas-wrap" id="traceWrap">
+        <div class="trace-ghost" id="traceGhost">ب</div>
+        <canvas id="traceCanvas" height="220"></canvas>
+      </div>
+      <div style="text-align:center;margin-bottom:10px;">
+        <button class="btn-padam" onclick="clearTrace()">🗑 Padam</button>
+      </div>
+      <div style="font-size:0.75rem;font-weight:700;color:var(--text-light);text-align:center;margin-bottom:12px;">
+        Ikut bentuk huruf yang kelihatan pudar di belakang
+      </div>
+      <button class="btn-tulis-next show" onclick="goToFazaBebas()" id="btnGoBebas">Seterusnya — Tulis Sendiri →</button>
+    </div>
+
+    <!-- Fasa 2: Bebas -->
+    <div id="fazaBebas" style="display:none;">
+      <div class="tulis-step-label">✍️ Fasa 2 — Tulis huruf sendiri tanpa panduan</div>
+      <div class="canvas-toolbar">
+        <button class="btn-padam" onclick="clearBebas()">🗑 Padam</button>
+        <div class="pen-size-row">
+          <button class="pen-btn active" id="pen-s" onclick="setPen(3,'s')" title="Nipis"><span style="width:4px;height:4px;"></span></button>
+          <button class="pen-btn" id="pen-m" onclick="setPen(6,'m')" title="Sederhana"><span style="width:7px;height:7px;"></span></button>
+          <button class="pen-btn" id="pen-l" onclick="setPen(10,'l')" title="Tebal"><span style="width:11px;height:11px;"></span></button>
+        </div>
+        <div class="color-row">
+          <button class="color-btn active" style="background:#2D2D2D;" onclick="setColor('#2D2D2D',this)"></button>
+          <button class="color-btn" style="background:#FF6B35;" onclick="setColor('#FF6B35',this)"></button>
+          <button class="color-btn" style="background:#9B5DE5;" onclick="setColor('#9B5DE5',this)"></button>
+          <button class="color-btn" style="background:#06D6A0;" onclick="setColor('#06D6A0',this)"></button>
+        </div>
+      </div>
+      <div class="canvas-wrap" id="bebasWrap">
+        <canvas id="bebasCanvas" height="220"></canvas>
+      </div>
+      <button class="btn-tulis-next show" onclick="goToSemak()" style="margin-bottom:8px;">Semak Tulisan Saya →</button>
+    </div>
+
+    <!-- Fasa 3: Semak -->
+    <div id="fazaSemak" style="display:none;">
+      <div class="tulis-step-label">🔍 Bandingkan tulisan kamu dengan contoh</div>
+      <div class="semak-wrap">
+        <div class="semak-title">Bandingkan tulisan kamu</div>
+        <div class="semak-compare">
+          <div class="semak-box">
+            <div class="semak-label">Contoh Betul</div>
+            <div class="semak-char" id="semakContoh">ب</div>
+          </div>
+          <div class="semak-arrow">⟷</div>
+          <div class="semak-box">
+            <div class="semak-label">Tulisan Kamu</div>
+            <canvas id="semakCanvas" height="100" style="border-radius:8px;width:100%;max-width:120px;"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="tulis-feedback" id="tulisFeedback"></div>
+      <div class="semak-btn-row">
+        <button class="btn-betul-sendiri" onclick="nilaiTulis(true)">✅ Betul!</button>
+        <button class="btn-cuba-lagi-tulis" onclick="nilaiTulis(false)">🔁 Cuba Lagi</button>
+      </div>
+      <button class="btn-tulis-next" id="btnTulisNext" onclick="nextTulisLetter()">Huruf Seterusnya →</button>
+    </div>
+
   </div>
 </div>
 
@@ -438,87 +1100,46 @@ try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch(e)
 // DATA HURUF
 // ══════════════════════════════════════════
 const GROUPS = {
-  bentuk: [
-    { id:'B-A', name:'Kumpulan A', subtitle:'Bentuk "Perahu"', emoji:'⛵', letters:[
-      {char:'ب',name:'Ba',dots:'Satu titik bawah',word:'Baju',wordEmoji:'👕'},
-      {char:'ت',name:'Ta',dots:'Dua titik atas',word:'Tali',wordEmoji:'🪢'},
-      {char:'ث',name:'Tha',dots:'Tiga titik atas',word:'Salji',wordEmoji:'❄️'},
-      {char:'ن',name:'Nun',dots:'Satu titik atas (tengah)',word:'Nuri',wordEmoji:'🦜'},
-      {char:'ي',name:'Ya',dots:'Dua titik bawah',word:'Yakin',wordEmoji:'💪'},
-    ]},
-    { id:'B-B', name:'Kumpulan B', subtitle:'Bentuk "Kail"', emoji:'🪝', letters:[
-      {char:'ج',name:'Jim',dots:'Satu titik bawah',word:'Jambu',wordEmoji:'🍓'},
-      {char:'ح',name:'Ha (besar)',dots:'Tiada titik',word:'Harimau',wordEmoji:'🐯'},
-      {char:'خ',name:'Kha',dots:'Satu titik atas',word:'Khemah',wordEmoji:'⛺'},
-    ]},
-    { id:'B-C', name:'Kumpulan C', subtitle:'Bentuk "Lengkung"', emoji:'🌙', letters:[
-      {char:'د',name:'Dal',dots:'Tiada titik',word:'Daun',wordEmoji:'🍃'},
-      {char:'ذ',name:'Zal',dots:'Satu titik atas',word:'Zat',wordEmoji:'⚗️'},
-      {char:'ر',name:'Ra',dots:'Tiada titik',word:'Roti',wordEmoji:'🍞'},
-      {char:'ز',name:'Zai',dots:'Satu titik atas',word:'Zaitun',wordEmoji:'🫒'},
-      {char:'و',name:'Wau',dots:'Tiada titik',word:'Warna',wordEmoji:'🎨'},
-    ]},
-    { id:'B-D', name:'Kumpulan D', subtitle:'Bentuk "Gergaji"', emoji:'🪚', letters:[
-      {char:'س',name:'Sin',dots:'Tiada titik',word:'Singa',wordEmoji:'🦁'},
-      {char:'ش',name:'Syin',dots:'Tiga titik atas',word:'Syurga',wordEmoji:'✨'},
-      {char:'ص',name:'Sad',dots:'Tiada titik',word:'Sabun',wordEmoji:'🧼'},
-      {char:'ض',name:'Dad',dots:'Satu titik atas',word:'Dabbah',wordEmoji:'🐾'},
-    ]},
-    { id:'B-E', name:'Kumpulan E', subtitle:'Bentuk "Kepala Bulat"', emoji:'⭕', letters:[
-      {char:'ع',name:'Ain',dots:'Tiada titik',word:'Amal',wordEmoji:'🤲'},
-      {char:'غ',name:'Ghain',dots:'Satu titik atas',word:'Ghaib',wordEmoji:'👻'},
-      {char:'ف',name:'Fa',dots:'Satu titik atas',word:'Fajar',wordEmoji:'🌅'},
-      {char:'ق',name:'Qaf',dots:'Dua titik atas',word:'Qamar',wordEmoji:'🌙'},
-    ]},
-    { id:'B-F', name:'Kumpulan F', subtitle:'Huruf Unik', emoji:'⭐', letters:[
-      {char:'ا',name:'Alif',dots:'Tiada titik',word:'Ayam',wordEmoji:'🐔'},
-      {char:'ل',name:'Lam',dots:'Tiada titik',word:'Lampu',wordEmoji:'💡'},
-      {char:'م',name:'Mim',dots:'Tiada titik',word:'Meja',wordEmoji:'🪑'},
-      {char:'ك',name:'Kaf',dots:'Tiada titik',word:'Kapal',wordEmoji:'🚢'},
-      {char:'ه',name:'Ha (kecil)',dots:'Tiada titik',word:'Hujan',wordEmoji:'🌧️'},
-      {char:'ة',name:'Ta Marbutah',dots:'Dua titik atas',word:'Madrasah',wordEmoji:'🏫'},
-    ]},
-    { id:'B-G', name:'Kumpulan G', subtitle:'Huruf Khas Melayu', emoji:'🌺', letters:[
-      {char:'چ',name:'Ca',dots:'Tiga titik bawah',word:'Cawan',wordEmoji:'🍵'},
-      {char:'ڠ',name:'Nga',dots:'Tiga titik bawah (luar)',word:'Naga',wordEmoji:'🐉'},
-      {char:'ڤ',name:'Pa',dots:'Tiga titik bawah',word:'Padi',wordEmoji:'🌾'},
-      {char:'ݢ',name:'Ga',dots:'Satu titik atas',word:'Gajah',wordEmoji:'🐘'},
-      {char:'ڽ',name:'Nya',dots:'Tiga titik atas',word:'Nyawa',wordEmoji:'💚'},
-      {char:'ۏ',name:'Va',dots:'Tiga titik atas (bulat)',word:'Van',wordEmoji:'🚐'},
-    ]},
-  ],
   bunyi: [
-    { id:'N-1', name:'Kumpulan 1', subtitle:'Bunyi Bibir — B, T, Th', emoji:'👄', letters:[
+    { id:'M-1', name:'Kelompok 1', subtitle:'Makhraj Bibir — شفتان', emoji:'👄', letters:[
       {char:'ب',name:'Ba',dots:'Satu titik bawah',word:'Baju',wordEmoji:'👕'},
-      {char:'ت',name:'Ta',dots:'Dua titik atas',word:'Tali',wordEmoji:'🪢'},
-      {char:'ث',name:'Tha',dots:'Tiga titik atas',word:'Salji',wordEmoji:'❄️'},
-    ]},
-    { id:'N-2', name:'Kumpulan 2', subtitle:'Bunyi Tekak', emoji:'🗣️', letters:[
-      {char:'ج',name:'Jim',dots:'Satu titik bawah',word:'Jambu',wordEmoji:'🍓'},
-      {char:'ح',name:'Ha (besar)',dots:'Tiada titik',word:'Harimau',wordEmoji:'🐯'},
-      {char:'خ',name:'Kha',dots:'Satu titik atas',word:'Khemah',wordEmoji:'⛺'},
-      {char:'ع',name:'Ain',dots:'Tiada titik',word:'Amal',wordEmoji:'🤲'},
-      {char:'غ',name:'Ghain',dots:'Satu titik atas',word:'Ghaib',wordEmoji:'👻'},
-    ]},
-    { id:'N-3', name:'Kumpulan 3', subtitle:'Bunyi Desis "S"', emoji:'🐍', letters:[
-      {char:'س',name:'Sin',dots:'Tiada titik',word:'Singa',wordEmoji:'🦁'},
-      {char:'ش',name:'Syin',dots:'Tiga titik atas',word:'Syurga',wordEmoji:'✨'},
-      {char:'ص',name:'Sad',dots:'Tiada titik',word:'Sabun',wordEmoji:'🧼'},
-    ]},
-    { id:'N-4', name:'Kumpulan 4', subtitle:'Bunyi "Z"', emoji:'⚡', letters:[
-      {char:'ذ',name:'Zal',dots:'Satu titik atas',word:'Zat',wordEmoji:'⚗️'},
-      {char:'ز',name:'Zai',dots:'Satu titik atas',word:'Zaitun',wordEmoji:'🫒'},
-      {char:'ض',name:'Dad',dots:'Satu titik atas',word:'Dabbah',wordEmoji:'🐾'},
-      {char:'ظ',name:'Zha',dots:'Satu titik atas',word:'Zalim',wordEmoji:'⚠️'},
-    ]},
-    { id:'N-5', name:'Kumpulan 5', subtitle:'Bunyi Hampir Sama', emoji:'🔄', letters:[
-      {char:'ط',name:'Ta (tebal)',dots:'Tiada titik',word:'Talib',wordEmoji:'🎒'},
-      {char:'ت',name:'Ta',dots:'Dua titik atas',word:'Tali',wordEmoji:'🪢'},
-      {char:'ق',name:'Qaf',dots:'Dua titik atas',word:'Qamar',wordEmoji:'🌙'},
-      {char:'ك',name:'Kaf',dots:'Tiada titik',word:'Kapal',wordEmoji:'🚢'},
+      {char:'م',name:'Mim',dots:'Tiada titik',word:'Meja',wordEmoji:'🪑'},
+      {char:'و',name:'Wau',dots:'Tiada titik',word:'Warna',wordEmoji:'🎨'},
       {char:'ف',name:'Fa',dots:'Satu titik atas',word:'Fajar',wordEmoji:'🌅'},
     ]},
-    { id:'N-6', name:'Kumpulan 6', subtitle:'Huruf Khas Melayu', emoji:'🌺', letters:[
+    { id:'M-2', name:'Kelompok 2', subtitle:'Hujung Lidah + Gigi — أسنان', emoji:'🦷', letters:[
+      {char:'ت',name:'Ta',dots:'Dua titik atas',word:'Tali',wordEmoji:'🪢'},
+      {char:'ث',name:'Tha',dots:'Tiga titik atas',word:'Salji',wordEmoji:'❄️'},
+      {char:'ذ',name:'Zal',dots:'Satu titik atas',word:'Zat',wordEmoji:'⚗️'},
+      {char:'ظ',name:'Zha',dots:'Satu titik atas',word:'Zalim',wordEmoji:'⚠️'},
+      {char:'ط',name:'Ta (tebal)',dots:'Tiada titik',word:'Talib',wordEmoji:'🎒'},
+      {char:'د',name:'Dal',dots:'Tiada titik',word:'Daun',wordEmoji:'🍃'},
+      {char:'ض',name:'Dad',dots:'Satu titik atas',word:'Darab',wordEmoji:'✖️'},
+      {char:'ن',name:'Nun',dots:'Satu titik atas',word:'Nuri',wordEmoji:'🦜'},
+      {char:'ل',name:'Lam',dots:'Tiada titik',word:'Lampu',wordEmoji:'💡'},
+    ]},
+    { id:'M-3', name:'Kelompok 3', subtitle:'Hujung Lidah + Gusi — لثة', emoji:'👅', letters:[
+      {char:'ز',name:'Zai',dots:'Satu titik atas',word:'Zirafah',wordEmoji:'🦒'},
+      {char:'س',name:'Sin',dots:'Tiada titik',word:'Singa',wordEmoji:'🦁'},
+      {char:'ص',name:'Sad',dots:'Tiada titik',word:'Sabun',wordEmoji:'🧼'},
+      {char:'ر',name:'Ra',dots:'Tiada titik',word:'Roti',wordEmoji:'🍞'},
+    ]},
+    { id:'M-4', name:'Kelompok 4', subtitle:'Tengah & Belakang Lidah — لسان', emoji:'🗣️', letters:[
+      {char:'ج',name:'Jim',dots:'Satu titik bawah',word:'Jambu',wordEmoji:'🍓'},
+      {char:'ش',name:'Syin',dots:'Tiga titik atas',word:'Syurga',wordEmoji:'✨'},
+      {char:'ي',name:'Ya',dots:'Dua titik bawah',word:'Yakin',wordEmoji:'💪'},
+      {char:'خ',name:'Kha',dots:'Satu titik atas',word:'Khemah',wordEmoji:'⛺'},
+      {char:'غ',name:'Ghain',dots:'Satu titik atas',word:'Ghaib',wordEmoji:'👻'},
+      {char:'ك',name:'Kaf',dots:'Tiada titik',word:'Kapal',wordEmoji:'🚢'},
+      {char:'ق',name:'Qaf',dots:'Dua titik atas',word:'Qamar',wordEmoji:'🌙'},
+    ]},
+    { id:'M-5', name:'Kelompok 5', subtitle:'Tekak — حلق', emoji:'🌀', letters:[
+      {char:'ح',name:'Ha (besar)',dots:'Tiada titik',word:'Hakim',wordEmoji:'👨‍⚖️'},
+      {char:'ع',name:'Ain',dots:'Tiada titik',word:'Amal',wordEmoji:'🤲'},
+      {char:'ه',name:'Ha (kecil)',dots:'Tiada titik',word:'Hujan',wordEmoji:'🌧️'},
+      {char:'ا',name:'Alif',dots:'Tiada titik',word:'Ayam',wordEmoji:'🐔'},
+    ]},
+    { id:'M-6', name:'Kelompok 6', subtitle:'Huruf Khas Melayu', emoji:'🌺', letters:[
       {char:'چ',name:'Ca',dots:'Tiga titik bawah',word:'Cawan',wordEmoji:'🍵'},
       {char:'ڠ',name:'Nga',dots:'Tiga titik bawah (luar)',word:'Naga',wordEmoji:'🐉'},
       {char:'ڤ',name:'Pa',dots:'Tiga titik bawah',word:'Padi',wordEmoji:'🌾'},
@@ -783,40 +1404,32 @@ function renderLeaderboard(lb, myNama) {
     </div>`).join('');
 }
 
-// ══════════════════════════════════════════
-// AUTH — cek murid / guru
-// ══════════════════════════════════════════
+
+
+
 let currentStudentData = null;
 
-async function initAuth() {
-  // Cek guru session
-  if (sb) {
-    try {
-      const { data:{ session } } = await sb.auth.getSession();
-      if (session) { window.location.href = 'dashboard.html'; return; }
-    } catch(e) { console.warn('Session check:', e.message); }
-  }
-  // Cek murid session
+function initAuth() {
   const raw = localStorage.getItem('jawikids_student');
-  if (raw) {
-    try {
-      currentStudentData = JSON.parse(raw);
-      document.getElementById('userBadge').style.display = 'flex';
-      document.getElementById('ubName').textContent = currentStudentData.nama;
-    } catch(e) {
-      localStorage.removeItem('jawikids_student');
-      window.location.href = 'auth.html';
-    }
-  } else {
-    // Tiada session — redirect ke halaman login
-    window.location.href = 'auth.html';
+  if (!raw) {
+    window.location.href = '/auth.html';
+    return;
+  }
+  try {
+    currentStudentData = JSON.parse(raw);
+    if (!currentStudentData.id || !currentStudentData.nama) throw new Error('invalid');
+    document.getElementById('userBadge').style.display = 'flex';
+    document.getElementById('ubName').textContent = currentStudentData.nama;
+  } catch(e) {
+    localStorage.removeItem('jawikids_student');
+    window.location.href = '/auth.html';
   }
 }
 
 function handleUserClick() {
   if (confirm('Nak log keluar?')) {
     localStorage.removeItem('jawikids_student');
-    window.location.href = 'auth.html';
+    window.location.href = '/auth.html';
   }
 }
 
@@ -840,16 +1453,8 @@ function showScreen(id) {
   window.scrollTo(0,0);
 }
 
-function switchPhase(phase) {
-  currentPhase = phase;
-  document.querySelectorAll('.phase-tab').forEach((t,i) => {
-    t.classList.toggle('active-tab', (i===0&&phase==='bentuk')||(i===1&&phase==='bunyi'));
-  });
-  renderGroups();
-}
-
 function renderGroups() {
-  const groups = GROUPS[currentPhase];
+  const groups = GROUPS.bunyi;
   document.getElementById('groupsGrid').innerHTML = groups.map((g,i) => {
     const best = stats.groupScores[g.id] || 0;
     const stars = best>=90?3:best>=60?2:best>=30?1:0;
@@ -876,12 +1481,13 @@ function renderGroups() {
 function goHome() { showScreen('home'); renderGroups(); }
 
 function startGroup(groupId) {
-  currentGroup = GROUPS[currentPhase].find(g => g.id === groupId);
+  currentGroup = GROUPS.bunyi.find(g => g.id === groupId);
   questions = generateQuestions(currentGroup.letters, 10);
   document.getElementById('gameTitle').textContent = currentGroup.name + ' — ' + currentGroup.subtitle;
-  document.getElementById('gamePhase').textContent = currentPhase==='bentuk'?'🔵 Kelompok Bentuk':'🟢 Kelompok Bunyi';
+  document.getElementById('gamePhase').textContent = '🗣️ Kelompok Makhraj';
   showScreen('game');
   renderLetterRefPanel();
+  updateMakhrajDiagram(groupId);
   updateStreak(); saveStats();
 }
 
@@ -892,17 +1498,157 @@ function generateQuestions(letters, total) {
   return qs.sort(() => Math.random()-0.5);
 }
 
+// ── MAKHRAJ DIAGRAM CONFIG ──
+const MAKHRAJ_CONFIG = {
+  'M-1': {
+    label: 'Makhraj Bibir — شفتان',
+    color: '#EF476F',
+    img: 'images/makhraj-1.png',
+    desc: 'Huruf dihasilkan dengan dua bibir atau bibir bawah dan gigi atas'
+  },
+  'M-2': {
+    label: 'Hujung Lidah + Gigi — أسنان',
+    color: '#FF6B35',
+    img: 'images/makhraj-2.png',
+    desc: 'Hujung lidah menyentuh belakang gigi atas atau gusi'
+  },
+  'M-3': {
+    label: 'Hujung Lidah + Gusi — لثة',
+    color: '#FFD93D',
+    img: 'images/makhraj-3.png',
+    desc: 'Hujung lidah menyentuh gusi atas di belakang gigi'
+  },
+  'M-4': {
+    label: 'Tengah & Belakang Lidah — لسان',
+    color: '#9B5DE5',
+    img: 'images/makhraj-4.png',
+    desc: 'Tengah atau belakang lidah menghampiri lelangit'
+  },
+  'M-5': {
+    label: 'Tekak — حلق',
+    color: '#4ECDC4',
+    img: 'images/makhraj-5.png',
+    desc: 'Bunyi dihasilkan dari anak tekak dan kerongkong'
+  },
+  'M-6': {
+    label: 'Huruf Khas Melayu',
+    color: '#06D6A0',
+    img: null,
+    desc: 'Huruf tambahan dalam tulisan Jawi untuk bahasa Melayu'
+  },
+};
+
+function updateMakhrajDiagram(groupId) {
+  const cfg = MAKHRAJ_CONFIG[groupId];
+  if (!cfg) return;
+
+  const imgWrap = document.getElementById('makhrajImgWrap');
+  if (!imgWrap) return;
+
+  if (cfg.img) {
+    const img = document.createElement('img');
+    img.src = cfg.img;
+    img.alt = cfg.label;
+    img.style.cssText = `width:100%;border-radius:12px;display:block;border:2px solid ${cfg.color}55;`;
+    img.onerror = function() {
+      this.parentElement.innerHTML =
+        `<div style="background:#f9f9f9;border-radius:12px;padding:28px 16px;text-align:center;border:2px dashed #ddd;">
+          <div style="font-size:2rem;margin-bottom:6px;">🖼️</div>
+          <div style="font-size:0.75rem;font-weight:700;color:#aaa;">
+            Gambar belum tersedia<br>
+            <strong>${cfg.img}</strong>
+          </div>
+        </div>`;
+    };
+    imgWrap.innerHTML = '';
+    imgWrap.appendChild(img);
+  } else {
+    imgWrap.innerHTML =
+      `<div style="background:linear-gradient(135deg,${cfg.color}18,${cfg.color}08);
+           border-radius:12px;padding:24px 16px;text-align:center;border:2px solid ${cfg.color}33;">
+        <div style="font-size:2.5rem;margin-bottom:8px;">🌺</div>
+        <div style="font-size:0.85rem;font-weight:800;color:${cfg.color};">${cfg.label}</div>
+      </div>`;
+  }
+
+  // Kemaskini legend
+  const legend = document.getElementById('makhrajLegend');
+  if (legend) {
+    legend.innerHTML =
+      `<div class="makhraj-legend-item" style="justify-content:center;">
+        <div class="makhraj-legend-dot" style="background:${cfg.color}"></div>
+        <span style="color:${cfg.color};font-weight:800;font-size:0.72rem;">${cfg.label}</span>
+      </div>
+      <div style="font-size:0.7rem;color:var(--text-light);font-weight:600;text-align:center;margin-top:4px;">${cfg.desc}</div>`;
+  }
+}
+
+// ══════════════════════════════════════════
+// FLASHCARD PANEL — HURUF SATU PERSATU
+// ══════════════════════════════════════════
+let fcIdx = 0, fcFlipped = false, fcAudio = null;
+
 function renderLetterRefPanel() {
-  document.getElementById('letterRefGrid').innerHTML = currentGroup.letters.map(l => `
-    <div class="letter-ref-item">
-      <span class="letter-ref-char">${l.char}</span>
-      <span class="letter-ref-name">${l.name}</span>
-      <span class="letter-ref-dots">${l.dots}</span>
-      <div class="ref-divider"></div>
-      <span class="letter-ref-emoji">${l.wordEmoji||'📖'}</span>
-      <span class="letter-ref-word">${l.word||''}</span>
-      <button class="btn-ref-audio" onclick="playRefAudio('${l.name}',this)">🔊 Dengar</button>
-    </div>`).join('');
+  fcIdx = 0; fcFlipped = false;
+  renderFcCard();
+}
+
+function renderFcCard() {
+  const letters = currentGroup.letters;
+  const l = letters[fcIdx];
+  if (!l) return;
+
+  // Reset flip
+  const card = document.getElementById('fcCard');
+  if (card) { card.classList.remove('flipped'); fcFlipped = false; }
+
+  document.getElementById('fcChar').textContent = l.char;
+  document.getElementById('fcName').textContent = l.name;
+  document.getElementById('fcEmoji').textContent = l.wordEmoji || '📖';
+  document.getElementById('fcWord').textContent = l.word || '';
+  document.getElementById('fcCurrent').textContent = fcIdx + 1;
+  document.getElementById('fcTotal').textContent = letters.length;
+
+  const audioBtn = document.getElementById('fcAudioBtn');
+  if (audioBtn) { audioBtn.textContent = '🔊 Dengar'; audioBtn.className = 'fc-audio-btn'; }
+  if (fcAudio) { fcAudio.pause(); fcAudio = null; }
+
+  document.getElementById('fcPrev').disabled = fcIdx === 0;
+  document.getElementById('fcNext').disabled = fcIdx === letters.length - 1;
+
+  // Dots — max 8
+  const max = Math.min(letters.length, 8);
+  document.getElementById('fcDots').innerHTML =
+    Array.from({length: max}, (_, i) =>
+      `<div class="fc-dot ${i === fcIdx ? 'active' : ''}"></div>`
+    ).join('');
+}
+
+function flipRefCard() {
+  const card = document.getElementById('fcCard');
+  if (!card) return;
+  fcFlipped = !fcFlipped;
+  card.classList.toggle('flipped', fcFlipped);
+}
+
+function fcNav(dir) {
+  const letters = currentGroup.letters;
+  fcIdx = Math.max(0, Math.min(letters.length - 1, fcIdx + dir));
+  renderFcCard();
+}
+
+function playFcAudio() {
+  const l = currentGroup.letters[fcIdx];
+  if (!l) return;
+  const key = AUDIO_MAP[l.name];
+  if (!key) return;
+  const btn = document.getElementById('fcAudioBtn');
+  if (fcAudio) { fcAudio.pause(); fcAudio = null; }
+  fcAudio = new Audio(`${AUDIO_FOLDER}${key}${AUDIO_EXT}`);
+  btn.classList.add('playing'); btn.textContent = '🔊 Main...';
+  fcAudio.play()
+    .then(() => { fcAudio.onended = () => { btn.classList.remove('playing'); btn.textContent = '🔊 Dengar'; }; })
+    .catch(() => { btn.classList.remove('playing'); btn.textContent = '🔇 Tiada audio'; });
 }
 
 // ══════════════════════════════════════════
@@ -941,7 +1687,7 @@ function renderQuestionInModal() {
 
   if (mode === 'char2name') {
     jawiEl.textContent = letter.char; jawiEl.style.fontSize = '6.5rem';
-    hintEl.textContent = 'Apakah nama huruf ini?'; dotsEl.textContent = letter.dots;
+    hintEl.textContent = 'Apakah nama huruf ini?'; dotsEl.textContent = '';
   } else if (mode === 'audio2char') {
     jawiEl.textContent = '🔊'; jawiEl.style.fontSize = '4rem';
     hintEl.textContent = 'Dengar dan pilih huruf yang betul!'; dotsEl.textContent = 'Tekan butang "Dengar" di bawah';
@@ -1167,8 +1913,370 @@ function launchConfetti() {
 }
 
 // ══════════════════════════════════════════
-// INIT
+// MEMORY MATCH GAME
 // ══════════════════════════════════════════
+let matchCards = [], matchFlipped = [], matchMatchedCount = 0;
+let matchFlipCount = 0, matchLock = false;
+let matchTimerInterval = null, matchSeconds = 0;
+let matchTotal = 0;
+
+function openMatchModal() {
+  document.getElementById('matchOverlay').classList.add('open');
+  resetMatch();
+}
+
+function closeMatchModal() {
+  document.getElementById('matchOverlay').classList.remove('open');
+  clearInterval(matchTimerInterval);
+}
+
+function resetMatch() {
+  clearInterval(matchTimerInterval);
+  matchFlipped = []; matchMatchedCount = 0;
+  matchFlipCount = 0; matchLock = false; matchSeconds = 0;
+
+  document.getElementById('matchFlips').textContent = '0';
+  document.getElementById('matchMatched').textContent = '0';
+  document.getElementById('matchTimer').textContent = '0s';
+  document.getElementById('matchResult').classList.remove('show');
+
+  // Ambil 4 huruf rawak dari kumpulan semasa — jadikan 8 kad (4 pasang)
+  const letters = currentGroup.letters;
+  const pick = shuffle([...letters]).slice(0, Math.min(4, letters.length));
+  matchTotal = pick.length;
+  document.getElementById('matchTotal').textContent = pick.length;
+
+  // Setiap pasang: satu kad huruf + satu kad emoji/objek
+  const pairs = [];
+  pick.forEach((l, i) => {
+    pairs.push({ id: i, type: 'huruf',  char: l.char, display: l.char,  label: l.name,      pairId: i });
+    pairs.push({ id: i, type: 'objek',  char: l.char, display: l.wordEmoji, label: l.word,  pairId: i });
+  });
+
+  matchCards = shuffle(pairs);
+
+  // Tentukan grid cols
+  const total = matchCards.length;
+  const grid = document.getElementById('matchGrid');
+  grid.className = 'match-grid ' + (total <= 6 ? 'cols-3' : 'cols-4');
+
+  // Render kad
+  grid.innerHTML = matchCards.map((c, idx) => `
+    <div class="match-card" id="mc-${idx}" onclick="flipCard(${idx})">
+      <div class="card-front">🌟</div>
+      <div class="card-back">
+        ${c.type === 'huruf'
+          ? `<span class="cb-char">${c.display}</span><span class="cb-word">${c.label}</span>`
+          : `<span class="cb-emoji">${c.display}</span><span class="cb-word">${c.label}</span>`
+        }
+      </div>
+    </div>`).join('');
+
+  // Mula timer
+  matchTimerInterval = setInterval(() => {
+    matchSeconds++;
+    document.getElementById('matchTimer').textContent = matchSeconds + 's';
+  }, 1000);
+}
+
+function flipCard(idx) {
+  if (matchLock) return;
+  const card = document.getElementById('mc-' + idx);
+  if (!card || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+
+  card.classList.add('flipped');
+  matchFlipCount++;
+  document.getElementById('matchFlips').textContent = matchFlipCount;
+  matchFlipped.push(idx);
+
+  if (matchFlipped.length === 2) {
+    matchLock = true;
+    checkMatchPair();
+  }
+}
+
+function checkMatchPair() {
+  const [a, b] = matchFlipped;
+  const ca = matchCards[a], cb = matchCards[b];
+
+  const isMatch = ca.pairId === cb.pairId && ca.type !== cb.type;
+
+  if (isMatch) {
+    // Padanan berjaya
+    setTimeout(() => {
+      document.getElementById('mc-' + a).classList.add('matched');
+      document.getElementById('mc-' + b).classList.add('matched');
+      matchMatchedCount++;
+      document.getElementById('matchMatched').textContent = matchMatchedCount;
+      playCorrectSfx();
+      gainXp(10);
+      matchFlipped = [];
+      matchLock = false;
+
+      if (matchMatchedCount === matchTotal) {
+        // Semua padanan selesai!
+        clearInterval(matchTimerInterval);
+        setTimeout(() => showMatchResult(), 600);
+      }
+    }, 500);
+  } else {
+    // Tidak sepadan — flip balik
+    setTimeout(() => {
+      document.getElementById('mc-' + a).classList.remove('flipped');
+      document.getElementById('mc-' + b).classList.remove('flipped');
+      document.getElementById('mc-' + a).classList.add('wrong-flash');
+      document.getElementById('mc-' + b).classList.add('wrong-flash');
+      setTimeout(() => {
+        document.getElementById('mc-' + a)?.classList.remove('wrong-flash');
+        document.getElementById('mc-' + b)?.classList.remove('wrong-flash');
+      }, 400);
+      playWrongSfx();
+      matchFlipped = [];
+      matchLock = false;
+    }, 900);
+  }
+}
+
+function showMatchResult() {
+  const flips = matchFlipCount;
+  const minFlips = matchTotal * 2; // Skor sempurna
+  const rating = flips <= minFlips + 2 ? '🏆' : flips <= minFlips + 6 ? '🌟' : '💪';
+  const msg = flips <= minFlips + 2
+    ? `Luar biasa! Hanya ${flips} flips dalam ${matchSeconds}s!`
+    : flips <= minFlips + 6
+    ? `Bagus! ${flips} flips dalam ${matchSeconds}s. Cuba lebih baik!`
+    : `Selesai dalam ${flips} flips dan ${matchSeconds}s. Teruskan berlatih!`;
+
+  document.getElementById('matchResultEmoji').textContent = rating;
+  document.getElementById('matchResultTitle').textContent =
+    rating === '🏆' ? 'Luar Biasa!' : rating === '🌟' ? 'Bagus!' : 'Tahniah!';
+  document.getElementById('matchResultSub').textContent = msg;
+  document.getElementById('matchResult').classList.add('show');
+  document.getElementById('matchBox').scrollTop = 999;
+
+  if (rating === '🏆') launchConfetti();
+  saveStats();
+}
+
+
+let tulisLetters = [], tulisIdx = 0;
+let traceCtx = null, bebasCtx = null;
+let isDrawing = false, penSize = 3, penColor = '#2D2D2D';
+let tulisScores = { betul: 0, cubaLagi: 0 };
+
+function openTulisModal() {
+  tulisLetters = [...currentGroup.letters];
+  tulisIdx = 0; tulisScores = { betul: 0, cubaLagi: 0 };
+  renderTulisSteps();
+  loadTulisLetter();
+  document.getElementById('tulisOverlay').classList.add('open');
+}
+
+function closeTulisModal() {
+  document.getElementById('tulisOverlay').classList.remove('open');
+  stopDrawing();
+}
+
+function renderTulisSteps() {
+  const steps = document.getElementById('tulisSteps');
+  steps.innerHTML = tulisLetters.map((_, i) => `
+    <div class="tulis-step-dot ${i < tulisIdx ? 'done' : i === tulisIdx ? 'active' : ''}"></div>
+  `).join('');
+}
+
+function loadTulisLetter() {
+  const letter = tulisLetters[tulisIdx];
+  document.getElementById('tulisChar').textContent = letter.char;
+  document.getElementById('tulisLetterName').textContent = `${letter.name}`;
+  document.getElementById('semakContoh').textContent = letter.char;
+  document.getElementById('traceGhost').textContent = letter.char;
+
+  // Reset fasa
+  document.getElementById('fazaTrace').style.display = 'block';
+  document.getElementById('fazaBebas').style.display = 'none';
+  document.getElementById('fazaSemak').style.display = 'none';
+  document.getElementById('tulisFeedback').textContent = '';
+  document.getElementById('btnTulisNext').className = 'btn-tulis-next';
+
+  // Init canvas trace
+  setTimeout(() => {
+    initTraceCanvas();
+    initBebasCanvas();
+  }, 100);
+}
+
+function initTraceCanvas() {
+  const canvas = document.getElementById('traceCanvas');
+  const wrap = document.getElementById('traceWrap');
+  canvas.width = wrap.offsetWidth || 320;
+  canvas.height = 220;
+  traceCtx = canvas.getContext('2d');
+  traceCtx.clearRect(0, 0, canvas.width, canvas.height);
+  traceCtx.lineCap = 'round';
+  traceCtx.lineJoin = 'round';
+  setupCanvasEvents(canvas, traceCtx, 'trace');
+}
+
+function initBebasCanvas() {
+  const canvas = document.getElementById('bebasCanvas');
+  const wrap = document.getElementById('bebasWrap');
+  canvas.width = wrap.offsetWidth || 320;
+  canvas.height = 220;
+  bebasCtx = canvas.getContext('2d');
+  bebasCtx.clearRect(0, 0, canvas.width, canvas.height);
+  bebasCtx.lineCap = 'round';
+  bebasCtx.lineJoin = 'round';
+  setupCanvasEvents(canvas, bebasCtx, 'bebas');
+}
+
+function getPos(canvas, e) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const src = e.touches ? e.touches[0] : e;
+  return {
+    x: (src.clientX - rect.left) * scaleX,
+    y: (src.clientY - rect.top) * scaleY
+  };
+}
+
+function setupCanvasEvents(canvas, ctx, type) {
+  const startDraw = (e) => {
+    e.preventDefault();
+    isDrawing = true;
+    const pos = getPos(canvas, e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    ctx.strokeStyle = type === 'trace' ? 'rgba(155,93,229,0.7)' : penColor;
+    ctx.lineWidth = type === 'trace' ? 5 : penSize;
+  };
+  const draw = (e) => {
+    e.preventDefault();
+    if (!isDrawing) return;
+    const pos = getPos(canvas, e);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+  };
+  const stop = () => { isDrawing = false; };
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stop);
+  canvas.addEventListener('mouseleave', stop);
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', stop);
+}
+
+function stopDrawing() { isDrawing = false; }
+
+function clearTrace() {
+  if (traceCtx) {
+    traceCtx.clearRect(0, 0, document.getElementById('traceCanvas').width, 220);
+  }
+}
+
+function clearBebas() {
+  if (bebasCtx) {
+    bebasCtx.clearRect(0, 0, document.getElementById('bebasCanvas').width, 220);
+  }
+}
+
+function setPen(size, id) {
+  penSize = size;
+  document.querySelectorAll('.pen-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pen-' + id).classList.add('active');
+}
+
+function setColor(color, btn) {
+  penColor = color;
+  document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (bebasCtx) bebasCtx.strokeStyle = color;
+}
+
+function goToFazaBebas() {
+  document.getElementById('fazaTrace').style.display = 'none';
+  document.getElementById('fazaBebas').style.display = 'block';
+  document.getElementById('tulisBox').scrollTop = 0;
+}
+
+function goToSemak() {
+  document.getElementById('fazaBebas').style.display = 'none';
+  document.getElementById('fazaSemak').style.display = 'block';
+  document.getElementById('tulisBox').scrollTop = 0;
+
+  // Salin lukisan bebas ke canvas semak (thumbnail)
+  const src = document.getElementById('bebasCanvas');
+  const dst = document.getElementById('semakCanvas');
+  const wrap = dst.parentElement;
+  dst.width = wrap.offsetWidth || 120;
+  dst.height = 100;
+  const dstCtx = dst.getContext('2d');
+  dstCtx.fillStyle = 'white';
+  dstCtx.fillRect(0, 0, dst.width, dst.height);
+  dstCtx.drawImage(src, 0, 0, dst.width, dst.height);
+}
+
+function nilaiTulis(betul) {
+  const fb = document.getElementById('tulisFeedback');
+  if (betul) {
+    tulisScores.betul++;
+    gainXp(8);
+    playCorrectSfx();
+    fb.textContent = '✅ Bagus! Tulisan kamu cantik!';
+    fb.className = 'tulis-feedback ok';
+  } else {
+    tulisScores.cubaLagi++;
+    playWrongSfx();
+    fb.textContent = '💪 Cuba lagi! Latihan buat sempurna.';
+    fb.className = 'tulis-feedback retry';
+  }
+  document.getElementById('btnTulisNext').className = 'btn-tulis-next show';
+  const isLast = tulisIdx >= tulisLetters.length - 1;
+  document.getElementById('btnTulisNext').textContent = isLast ? '✅ Selesai!' : 'Huruf Seterusnya →';
+}
+
+function nextTulisLetter() {
+  tulisIdx++;
+  if (tulisIdx >= tulisLetters.length) {
+    // Selesai semua huruf
+    closeTulisModal();
+    showTulisResult();
+    return;
+  }
+  renderTulisSteps();
+  loadTulisLetter();
+  document.getElementById('tulisBox').scrollTop = 0;
+}
+
+function showTulisResult() {
+  const total = tulisLetters.length;
+  const pct = Math.round(tulisScores.betul / total * 100);
+  const msg = pct >= 80
+    ? `🏆 Luar biasa! ${tulisScores.betul}/${total} huruf ditulis dengan betul!`
+    : pct >= 50
+    ? `🌟 Bagus! ${tulisScores.betul}/${total} huruf betul. Teruskan berlatih!`
+    : `💪 ${tulisScores.betul}/${total} betul. Jangan putus asa, cuba lagi!`;
+
+  // Tunjuk sebagai popup ringkas
+  const popup = document.createElement('div');
+  popup.style.cssText = `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+    background:white;border-radius:24px;padding:28px 24px;text-align:center;z-index:300;
+    box-shadow:0 20px 60px rgba(0,0,0,0.25);max-width:320px;width:90%;
+    transition:transform 0.4s cubic-bezier(.34,1.56,.64,1);border:3px solid var(--purple);`;
+  popup.innerHTML = `
+    <div style="font-size:3rem;margin-bottom:10px;">${pct>=80?'🏆':pct>=50?'🌟':'💪'}</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;margin-bottom:8px;">Latihan Menulis Selesai!</div>
+    <div style="font-size:0.88rem;color:var(--text-light);font-weight:700;margin-bottom:20px;">${msg}</div>
+    <button onclick="this.parentElement.remove()" style="padding:12px 28px;background:var(--purple);color:white;border:none;border-radius:99px;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;">OK!</button>`;
+  document.body.appendChild(popup);
+  requestAnimationFrame(() => { popup.style.transform = 'translate(-50%,-50%) scale(1)'; });
+  if (pct >= 80) launchConfetti();
+  saveStats();
+}
+
+
 initAuth();
 renderGroups();
 </script>
@@ -1185,5 +2293,36 @@ renderGroups();
       });
     }
   </script>
+<script id="sidebar-script">
+/* ══════════════════════════════════════════
+   JawiKids — Shared Sidebar JS
+   ══════════════════════════════════════════ */
+
+function sbOpen() {
+  document.getElementById('sbSidebar').classList.add('open');
+  document.getElementById('sbOverlay').classList.add('open');
+}
+function sbClose() {
+  document.getElementById('sbSidebar').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('open');
+}
+function sbToggle() {
+  document.getElementById('sbSidebar').classList.contains('open') ? sbClose() : sbOpen();
+}
+
+// Tutup bila klik overlay
+document.addEventListener('DOMContentLoaded', () => {
+  const overlay = document.getElementById('sbOverlay');
+  if (overlay) overlay.addEventListener('click', sbClose);
+
+  // Highlight menu aktif berdasarkan URL
+  const page = window.location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('.sb-item[data-page]').forEach(el => {
+    if (el.dataset.page === page) el.classList.add('active');
+    else el.classList.remove('active');
+  });
+});
+
+</script>
 </body>
 </html>

@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>JawiKids — Suku Kata Terbuka</title>
+<script>
+  // Auth guard — semak sebelum apa-apa lain dirender
+  (function() {
+    try {
+      const raw = localStorage.getItem('jawikids_student');
+      if (!raw) { window.location.href = '/auth.html'; return; }
+      const d = JSON.parse(raw);
+      if (!d.id || !d.nama) { localStorage.removeItem('jawikids_student'); window.location.href = '/auth.html'; }
+    } catch(e) {
+      localStorage.removeItem('jawikids_student');
+      window.location.href = '/auth.html';
+    }
+  })();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2196F3">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg: #FFF8F2;
+  --primary: #2196F3;
+  --primary-light: #E3F2FD;
+  --primary-dark: #1565C0;
+  --blue: #2196F3;
+  --blue-light: #E3F2FD;
+  --blue-dark: #1565C0;
+  --green: #06D6A0;
+  --green-light: #D0F7EE;
+  --red: #EF476F;
+  --red-light: #FDDDE6;
+  --accent: #4ECDC4;
+  --text: #2D2D2D;
+  --text-light: #7A7A7A;
+  --card: #FFFFFF;
+  --shadow: 0 8px 32px rgba(33,150,243,0.12);
+  --radius: 20px;
+
+  /* Sidebar */
+  --sb-width: 240px;
+  --sb-bg: #1a1a2e;
+  --sb-border: rgba(255,255,255,0.06);
+  --sb-text: rgba(255,255,255,0.65);
+  --sb-text-active: #ffffff;
+  --sb-green: #06D6A0;
+  --sb-purple: #9B5DE5;
+  --sb-hover: rgba(255,255,255,0.06);
+  --sb-active-bg: rgba(33,150,243,0.18);
+  --sb-radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ══ SIDEBAR ══ */
+.sb-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:200; backdrop-filter:blur(2px); }
+.sb-overlay.open { display:block; }
+.sb-sidebar { position:fixed; left:0; top:0; bottom:0; width:var(--sb-width); background:var(--sb-bg); z-index:210; display:flex; flex-direction:column; transition:transform 0.3s cubic-bezier(.4,0,.2,1); box-shadow:4px 0 24px rgba(0,0,0,0.3); }
+.sb-brand { padding:22px 18px 18px; border-bottom:1px solid var(--sb-border); flex-shrink:0; }
+.sb-logo { font-family:'Fredoka One',cursive; font-size:1.7rem; line-height:1; background:linear-gradient(135deg,var(--sb-green),var(--sb-purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.sb-tagline { font-size:0.62rem; font-weight:700; color:var(--sb-text); letter-spacing:1.5px; text-transform:uppercase; margin-top:3px; }
+.sb-nav { flex:1; overflow-y:auto; padding:12px 10px; }
+.sb-section-label { font-size:0.58rem; font-weight:800; text-transform:uppercase; letter-spacing:1.8px; color:rgba(255,255,255,0.3); padding:10px 10px 4px; }
+.sb-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--sb-radius); margin-bottom:2px; cursor:pointer; border:none; background:none; width:100%; text-align:left; color:var(--sb-text); font-family:'Nunito',sans-serif; font-size:0.88rem; font-weight:700; transition:all 0.15s; text-decoration:none; }
+.sb-item:hover { background:var(--sb-hover); color:var(--sb-text-active); }
+.sb-item.active { background:var(--sb-active-bg); color:var(--primary); font-weight:800; }
+.sb-item.coming { opacity:0.4; cursor:not-allowed; pointer-events:none; }
+.sb-icon { font-size:1.1rem; width:22px; text-align:center; flex-shrink:0; direction:rtl; }
+.sb-label { flex:1; }
+.sb-badge { font-size:0.58rem; font-weight:800; padding:2px 7px; border-radius:99px; background:rgba(33,150,243,0.2); color:var(--primary); flex-shrink:0; }
+.sb-badge.soon { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.3); }
+.sb-footer { padding:14px 18px 20px; border-top:1px solid var(--sb-border); flex-shrink:0; }
+.sb-footer-sig { font-size:0.68rem; font-weight:700; color:rgba(255,255,255,0.3); text-align:center; line-height:1.5; }
+.sb-footer-sig span { color:var(--sb-green); }
+.sb-hamburger { display:none; flex-direction:column; align-items:center; justify-content:center; gap:5px; width:40px; height:40px; cursor:pointer; background:rgba(33,150,243,0.12); border:none; border-radius:10px; }
+.sb-hamburger span { width:18px; height:2px; border-radius:99px; background:var(--primary); display:block; }
+.sb-topbar { display:none; align-items:center; gap:12px; padding:12px 16px; background:var(--sb-bg); border-bottom:1px solid var(--sb-border); position:sticky; top:0; z-index:100; }
+.sb-topbar-logo { font-family:'Fredoka One',cursive; font-size:1.3rem; background:linear-gradient(135deg,var(--sb-green),var(--sb-purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+@media(max-width:860px) { .sb-sidebar{transform:translateX(-100%);} .sb-sidebar.open{transform:translateX(0);} .sb-hamburger{display:flex;} .sb-topbar{display:flex;} }
+@media(min-width:861px) { .screen{margin-left:var(--sb-width);} }
+
+/* ══ SCREENS ══ */
+.screen { display:none; min-height:100vh; flex-direction:column; align-items:center; }
+.screen.active { display:flex; }
+
+/* ══ HOME ══ */
+#home { padding:0 20px 48px; }
+.home-hero { text-align:center; padding:20px 0 24px; }
+.home-hero h1 { font-family:'Fredoka One',cursive; font-size:2rem; line-height:1.2; margin-bottom:8px; }
+.home-hero h1 span { color:var(--teal); }
+.home-hero p { font-size:0.9rem; color:var(--text-light); font-weight:600; }
+
+/* Vokal menu cards */
+.vokal-grid { display:flex; flex-direction:column; gap:14px; width:100%; max-width:580px; }
+.vokal-card {
+  background:var(--card); border-radius:var(--radius);
+  padding:20px 22px; cursor:pointer;
+  transition:all 0.22s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:var(--shadow); border:3px solid transparent;
+  display:flex; align-items:center; gap:18px;
+}
+.vokal-card:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgba(33,150,243,0.2); border-color:var(--primary); }
+.vokal-icon {
+  width:72px; height:72px; border-radius:20px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-family:'Fredoka One',cursive; flex-shrink:0;
+}
+.vi-a { background:linear-gradient(135deg,#E3F2FD,#4ECDC433); }
+.vi-i { background:linear-gradient(135deg,#E3F2FD,#2196F333); }
+.vi-u { background:linear-gradient(135deg,#E8F5E9,#06D6A033); }
+.vokal-jawi { font-size:2.2rem; direction:rtl; line-height:1; }
+.vokal-rumi { font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+.vokal-info { flex:1; }
+.vokal-name { font-family:'Fredoka One',cursive; font-size:1.2rem; margin-bottom:4px; }
+.vokal-desc { font-size:0.78rem; color:var(--text-light); font-weight:700; line-height:1.5; }
+.vokal-count { font-size:0.68rem; font-weight:800; margin-top:6px; padding:3px 10px; border-radius:99px; display:inline-block; }
+.vc-a { color:var(--primary); background:var(--primary-light); }
+.vc-i { color:var(--teal); background:var(--teal-light); }
+.vc-u { color:#1b7a50; background:var(--green-light); }
+
+/* ══ GAME SCREEN ══ */
+#game { padding:0 16px 48px; }
+.game-header {
+  width:100%; max-width:640px;
+  display:flex; align-items:center; gap:10px;
+  padding:14px 0 16px;
+}
+.btn-back {
+  background:var(--card); border:none; border-radius:12px;
+  width:40px; height:40px; font-size:1.2rem; cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08); display:flex;
+  align-items:center; justify-content:center; flex-shrink:0;
+}
+.game-title { font-family:'Fredoka One',cursive; font-size:1.1rem; }
+.game-sub { font-size:0.7rem; color:var(--text-light); font-weight:700; }
+
+/* HUD */
+.hud-row {
+  display:flex; gap:8px; margin-bottom:12px;
+  width:100%; max-width:640px;
+}
+.hud-chip { padding:6px 14px; border-radius:99px; font-size:0.8rem; font-weight:800; }
+.hud-q { background:var(--primary-light); color:var(--primary-dark); }
+.hud-ok { background:var(--green-light); color:#04a87d; }
+.hud-err { background:var(--red-light); color:var(--red); }
+
+/* Progress */
+.prog-bar-wrap { width:100%; max-width:640px; margin-bottom:16px; }
+.prog-bar { height:9px; background:#eee; border-radius:99px; overflow:hidden; }
+.prog-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,var(--primary),#4ECDC4); transition:width 0.5s cubic-bezier(.34,1.56,.64,1); }
+
+/* ══ SOALAN ══ */
+.soalan-panel {
+  width:100%; max-width:640px; background:var(--card);
+  border-radius:var(--radius); padding:22px 18px;
+  box-shadow:var(--shadow); margin-bottom:14px;
+  text-align:center;
+}
+.soalan-label { font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-light); margin-bottom:10px; }
+
+/* Perkataan besar dengan warna vokal */
+.perkataan-display {
+  font-size:4.5rem; direction:rtl; line-height:1.2;
+  margin-bottom:6px; letter-spacing:4px;
+}
+.perkataan-rumi { font-size:0.85rem; font-weight:700; color:var(--text-light); margin-bottom:6px; }
+
+/* Suku kata breakdown */
+.sukukata-row {
+  display:flex; gap:8px; justify-content:center;
+  flex-direction:row-reverse; margin-bottom:14px; flex-wrap:wrap;
+}
+.sk-chip {
+  background:var(--bg); border:2px solid #eee; border-radius:12px;
+  padding:8px 14px; font-size:1.6rem; direction:rtl; font-weight:800;
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+}
+.sk-chip .sk-rumi { font-size:0.65rem; font-weight:800; color:var(--text-light); font-family:'Nunito',sans-serif; direction:ltr; }
+.sk-chip.highlight-a { border-color:var(--primary); background:var(--primary-light); }
+.sk-chip.highlight-i { border-color:var(--blue); background:var(--blue-light); }
+.sk-chip.highlight-u { border-color:var(--green); background:var(--green-light); }
+
+/* Soalan teks */
+.q-text {
+  font-size:1rem; font-weight:800; color:var(--text);
+  margin-bottom:4px;
+}
+.q-hint { font-size:0.78rem; color:var(--text-light); font-weight:600; }
+
+/* ══ PILIHAN ══ */
+.choices-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:10px; width:100%; max-width:640px; margin-bottom:12px;
+}
+.choice-btn {
+  background:var(--card); border:3px solid #eee; border-radius:16px;
+  padding:14px 10px; cursor:pointer; font-family:'Nunito',sans-serif;
+  font-weight:800; color:var(--text); transition:all 0.18s;
+  box-shadow:0 3px 10px rgba(0,0,0,0.05);
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  min-height:80px; justify-content:center;
+}
+.choice-btn:hover:not(:disabled) { border-color:var(--primary); transform:translateY(-2px); box-shadow:0 8px 20px rgba(33,150,243,0.18); }
+.choice-btn:disabled { cursor:default; }
+.choice-btn.correct { background:var(--green-light); border-color:var(--green); color:#04a87d; transform:scale(1.04); }
+.choice-btn.wrong { background:var(--red-light); border-color:var(--red); color:var(--red); }
+.choice-btn.reveal { background:var(--green-light); border-color:var(--green); }
+.choice-jawi { font-size:2rem; direction:rtl; line-height:1; }
+.choice-rumi { font-size:0.65rem; font-weight:800; color:var(--text-light); }
+
+.feedback-msg { font-size:0.95rem; font-weight:800; text-align:center; min-height:22px; margin-bottom:10px; width:100%; max-width:640px; }
+.feedback-msg.ok { color:var(--green); }
+.feedback-msg.err { color:var(--red); }
+
+.btn-next {
+  width:100%; max-width:640px; padding:14px; background:var(--primary);
+  color:white; border:none; border-radius:99px;
+  font-family:'Fredoka One',cursive; font-size:1.05rem; cursor:pointer;
+  box-shadow:0 6px 20px rgba(33,150,243,0.35); transition:all 0.18s; display:none;
+}
+.btn-next.show { display:block; animation:popIn 0.3s ease; }
+
+/* ══ RESULT ══ */
+.result-box {
+  background:var(--card); border-radius:var(--radius);
+  padding:28px 20px; text-align:center;
+  width:100%; max-width:640px; box-shadow:var(--shadow); display:none;
+}
+.result-box.show { display:block; animation:popIn 0.4s ease; }
+.result-trophy { font-size:3.5rem; margin-bottom:10px; animation:float 2s ease-in-out infinite; }
+.result-title { font-family:'Fredoka One',cursive; font-size:1.7rem; margin-bottom:6px; }
+.result-sub { font-size:0.85rem; color:var(--text-light); font-weight:700; margin-bottom:20px; }
+.result-stats { display:flex; gap:10px; justify-content:center; margin-bottom:20px; }
+.result-stat { background:var(--bg); border-radius:14px; padding:12px 16px; min-width:80px; }
+.result-stat .rnum { font-family:'Fredoka One',cursive; font-size:1.6rem; }
+.result-stat .rlbl { font-size:0.65rem; font-weight:800; color:var(--text-light); }
+.result-btns { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+.btn-r-ok { padding:12px 24px; background:var(--primary); color:white; border:none; border-radius:99px; font-family:'Fredoka One',cursive; font-size:0.95rem; cursor:pointer; transition:all 0.15s; }
+.btn-r-sec { padding:12px 24px; background:var(--card); color:var(--text); border:2px solid #eee; border-radius:99px; font-family:'Fredoka One',cursive; font-size:0.95rem; cursor:pointer; transition:all 0.15s; }
+
+/* ══ XP BAR ══ */
+.xp-wrap { width:100%; max-width:580px; background:var(--card); border-radius:14px; padding:10px 14px; margin-bottom:12px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow); }
+.xp-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--primary),#4ECDC4); display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; position:relative; }
+.lvl-tag { position:absolute; bottom:-3px; right:-3px; background:#9B5DE5; color:white; font-size:0.48rem; font-weight:800; padding:1px 4px; border-radius:99px; }
+.xp-info { flex:1; }
+.xp-labels { display:flex; justify-content:space-between; font-size:0.68rem; font-weight:800; color:var(--text-light); margin-bottom:4px; }
+.xp-track { height:8px; background:#eee; border-radius:99px; overflow:hidden; }
+.xp-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,var(--primary),#4ECDC4); transition:width 0.8s cubic-bezier(.34,1.56,.64,1); }
+
+/* ══ ANIMASI ══ */
+@keyframes popIn { from{transform:scale(0.6);opacity:0} to{transform:scale(1);opacity:1} }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.xp-float { position:fixed; font-family:'Fredoka One',cursive; font-size:1.2rem; pointer-events:none; z-index:300; animation:floatXp 1.2s ease forwards; color:var(--primary); }
+@keyframes floatXp { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-80px)} }
+.confetti-piece { position:fixed; top:-10px; animation:confettiFall linear forwards; border-radius:2px; z-index:999; pointer-events:none; }
+@keyframes confettiFall { to{transform:translateY(110vh) rotate(720deg);opacity:0} }
+
+@keyframes correctBoom { 0%{transform:scale(1)} 25%{transform:scale(1.06) rotate(-1deg)} 75%{transform:scale(1.04) rotate(1deg)} 100%{transform:scale(1)} }
+@keyframes wrongShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+.soalan-panel.correct-anim { animation:correctBoom 0.45s ease; border:2px solid var(--green); }
+.soalan-panel.wrong-anim { animation:wrongShake 0.45s ease; border:2px solid var(--red); }
+
+/* ══ FLASHCARD (LATIH TUBI) ══ */
+.fc-scene { perspective:1000px; cursor:pointer; width:100%; margin:0 auto 16px; }
+.fc-card { width:100%; height:200px; position:relative; transform-style:preserve-3d; transition:transform 0.55s cubic-bezier(.4,.2,.2,1); border-radius:20px; }
+.fc-card.flipped { transform:rotateY(180deg); }
+.fc-front, .fc-back { position:absolute; inset:0; border-radius:20px; backface-visibility:hidden; -webkit-backface-visibility:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px; border:2px solid #eee; }
+.fc-back { transform:rotateY(180deg); }
+.fc-front-char { font-size:5rem; direction:rtl; line-height:1; margin-bottom:6px; }
+.fc-back-word { font-family:'Fredoka One',cursive; line-height:1; }
+.fc-tap-hint { font-size:0.62rem; font-weight:700; color:var(--text-light); opacity:0.7; position:absolute; bottom:10px; }
+.fc-nav { display:flex; align-items:center; justify-content:center; gap:12px; width:100%; }
+.fc-nav-btn { width:38px; height:38px; border-radius:50%; background:var(--card); border:2px solid #eee; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.15s; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+.fc-nav-btn:hover { border-color:#9B5DE5; background:#F3E5F5; }
+.fc-nav-btn:disabled { opacity:0.3; cursor:default; }
+.fc-dots { display:flex; gap:5px; flex-wrap:wrap; justify-content:center; }
+.fc-dot { width:7px; height:7px; border-radius:50%; background:#ddd; transition:all 0.2s; }
+.fc-dot.active { background:#9B5DE5; transform:scale(1.3); }
+
+/* ══ SUKU KATA BREAKDOWN — LATIH TUBI ══ */
+.gl-sk-breakdown {
+  display:flex; align-items:center; justify-content:center; gap:14px;
+  width:100%; max-width:640px; margin:0 auto 18px;
+  direction:rtl;
+}
+.gl-sk-box {
+  background:white; border:3px solid #9B5DE5; border-radius:20px;
+  width:110px; height:110px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:3.2rem; direction:rtl; font-weight:800;
+  box-shadow:0 8px 24px rgba(155,93,229,0.22);
+  transition:transform 0.2s;
+}
+.gl-sk-plus {
+  font-size:2.2rem; font-weight:800; color:#9B5DE5;
+  font-family:'Fredoka One',cursive; flex-shrink:0;
+}
+@media(max-width:480px){
+  .gl-sk-box{width:88px;height:88px;font-size:2.6rem;}
+  .gl-sk-plus{font-size:1.8rem;}
+}
+
+@media(max-width:480px){ .perkataan-display{font-size:3.5rem;} .choices-grid{grid-template-columns:1fr 1fr;} }
+
+/* ══ AKTIVITI KV ══ */
+.kv-screen-topbar { display:none; align-items:center; gap:12px; padding:12px 16px; background:var(--sb-bg); border-bottom:1px solid var(--sb-border); position:sticky; top:0; z-index:100; }
+@media(max-width:860px){ .kv-screen-topbar { display:flex; } }
+
+.kv-header { width:100%; max-width:640px; display:flex; align-items:center; gap:10px; padding:14px 0 12px; }
+.kv-title { font-family:'Fredoka One',cursive; font-size:1.1rem; }
+.kv-sub { font-size:0.7rem; color:var(--text-light); font-weight:700; }
+
+/* Progress dots */
+.kv-prog-row { display:flex; align-items:center; justify-content:space-between; width:100%; max-width:640px; margin-bottom:14px; }
+.kv-counter { font-size:0.72rem; font-weight:800; color:var(--text-light); }
+.kv-dots { display:flex; gap:4px; flex-wrap:wrap; justify-content:center; flex:1; margin:0 10px; }
+.kv-dot { width:8px; height:8px; border-radius:50%; background:#ddd; transition:all 0.2s; flex-shrink:0; }
+.kv-dot.active { background:var(--primary); transform:scale(1.3); }
+.kv-dot.done { background:var(--teal); }
+
+/* Flash card KV */
+.kv-card-wrap { width:100%; max-width:640px; margin-bottom:16px; }
+.kv-card {
+  background:var(--card); border-radius:24px;
+  padding:28px 20px 20px; text-align:center;
+  box-shadow:var(--shadow); border:3px solid var(--primary-light);
+  position:relative; transition:border-color 0.2s;
+}
+.kv-card.ok  { border-color:var(--teal); background:linear-gradient(135deg,#f0fffe,white); }
+.kv-card.err { border-color:var(--red);  background:linear-gradient(135deg,#fff0f3,white); }
+
+.kv-jawi { font-size:6rem; direction:rtl; line-height:1; margin-bottom:10px; display:block; }
+.kv-rumi-hint { font-size:0.8rem; font-weight:700; color:var(--text-light); margin-bottom:14px; letter-spacing:2px; }
+.kv-rumi-reveal {
+  font-family:'Fredoka One',cursive; font-size:2.2rem;
+  color:var(--primary); margin-bottom:10px; display:none;
+}
+.kv-rumi-reveal.show { display:block; animation:popIn 0.35s ease; }
+
+.kv-contoh-wrap {
+  display:flex; align-items:center; justify-content:center;
+  background:var(--primary-light); border-radius:14px;
+  padding:14px; margin-bottom:12px;
+}
+.kv-audio-btn {
+  width:90px; height:90px; border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),#42a5f5);
+  border:none; cursor:pointer;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:4px;
+  box-shadow:0 8px 24px rgba(33,150,243,0.45), 0 0 0 6px rgba(33,150,243,0.12);
+  transition:all 0.2s cubic-bezier(.34,1.56,.64,1);
+  margin-bottom:8px;
+}
+.kv-audio-btn:hover { transform:scale(1.1); box-shadow:0 12px 32px rgba(33,150,243,0.55),0 0 0 10px rgba(33,150,243,0.15); }
+.kv-audio-btn .btn-icon { font-size:2.2rem; line-height:1; }
+.kv-audio-btn .btn-label { font-size:0.58rem; font-weight:800; color:white; letter-spacing:1px; text-transform:uppercase; }
+.kv-audio-btn.playing {
+  background:linear-gradient(135deg,#42a5f5,var(--teal));
+  animation:pulsRing 1s ease infinite;
+}
+@keyframes pulsRing {
+  0%   { box-shadow:0 8px 24px rgba(33,150,243,0.5),0 0 0 0 rgba(33,150,243,0.35); }
+  70%  { box-shadow:0 8px 24px rgba(33,150,243,0.5),0 0 0 18px rgba(33,150,243,0); }
+  100% { box-shadow:0 8px 24px rgba(33,150,243,0.5),0 0 0 0 rgba(33,150,243,0); }
+}
+.kv-audio-btn.no-audio { background:#eee; box-shadow:none; cursor:default; }
+.kv-audio-btn.no-audio .btn-icon { filter:grayscale(1); opacity:0.4; }
+.kv-audio-note { font-size:0.65rem; color:var(--text-light); font-weight:600; }
+
+/* Pilihan KV */
+.kv-choices { display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%; max-width:640px; margin-bottom:12px; }
+.kv-choice {
+  background:var(--card); border:3px solid #eee; border-radius:16px;
+  padding:16px 10px; cursor:pointer;
+  font-family:'Nunito',sans-serif; font-weight:800; color:var(--text);
+  transition:all 0.18s; display:flex; flex-direction:column;
+  align-items:center; gap:4px; min-height:80px; justify-content:center;
+  box-shadow:0 3px 10px rgba(0,0,0,0.05);
+}
+.kv-choice:hover:not(:disabled) { border-color:var(--primary); transform:translateY(-2px); }
+.kv-choice:disabled { cursor:default; }
+.kv-choice.correct { background:var(--green-light); border-color:var(--green); color:#04a87d; transform:scale(1.04); }
+.kv-choice.wrong   { background:var(--red-light); border-color:var(--red); color:var(--red); }
+.kv-choice.reveal  { background:var(--green-light); border-color:var(--green); }
+.kv-choice-jawi { font-size:2.2rem; direction:rtl; line-height:1; }
+.kv-choice-rumi { font-size:0.68rem; font-weight:800; color:var(--text-light); }
+
+.kv-feedback { font-size:0.95rem; font-weight:800; text-align:center; min-height:22px; width:100%; max-width:640px; margin-bottom:10px; }
+.kv-feedback.ok  { color:var(--green); }
+.kv-feedback.err { color:var(--red); }
+
+/* Nav btn KV */
+.kv-nav-row { display:flex; gap:10px; width:100%; max-width:640px; }
+.kv-btn-next { flex:1; padding:14px; background:var(--primary); color:white; border:none; border-radius:99px; font-family:'Fredoka One',cursive; font-size:1.05rem; cursor:pointer; box-shadow:0 6px 20px rgba(33,150,243,0.35); transition:all 0.18s; display:none; }
+.kv-btn-next.show { display:block; animation:popIn 0.3s ease; }
+
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<div class="sb-overlay" id="sbOverlay"></div>
+<div class="sb-sidebar" id="sbSidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">JawiKids</div>
+    <div class="sb-tagline">Platform Pembelajaran Jawi</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section-label">Kemahiran</div>
+    <a class="sb-item" data-page="index.html" href="index.html">
+      <span class="sb-icon">ب</span><span class="sb-label">Huruf Jawi Tunggal</span>
+    </a>
+    <a class="sb-item" data-page="sambung.html" href="sambung.html">
+      <span class="sb-icon">بـ</span><span class="sb-label">Huruf Bersambung</span>
+    </a>
+    <a class="sb-item active" data-page="sukukata.html" href="sukukata.html">
+      <span class="sb-icon">با</span><span class="sb-label">Suku Kata Terbuka</span>
+      <span class="sb-badge">Aktif</span>
+    </a>
+    <div class="sb-section-label" style="margin-top:8px;">Akaun</div>
+    <a class="sb-item" data-page="dashboard.html" href="dashboard.html">
+      <span class="sb-icon">📊</span><span class="sb-label">Dashboard Guru</span>
+    </a>
+    <a class="sb-item" data-page="auth.html" href="auth.html">
+      <span class="sb-icon">👤</span><span class="sb-label">Log Masuk</span>
+    </a>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-footer-sig">✦ Direka oleh <span>Ustaz Wan</span> ✦<br>© 2026 JawiKids</div>
+  </div>
+</div>
+
+<!-- ══ HOME ══ -->
+<div id="home" class="screen active">
+  <div class="sb-topbar">
+    <button class="sb-hamburger" onclick="sbToggle()"><span></span><span></span><span></span></button>
+    <div class="sb-topbar-logo">JawiKids</div>
+    <button onclick="handleUserClick()" style="margin-left:auto;background:none;border:none;display:flex;align-items:center;gap:6px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:0.78rem;font-weight:700;">
+      <span>👤</span><span id="ubName">—</span>
+    </button>
+  </div>
+
+  <div style="width:100%;max-width:620px;padding:0 20px;">
+    <div class="home-hero">
+      <h1>Suku Kata<br><span>Terbuka</span> 📖</h1>
+      <p>Pilih vokal untuk mula berlatih</p>
+    </div>
+
+    <!-- XP Bar -->
+    <div class="xp-wrap">
+      <div class="xp-avatar">⭐<span class="lvl-tag" id="lvlTag">1</span></div>
+      <div class="xp-info">
+        <div class="xp-labels"><span id="lvlLabel">Tahap 1 — Pelajar Baru</span><span id="xpLabel">0/100 XP</span></div>
+        <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- Vokal Menu -->
+    <div class="vokal-grid">
+      <div class="vokal-card" onclick="showVokalMenu('a')">
+        <div class="vokal-icon vi-a">
+          <div class="vokal-jawi">ا</div>
+          <div class="vokal-rumi" style="color:var(--primary);">Vokal A</div>
+        </div>
+        <div class="vokal-info">
+          <div class="vokal-name">Vokal A</div>
+          <div class="vokal-desc">Suku kata terbuka dengan vokal "a"<br>Contoh: با = ba, لا = la, جا = ja</div>
+          <span class="vokal-count vc-a">14 perkataan · 15 soalan</span>
+        </div>
+      </div>
+
+      <div class="vokal-card" onclick="showVokalMenu('i')">
+        <div class="vokal-icon vi-i">
+          <div class="vokal-jawi">ي</div>
+          <div class="vokal-rumi" style="color:var(--teal);">Vokal I</div>
+        </div>
+        <div class="vokal-info">
+          <div class="vokal-name">Vokal I</div>
+          <div class="vokal-desc">Suku kata terbuka dengan vokal "i"<br>Contoh: بي = bi, لي = li, جي = ji</div>
+          <span class="vokal-count vc-i">11 perkataan · 15 soalan</span>
+        </div>
+      </div>
+
+      <div class="vokal-card" onclick="showVokalMenu('u')">
+        <div class="vokal-icon vi-u">
+          <div class="vokal-jawi">و</div>
+          <div class="vokal-rumi" style="color:#1b7a50;">Vokal U</div>
+        </div>
+        <div class="vokal-info">
+          <div class="vokal-name">Vokal U</div>
+          <div class="vokal-desc">Suku kata terbuka dengan vokal "u"<br>Contoh: بو = bu, لو = lu, جو = jo</div>
+          <span class="vokal-count vc-u">12 perkataan · 15 soalan</span>
+        </div>
+      </div>
+
+      <div class="vokal-card" onclick="showVokalMenu('gugur')">
+        <div class="vokal-icon" style="background:linear-gradient(135deg,#F3E5F5,#9B5DE533);">
+          <div class="vokal-jawi" style="font-size:1.8rem;">اـ</div>
+          <div class="vokal-rumi" style="color:#7B3FA0;">Gugur A</div>
+        </div>
+        <div class="vokal-info">
+          <div class="vokal-name">Suku Kata Terbuka (Gugur ا)</div>
+          <div class="vokal-desc">Vokal "a" pada suku kata kedua tidak ditulis<br>Contoh: راب = raba, كات = kata, ماس = masa</div>
+          <span class="vokal-count" style="background:#F3E5F5;color:#7B3FA0;">18 perkataan · 15 soalan</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ══ SUBMENU VOKAL ══ -->
+<div id="submenu" class="screen">
+  <div class="sb-topbar">
+    <button class="sb-hamburger" onclick="sbToggle()"><span></span><span></span><span></span></button>
+    <div class="sb-topbar-logo">JawiKids</div>
+  </div>
+  <div style="width:100%;max-width:620px;padding:0 20px;">
+    <div style="display:flex;align-items:center;gap:10px;padding:16px 0 20px;">
+      <button class="btn-back" onclick="goHome()">←</button>
+      <div>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.2rem;" id="submenuTitle">Vokal A</div>
+        <div style="font-size:0.7rem;color:var(--text-light);font-weight:700;">Pilih aktiviti</div>
+      </div>
+    </div>
+    <div id="submenuNormalActs" style="display:flex;flex-direction:column;gap:12px;">
+      <div class="vokal-card" onclick="startKv(currentVokalMenu)" style="cursor:pointer;">
+        <div class="vokal-icon" style="background:linear-gradient(135deg,var(--primary-light),var(--teal-light));">
+          <div style="font-size:1.8rem;">👂</div>
+        </div>
+        <div class="vokal-info">
+          <div class="vokal-name">Kenali Bunyi Suku Kata</div>
+          <div class="vokal-desc">Dengar dan pilih suku kata yang betul<br>16 suku kata KV interaktif</div>
+          <span class="vokal-count" style="background:var(--primary-light);color:var(--primary-dark);">Flash Card + Audio</span>
+        </div>
+      </div>
+      <div class="vokal-card" onclick="startVokal(currentVokalMenu)" style="cursor:pointer;">
+        <div class="vokal-icon" style="background:linear-gradient(135deg,var(--teal-light),#e0f7f5);">
+          <div style="font-size:1.8rem;">📝</div>
+        </div>
+        <div class="vokal-info">
+          <div class="vokal-name">Pilih Perkataan Betul</div>
+          <div class="vokal-desc">Kenal pasti perkataan mengandungi vokal ini<br>15 soalan pelbagai jenis</div>
+          <span class="vokal-count" style="background:var(--teal-light);color:#0a7a70;">Multiple Choice</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submenu untuk kategori Gugur A -->
+    <div id="submenuGugurActs" style="display:none;flex-direction:column;gap:12px;">
+      <div class="vokal-card" onclick="startGugurLatihTubi()" style="cursor:pointer;">
+        <div class="vokal-icon" style="background:linear-gradient(135deg,#F3E5F5,#EDE0FF);">
+          <div style="font-size:1.8rem;">🔁</div>
+        </div>
+        <div class="vokal-info">
+          <div class="vokal-name">Latih Tubi Ejaan</div>
+          <div class="vokal-desc">Ingat dan eja perkataan satu persatu<br>18 perkataan suku kata tertutup</div>
+          <span class="vokal-count" style="background:#F3E5F5;color:#7B3FA0;">Flash Card</span>
+        </div>
+      </div>
+      <div class="vokal-card" onclick="startGugurUjiMinda()" style="cursor:pointer;">
+        <div class="vokal-icon" style="background:linear-gradient(135deg,#EDE0FF,#E3F2FD);">
+          <div style="font-size:1.8rem;">🧠</div>
+        </div>
+        <div class="vokal-info">
+          <div class="vokal-name">Uji Minda</div>
+          <div class="vokal-desc">Pilih ejaan yang betul — 2 pilihan jawapan<br>15 soalan pantas</div>
+          <span class="vokal-count" style="background:#EDE0FF;color:#5a2d99;">2 Pilihan</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ LATIH TUBI GUGUR A ══ -->
+<div id="gugurLatih" class="screen">
+  <div class="sb-topbar">
+    <button class="sb-hamburger" onclick="sbToggle()"><span></span><span></span><span></span></button>
+    <div class="sb-topbar-logo">JawiKids</div>
+  </div>
+  <div class="kv-header">
+    <button class="btn-back" onclick="showVokalMenu('gugur')">←</button>
+    <div>
+      <div class="kv-title">Latih Tubi Ejaan</div>
+      <div class="kv-sub">Suku Kata Terbuka (Gugur ا) — Gugur ا</div>
+    </div>
+  </div>
+
+  <div class="kv-prog-row">
+    <div class="kv-counter"><span id="glCur">1</span>/<span id="glTot">18</span></div>
+    <div class="kv-dots" id="glDots"></div>
+  </div>
+
+  <!-- Flashcard flip -->
+  <div class="fc-scene" onclick="flipGugurCard()" style="max-width:640px;">
+    <div class="fc-card" id="glCard">
+      <div class="fc-front" style="background:linear-gradient(135deg,#F3E5F5,#EDE0FF);border-color:#d8b8f0;">
+        <div class="fc-front-char" id="glJawi" style="font-size:4rem;">راب</div>
+        <div class="fc-tap-hint">Ketuk untuk lihat ejaan Rumi 👆</div>
+      </div>
+      <div class="fc-back" style="background:linear-gradient(135deg,#fff8f0,#fff0e8);">
+        <div class="fc-back-word" id="glRumi" style="font-size:2rem;color:#7B3FA0;">rab</div>
+        <div class="fc-tap-hint">Ketuk untuk kembali 👆</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Susunan suku kata besar dan jelas -->
+  <div class="gl-sk-breakdown" id="glSkBreakdown">
+    <div class="gl-sk-box" id="glSkBox1">را</div>
+    <div class="gl-sk-plus">+</div>
+    <div class="gl-sk-box" id="glSkBox2">ب</div>
+  </div>
+
+  <div class="fc-nav" style="max-width:640px;margin:0 auto 16px;">
+    <button class="fc-nav-btn" id="glPrev" onclick="glNav(-1)">←</button>
+    <div class="fc-dots" id="glFcDots"></div>
+    <button class="fc-nav-btn" id="glNext" onclick="glNav(1)">→</button>
+  </div>
+
+  <div style="width:100%;max-width:640px;margin:0 auto;">
+    <button class="btn-next show" style="background:linear-gradient(135deg,#9B5DE5,#7B3FA0);box-shadow:0 6px 20px rgba(155,93,229,0.4);" onclick="startGugurUjiMinda()">
+      🧠 Uji Ingatan
+    </button>
+  </div>
+</div>
+
+<!-- ══ UJI MINDA GUGUR A ══ -->
+<div id="gugurUji" class="screen">
+  <div class="sb-topbar">
+    <button class="sb-hamburger" onclick="sbToggle()"><span></span><span></span><span></span></button>
+    <div class="sb-topbar-logo">JawiKids</div>
+  </div>
+  <div class="kv-header">
+    <button class="btn-back" onclick="showVokalMenu('gugur')">←</button>
+    <div>
+      <div class="kv-title">Uji Minda</div>
+      <div class="kv-sub">Pilih ejaan yang betul</div>
+    </div>
+  </div>
+
+  <div class="hud-row">
+    <div class="hud-chip hud-q">Soalan <span id="guIdx">1</span>/15</div>
+    <div class="hud-chip hud-ok">✓ <span id="guBetul">0</span></div>
+    <div class="hud-chip hud-err">✗ <span id="guSalah">0</span></div>
+  </div>
+  <div class="prog-bar-wrap"><div class="prog-bar"><div class="prog-fill" id="guProg" style="width:0%"></div></div></div>
+
+  <div class="soalan-panel" id="guPanel">
+    <div class="soalan-label" id="guLabel">Perkataan ini eja sebagai...</div>
+    <div class="perkataan-display" id="guJawi" style="font-size:3.5rem;">راب</div>
+  </div>
+
+  <div class="choices-grid" id="guChoices" style="grid-template-columns:1fr 1fr;"></div>
+  <div class="feedback-msg" id="guFeedback"></div>
+  <button class="btn-next" id="guBtnNext" onclick="guNext()">Seterusnya →</button>
+
+  <div class="result-box" id="guResult">
+    <div class="result-trophy" id="guTrophy">🏆</div>
+    <div class="result-title" id="guRTitle">Tahniah!</div>
+    <div class="result-sub" id="guRSub"></div>
+    <div class="result-stats">
+      <div class="result-stat"><div class="rnum" id="guRBetul" style="color:var(--green)">0</div><div class="rlbl">Betul</div></div>
+      <div class="result-stat"><div class="rnum" id="guRSalah" style="color:var(--red)">0</div><div class="rlbl">Salah</div></div>
+      <div class="result-stat"><div class="rnum" id="guRPct" style="color:var(--primary)">0%</div><div class="rlbl">Skor</div></div>
+    </div>
+    <div class="result-btns">
+      <button class="btn-r-ok" onclick="startGugurUjiMinda()">🔁 Cuba Lagi</button>
+      <button class="btn-r-sec" onclick="goHome()">🏠 Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AKTIVITI KV ══ -->
+<div id="kv" class="screen">
+  <div class="sb-topbar kv-screen-topbar">
+    <button class="sb-hamburger" onclick="sbToggle()"><span></span><span></span><span></span></button>
+    <div class="sb-topbar-logo">JawiKids</div>
+  </div>
+
+  <div class="kv-header">
+    <button class="btn-back" onclick="showVokalMenu(currentVokalMenu)">←</button>
+    <div>
+      <div class="kv-title" id="kvTitle">Vokal A — Suku Kata KV</div>
+      <div class="kv-sub">Dengar dan kenali bunyi suku kata</div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="kv-prog-row">
+    <div class="kv-counter"><span id="kvCur">1</span>/<span id="kvTot">16</span></div>
+    <div class="kv-dots" id="kvDots"></div>
+    <div class="kv-counter" id="kvXpCount">+0 XP</div>
+  </div>
+
+  <!-- Kad KV -->
+  <div class="kv-card-wrap">
+    <div class="kv-card" id="kvCard">
+      <span class="kv-jawi" id="kvJawi">با</span>
+      <div class="kv-rumi-hint">Tekan 🔊 untuk dengar bunyi</div>
+      <div style="display:flex;justify-content:center;width:100%;margin:8px 0;">
+        <button class="kv-audio-btn" id="kvAudioBtn" onclick="playKvAudio()">
+          <span class="btn-icon">🔊</span>
+          <span class="btn-label">Dengar</span>
+        </button>
+      </div>
+      <div class="kv-audio-note" id="kvAudioNote"></div>
+      <div class="kv-rumi-reveal" id="kvRumiReveal">ba</div>
+    </div>
+  </div>
+
+  <!-- Soalan pilihan -->
+  <div id="kvQuestionLabel" style="font-size:0.82rem;font-weight:800;color:var(--text-light);text-align:center;margin-bottom:10px;width:100%;max-width:640px;">
+    Apakah bunyi suku kata ini?
+  </div>
+  <div class="kv-choices" id="kvChoices"></div>
+  <div class="kv-feedback" id="kvFeedback"></div>
+  <div class="kv-nav-row">
+    <button class="kv-btn-next" id="kvBtnNext" onclick="kvNext()">Seterusnya →</button>
+  </div>
+
+  <!-- Result -->
+  <div class="result-box" id="kvResult">
+    <div class="result-trophy" id="kvTrophy">🏆</div>
+    <div class="result-title" id="kvRTitle">Tahniah!</div>
+    <div class="result-sub" id="kvRSub">Kamu hebat!</div>
+    <div class="result-stats">
+      <div class="result-stat"><div class="rnum" id="kvRBetul" style="color:var(--green)">0</div><div class="rlbl">Betul</div></div>
+      <div class="result-stat"><div class="rnum" id="kvRSalah" style="color:var(--red)">0</div><div class="rlbl">Salah</div></div>
+      <div class="result-stat"><div class="rnum" id="kvRPct" style="color:var(--primary)">0%</div><div class="rlbl">Skor</div></div>
+    </div>
+    <div class="result-btns">
+      <button class="btn-r-ok" onclick="retryKv()">🔁 Cuba Lagi</button>
+      <button class="btn-r-sec" onclick="goHome()">🏠 Menu</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ GAME ══ -->
+<div id="game" class="screen">
+  <div class="sb-topbar">
+    <button class="sb-hamburger" onclick="sbToggle()"><span></span><span></span><span></span></button>
+    <div class="sb-topbar-logo">JawiKids</div>
+  </div>
+
+  <div class="game-header">
+    <button class="btn-back" onclick="showVokalMenu(currentVokal)">←</button>
+    <div>
+      <div class="game-title" id="gameTitle">Vokal A</div>
+      <div class="game-sub" id="gameSub">Suku Kata Terbuka</div>
+    </div>
+  </div>
+
+  <div class="hud-row">
+    <div class="hud-chip hud-q">Soalan <span id="qIdx">1</span>/15</div>
+    <div class="hud-chip hud-ok">✓ <span id="qBetul">0</span></div>
+    <div class="hud-chip hud-err">✗ <span id="qSalah">0</span></div>
+  </div>
+  <div class="prog-bar-wrap"><div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div></div>
+
+  <!-- Soalan -->
+  <div class="soalan-panel" id="soalanPanel">
+    <div class="soalan-label" id="qLabel">Pilih perkataan yang betul</div>
+    <div class="perkataan-display" id="qPerkataan">باوا</div>
+    <div class="sukukata-row" id="qSukukata"></div>
+    <div class="q-text" id="qText">Apakah perkataan ini?</div>
+  </div>
+
+  <div class="choices-grid" id="choicesGrid"></div>
+  <div class="feedback-msg" id="feedbackMsg"></div>
+  <button class="btn-next" id="btnNext" onclick="nextQ()">Seterusnya →</button>
+
+  <!-- Result -->
+  <div class="result-box" id="resultBox">
+    <div class="result-trophy" id="rTrophy">🏆</div>
+    <div class="result-title" id="rTitle">Tahniah!</div>
+    <div class="result-sub" id="rSub">Kamu hebat!</div>
+    <div class="result-stats">
+      <div class="result-stat"><div class="rnum" id="rBetul" style="color:var(--green)">0</div><div class="rlbl">Betul</div></div>
+      <div class="result-stat"><div class="rnum" id="rSalah" style="color:var(--red)">0</div><div class="rlbl">Salah</div></div>
+      <div class="result-stat"><div class="rnum" id="rPct" style="color:var(--primary)">0%</div><div class="rlbl">Skor</div></div>
+    </div>
+    <div class="result-btns">
+      <button class="btn-r-ok" onclick="retryGame()">🔁 Cuba Lagi</button>
+      <button class="btn-r-sec" onclick="goHome()">🏠 Menu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA SUKU KATA TERBUKA
+// ══════════════════════════════════════════
+const WORDS = {
+  a: [
+    { jawi:'باوا', rumi:'bawa',   sk:['با','وا'] },
+    { jawi:'لادا', rumi:'lada',   sk:['لا','دا'] },
+    { jawi:'جالا', rumi:'jala',   sk:['جا','لا'] },
+    { jawi:'دادا', rumi:'dada',   sk:['دا','دا'] },
+    { jawi:'ڠاڠا', rumi:'nganga', sk:['ڠا','ڠا'] },
+    { jawi:'نادا', rumi:'nada',   sk:['نا','دا'] },
+    { jawi:'باجو', rumi:'baju',   sk:['با','جو'] },
+    { jawi:'ساتو', rumi:'satu',   sk:['سا','تو'] },
+    { jawi:'كودا', rumi:'kuda',   sk:['كو','دا'] },
+    { jawi:'ڤاكو', rumi:'paku',   sk:['ڤا','كو'] },
+    { jawi:'كاكي', rumi:'kaki',   sk:['كا','كي'] },
+    { jawi:'مادو', rumi:'madu',   sk:['ما','دو'] },
+    { jawi:'باتو', rumi:'batu',   sk:['با','تو'] },
+    { jawi:'تالي', rumi:'tali',   sk:['تا','لي'] },
+    { jawi:'ڤادي', rumi:'padi',   sk:['ڤا','دي'] },
+  ],
+  i: [
+    { jawi:'ݢيݢي', rumi:'gigi',   sk:['ݢي','ݢي'] },
+    { jawi:'ڤيڤي', rumi:'pipi',   sk:['ڤي','ڤي'] },
+    { jawi:'ليدي', rumi:'lidi',   sk:['لي','دي'] },
+    { jawi:'بيجي', rumi:'biji',   sk:['بي','جي'] },
+    { jawi:'تيتي', rumi:'titi',   sk:['تي','تي'] },
+    { jawi:'چيلي', rumi:'cili',   sk:['چي','لي'] },
+    { jawi:'ڤيلي', rumi:'pili',   sk:['ڤي','لي'] },
+    { jawi:'كاكي', rumi:'kaki',   sk:['كا','كي'] },
+    { jawi:'تالي', rumi:'tali',   sk:['تا','لي'] },
+    { jawi:'ڤادي', rumi:'padi',   sk:['ڤا','دي'] },
+    { jawi:'تيسو', rumi:'tisu',   sk:['تي','سو'] },
+    { jawi:'ناسي', rumi:'nasi',   sk:['نا','سي'] },
+    { jawi:'ݢولي', rumi:'guli',   sk:['ݢو','لي'] },
+  ],
+  u: [
+    { jawi:'كوكو', rumi:'kuku',   sk:['كو','كو'] },
+    { jawi:'ݢورو', rumi:'guru',   sk:['ݢو','رو'] },
+    { jawi:'سوسو', rumi:'susu',   sk:['سو','سو'] },
+    { jawi:'بوكو', rumi:'buku',   sk:['بو','كو'] },
+    { jawi:'سودو', rumi:'sudu',   sk:['سو','دو'] },
+    { jawi:'كوتو', rumi:'kutu',   sk:['كو','تو'] },
+    { jawi:'بولو', rumi:'bulu',   sk:['بو','لو'] },
+    { jawi:'توݢو', rumi:'tugu',   sk:['تو','ݢو'] },
+    { jawi:'سوڠا', rumi:'songa',  sk:['سو','ڠا'] },
+    { jawi:'مادو', rumi:'madu',   sk:['ما','دو'] },
+    { jawi:'باجو', rumi:'baju',   sk:['با','جو'] },
+    { jawi:'ساتو', rumi:'satu',   sk:['سا','تو'] },
+    { jawi:'ڤاكو', rumi:'paku',   sk:['ڤا','كو'] },
+    { jawi:'تيسو', rumi:'tisu',   sk:['تي','سو'] },
+    { jawi:'ݢولي', rumi:'guli',   sk:['ݢو','لي'] },
+  ]
+};
+
+// Pool semua perkataan untuk distractor
+const ALL_WORDS = [...new Set([...WORDS.a, ...WORDS.i, ...WORDS.u].map(w=>w.jawi))].map(j => {
+  const found = [...WORDS.a,...WORDS.i,...WORDS.u].find(w=>w.jawi===j);
+  return found;
+});
+
+// ══════════════════════════════════════════
+// STATS & XP
+// ══════════════════════════════════════════
+const XP_LEVELS = [
+  {level:1,needed:100,title:'Pelajar Baru',emoji:'🌱'},
+  {level:2,needed:250,title:'Murid Rajin',emoji:'📖'},
+  {level:3,needed:500,title:'Hafiz Muda',emoji:'✨'},
+  {level:4,needed:900,title:'Pakar Jawi',emoji:'🌟'},
+  {level:5,needed:1500,title:'Tokoh Jawi',emoji:'🏆'},
+  {level:6,needed:9999,title:'Legenda Jawi',emoji:'👑'},
+];
+let stats = JSON.parse(localStorage.getItem('jawiSkStats') || '{"xp":0,"sesi":0}');
+
+function getLv(xp) {
+  let cum=0;
+  for (const l of XP_LEVELS) {
+    if (xp>=cum+l.needed) cum+=l.needed;
+    else return {...l, xpIn:xp-cum, cum};
+  }
+  return {...XP_LEVELS[XP_LEVELS.length-1], xpIn:XP_LEVELS[XP_LEVELS.length-1].needed, cum};
+}
+
+function renderXp() {
+  const lv=getLv(stats.xp);
+  const pct=Math.min(100,Math.round(lv.xpIn/lv.needed*100));
+  document.getElementById('lvlTag').textContent=lv.level;
+  document.getElementById('lvlLabel').textContent=`Tahap ${lv.level} — ${lv.title}`;
+  document.getElementById('xpLabel').textContent=`${lv.xpIn}/${lv.needed} XP`;
+  document.getElementById('xpFill').style.width=pct+'%';
+}
+
+function gainXp(amt) {
+  stats.xp+=amt;
+  localStorage.setItem('jawiSkStats',JSON.stringify(stats));
+  const el=document.createElement('div');
+  el.className='xp-float';
+  el.textContent=`+${amt} XP ⭐`;
+  el.style.cssText=`left:${window.innerWidth/2-30}px;top:${window.innerHeight/2-40}px`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1200);
+}
+
+// ══════════════════════════════════════════
+// SFX
+// ══════════════════════════════════════════
+let audioCtx=null;
+function getCtx(){ if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+function sfxOk(){
+  try {
+    const ctx=getCtx(),t=ctx.currentTime;
+    [523,659,784].forEach((f,i)=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.setValueAtTime(f,t+i*0.1);
+      g.gain.setValueAtTime(0.2,t+i*0.1);g.gain.exponentialRampToValueAtTime(0.001,t+i*0.1+0.3);
+      o.start(t+i*0.1);o.stop(t+i*0.1+0.3);
+    });
+  }catch(e){}
+}
+function sfxErr(){
+  try {
+    const ctx=getCtx(),t=ctx.currentTime,o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type='sawtooth';o.frequency.setValueAtTime(250,t);o.frequency.exponentialRampToValueAtTime(130,t+0.25);
+    g.gain.setValueAtTime(0.15,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.25);
+    o.start(t);o.stop(t+0.25);
+  }catch(e){}
+}
+
+function confetti(){
+  const colors=['#FF6B35','#FFD93D','#4ECDC4','#9B5DE5','#06D6A0','#EF476F'];
+  for(let i=0;i<50;i++) setTimeout(()=>{
+    const el=document.createElement('div');el.className='confetti-piece';
+    el.style.cssText=`left:${Math.random()*100}vw;background:${colors[Math.floor(Math.random()*6)]};width:${Math.random()*8+4}px;height:${Math.random()*8+4}px;border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${Math.random()*2+1.5}s`;
+    document.body.appendChild(el);setTimeout(()=>el.remove(),3500);
+  },i*40);
+}
+
+function shuffle(a){ return [...a].sort(()=>Math.random()-.5); }
+function randomPraise(){ return ['Bagus! 🎉','Betul! 🌟','Pandai! ✨','Hebat! 🔥','Tepat! 💪','Syabas! 🏅'][Math.floor(Math.random()*6)]; }
+
+// ══════════════════════════════════════════
+// DATA SUKU KATA TERTUTUP (GUGUR ا)
+// ══════════════════════════════════════════
+const GUGUR_WORDS = [
+  { jawi:'راب', rumi:'raba', sk:['را','ب'] },
+  { jawi:'كات', rumi:'kata', sk:['كا','ت'] },
+  { jawi:'باڤ', rumi:'bapa', sk:['با','ڤ'] },
+  { jawi:'راݢ', rumi:'raga', sk:['را','ݢ'] },
+  { jawi:'مان', rumi:'mana', sk:['ما','ن'] },
+  { jawi:'ماس', rumi:'masa', sk:['ما','س'] },
+  { jawi:'تاڽ', rumi:'tanya', sk:['تا','ڽ'] },
+  { jawi:'نام', rumi:'nama', sk:['نا','م'] },
+  { jawi:'ساك', rumi:'saka', sk:['سا','ك'] },
+  { jawi:'راج', rumi:'raja', sk:['را','ج'] },
+  { jawi:'باچ', rumi:'baca', sk:['با','چ'] },
+  { jawi:'كاي', rumi:'kaya', sk:['كا','ي'] },
+  { jawi:'لام', rumi:'lama', sk:['لا','م'] },
+  { jawi:'كاچ', rumi:'kaca', sk:['كا','چ'] },
+  { jawi:'سان', rumi:'sana', sk:['سا','ن'] },
+  { jawi:'رات', rumi:'rata', sk:['را','ت'] },
+  { jawi:'باج', rumi:'baja', sk:['با','ج'] },
+  { jawi:'سام', rumi:'sama', sk:['سا','م'] },
+];
+
+// ══════════════════════════════════════════
+// LATIH TUBI GUGUR A
+// ══════════════════════════════════════════
+let glIdx = 0, glFlipped = false;
+
+function startGugurLatihTubi() {
+  glIdx = 0; glFlipped = false;
+  document.getElementById('glTot').textContent = GUGUR_WORDS.length;
+  showScreen('gugurLatih');
+  renderGlCard();
+}
+
+function renderGlCard() {
+  const w = GUGUR_WORDS[glIdx];
+  const card = document.getElementById('glCard');
+  card.classList.remove('flipped'); glFlipped = false;
+
+  document.getElementById('glCur').textContent = glIdx + 1;
+  document.getElementById('glJawi').textContent = w.jawi;
+  document.getElementById('glRumi').textContent = w.rumi;
+  document.getElementById('glSkBox1').textContent = w.sk[0];
+  document.getElementById('glSkBox2').textContent = w.sk[1];
+
+  document.getElementById('glPrev').disabled = glIdx === 0;
+  document.getElementById('glNext').disabled = glIdx === GUGUR_WORDS.length - 1;
+
+  const max = Math.min(GUGUR_WORDS.length, 9);
+  document.getElementById('glFcDots').innerHTML =
+    Array.from({length:max},(_,i)=>`<div class="fc-dot ${i===glIdx?'active':''}"></div>`).join('');
+  document.getElementById('glDots').innerHTML =
+    GUGUR_WORDS.map((_,i)=>`<div class="kv-dot ${i<glIdx?'done':i===glIdx?'active':''}"></div>`).join('');
+}
+
+function flipGugurCard() {
+  const card = document.getElementById('glCard');
+  glFlipped = !glFlipped;
+  card.classList.toggle('flipped', glFlipped);
+}
+
+function glNav(dir) {
+  glIdx = Math.max(0, Math.min(GUGUR_WORDS.length-1, glIdx+dir));
+  renderGlCard();
+}
+
+// ══════════════════════════════════════════
+// UJI MINDA GUGUR A — 2 PILIHAN
+// ══════════════════════════════════════════
+let guQ = [], guIdx = 0, guBetul = 0, guSalah = 0;
+const GU_TOTAL = 15;
+
+function startGugurUjiMinda() {
+  const pool = shuffle([...GUGUR_WORDS]);
+  guQ = [];
+  for (let i=0;i<GU_TOTAL;i++) guQ.push(pool[i%pool.length]);
+
+  guIdx = 0; guBetul = 0; guSalah = 0;
+  document.getElementById('guBetul').textContent = '0';
+  document.getElementById('guSalah').textContent = '0';
+  document.getElementById('guResult').classList.remove('show');
+  document.getElementById('guBtnNext').className = 'btn-next';
+
+  showScreen('gugurUji');
+  renderGuQ();
+}
+
+function renderGuQ() {
+  const q = guQ[guIdx];
+  const pct = Math.round(guIdx/GU_TOTAL*100);
+  const isJawiToRumi = guIdx % 2 === 0; // selang-seli: genap=Jawi→Rumi, ganjil=Rumi→Jawi
+
+  document.getElementById('guIdx').textContent = guIdx+1;
+  document.getElementById('guProg').style.width = pct+'%';
+  document.getElementById('guFeedback').textContent = '';
+  document.getElementById('guFeedback').className = 'feedback-msg';
+  document.getElementById('guBtnNext').className = 'btn-next';
+  document.getElementById('guPanel').className = 'soalan-panel';
+
+  const guLabel = document.getElementById('guLabel');
+  const wrong = shuffle(GUGUR_WORDS.filter(w => w.rumi !== q.rumi))[0];
+
+  if (isJawiToRumi) {
+    // Tunjuk Jawi, pilih jawapan Rumi
+    if (guLabel) guLabel.textContent = 'Perkataan ini eja sebagai...';
+    document.getElementById('guJawi').textContent = q.jawi;
+    document.getElementById('guJawi').style.fontSize = '3.5rem';
+    document.getElementById('guJawi').style.fontFamily = '';
+
+    const choices = shuffle([
+      {label:q.rumi, isCorrect:true},
+      {label:wrong.rumi, isCorrect:false}
+    ]);
+    document.getElementById('guChoices').innerHTML = choices.map(c => `
+      <button class="choice-btn" onclick="checkGu(this,${c.isCorrect},'${q.rumi}')">
+        <span style="font-size:1.3rem;font-weight:800;">${c.label}</span>
+      </button>`).join('');
+  } else {
+    // Tunjuk Rumi, pilih jawapan Jawi
+    if (guLabel) guLabel.textContent = 'Perkataan ini ditulis dalam Jawi sebagai...';
+    document.getElementById('guJawi').textContent = q.rumi;
+    document.getElementById('guJawi').style.fontSize = '2.6rem';
+    document.getElementById('guJawi').style.fontFamily = "'Fredoka One',cursive";
+
+    const choices = shuffle([
+      {label:q.jawi, isCorrect:true},
+      {label:wrong.jawi, isCorrect:false}
+    ]);
+    document.getElementById('guChoices').innerHTML = choices.map(c => `
+      <button class="choice-btn" onclick="checkGu(this,${c.isCorrect},'${q.jawi}')">
+        <span class="choice-jawi" style="font-size:2rem;direction:rtl;">${c.label}</span>
+      </button>`).join('');
+  }
+}
+
+function checkGu(btn, isCorrect, correctLabel) {
+  document.querySelectorAll('#guChoices .choice-btn').forEach(b=>b.disabled=true);
+  const panel = document.getElementById('guPanel');
+  const fb = document.getElementById('guFeedback');
+
+  if (isCorrect) {
+    guBetul++; sfxOk(); gainXp(8);
+    btn.classList.add('correct');
+    panel.classList.add('correct-anim');
+    fb.textContent = randomPraise();
+    fb.className = 'feedback-msg ok';
+    document.getElementById('guBetul').textContent = guBetul;
+  } else {
+    guSalah++; sfxErr();
+    btn.classList.add('wrong');
+    panel.classList.add('wrong-anim');
+    document.querySelectorAll('#guChoices .choice-btn').forEach(b=>{
+      if(b.textContent.trim()===correctLabel) b.classList.add('reveal');
+    });
+    fb.textContent = `Jawapan betul: ${correctLabel}`;
+    fb.className = 'feedback-msg err';
+    document.getElementById('guSalah').textContent = guSalah;
+  }
+
+  const isLast = guIdx >= GU_TOTAL-1;
+  const btnNext = document.getElementById('guBtnNext');
+  btnNext.className = 'btn-next show';
+  btnNext.textContent = isLast ? '✅ Lihat Keputusan' : 'Seterusnya →';
+}
+
+function guNext() {
+  guIdx++;
+  if (guIdx >= GU_TOTAL) {
+    const pct = Math.round(guBetul/GU_TOTAL*100);
+    document.getElementById('guRBetul').textContent = guBetul;
+    document.getElementById('guRSalah').textContent = guSalah;
+    document.getElementById('guRPct').textContent = pct+'%';
+    document.getElementById('guTrophy').textContent = pct>=90?'🏆':pct>=60?'🌟':'💪';
+    document.getElementById('guRTitle').textContent = pct>=90?'Luar Biasa!':pct>=60?'Bagus!':'Teruskan!';
+    document.getElementById('guRSub').textContent = `${guBetul}/${GU_TOTAL} soalan betul!`;
+    document.getElementById('guResult').classList.add('show');
+    document.getElementById('guBtnNext').className = 'btn-next';
+    stats.sesi++;
+    localStorage.setItem('jawiSkStats', JSON.stringify(stats));
+    saveSukukataSession('uji_minda_gugur_a', guBetul, GU_TOTAL, guBetul*8);
+    if (pct>=90) confetti();
+  } else {
+    renderGuQ();
+  }
+}
+
+// ══════════════════════════════════════════
+// DATA SUKU KATA KV
+// ══════════════════════════════════════════
+const SK_DATA = {
+  a: [
+    {jawi:'با', rumi:'ba', audio:'sk-ba', contoh:'بادان', contohrumi:'badan',    emoji:'🧍'},
+    {jawi:'تا', rumi:'ta', audio:'sk-ta', contoh:'تالي',  contohrumi:'tali',     emoji:'🪢'},
+    {jawi:'جا', rumi:'ja', audio:'sk-ja', contoh:'جالا',  contohrumi:'jala',     emoji:'🕸️'},
+    {jawi:'دا', rumi:'da', audio:'sk-da', contoh:'دادا',  contohrumi:'dada',     emoji:'👴'},
+    {jawi:'را', rumi:'ra', audio:'sk-ra', contoh:'راجا',  contohrumi:'raja',     emoji:'👑'},
+    {jawi:'سا', rumi:'sa', audio:'sk-sa', contoh:'ساتو',  contohrumi:'satu',     emoji:'1️⃣'},
+    {jawi:'ڠا', rumi:'nga',audio:'sk-nga',contoh:'ڠاڠا', contohrumi:'nganga',   emoji:'😮'},
+    {jawi:'فا', rumi:'fa', audio:'sk-fa', contoh:'فاجر',  contohrumi:'fajar',    emoji:'🌅'},
+    {jawi:'ڤا', rumi:'pa', audio:'sk-pa', contoh:'ڤادي', contohrumi:'padi',     emoji:'🌾'},
+    {jawi:'لا', rumi:'la', audio:'sk-la', contoh:'لادا',  contohrumi:'lada',     emoji:'🌶️'},
+    {jawi:'ما', rumi:'ma', audio:'sk-ma', contoh:'مادو',  contohrumi:'madu',     emoji:'🍯'},
+    {jawi:'نا', rumi:'na', audio:'sk-na', contoh:'نادا',  contohrumi:'nada',     emoji:'🎵'},
+    {jawi:'ݢا', rumi:'ga', audio:'sk-ga', contoh:'ݢاجه',  contohrumi:'gajah',   emoji:'🐘'},
+    {jawi:'كا', rumi:'ka', audio:'sk-ka', contoh:'كاكي',  contohrumi:'kaki',    emoji:'🦵'},
+    {jawi:'وا', rumi:'wa', audio:'sk-wa', contoh:'واڠ',   contohrumi:'wang',    emoji:'💰'},
+    {jawi:'ڽا', rumi:'nya',audio:'sk-nya',contoh:'ڽاموق', contohrumi:'nyamuk', emoji:'🦟'},
+  ],
+  i: [
+    {jawi:'بي', rumi:'bi', audio:'sk-bi', contoh:'بيجي',  contohrumi:'biji',    emoji:'🌰'},
+    {jawi:'تي', rumi:'ti', audio:'sk-ti', contoh:'تيتي',  contohrumi:'titi',    emoji:'🌉'},
+    {jawi:'جي', rumi:'ji', audio:'sk-ji', contoh:'جيراڤ', contohrumi:'jerapah', emoji:'🦒'},
+    {jawi:'دي', rumi:'di', audio:'sk-di', contoh:'دينو',  contohrumi:'dino',    emoji:'🦕'},
+    {jawi:'ري', rumi:'ri', audio:'sk-ri', contoh:'ريبوت', contohrumi:'ribut',   emoji:'⛈️'},
+    {jawi:'سي', rumi:'si', audio:'sk-si', contoh:'سيڤو',  contohrumi:'sipu',   emoji:'🐚'},
+    {jawi:'ڠي', rumi:'ngi',audio:'sk-ngi',contoh:'ڠيلي',  contohrumi:'ngeri',  emoji:'😨'},
+    {jawi:'في', rumi:'fi', audio:'sk-fi', contoh:'فيلم',  contohrumi:'filem',   emoji:'🎬'},
+    {jawi:'ڤي', rumi:'pi', audio:'sk-pi', contoh:'ڤيڤي',  contohrumi:'pipi',   emoji:'😊'},
+    {jawi:'لي', rumi:'li', audio:'sk-li', contoh:'ليدي',  contohrumi:'lidi',   emoji:'🪵'},
+    {jawi:'مي', rumi:'mi', audio:'sk-mi', contoh:'ميز',   contohrumi:'meja',   emoji:'🪑'},
+    {jawi:'ني', rumi:'ni', audio:'sk-ni', contoh:'نيلا',  contohrumi:'nila',   emoji:'💜'},
+    {jawi:'ݢي', rumi:'gi', audio:'sk-gi', contoh:'ݢيݢي',  contohrumi:'gigi',  emoji:'🦷'},
+    {jawi:'كي', rumi:'ki', audio:'sk-ki', contoh:'كيتا',  contohrumi:'kita',  emoji:'👥'},
+    {jawi:'وي', rumi:'wi', audio:'sk-wi', contoh:'ويرا',  contohrumi:'wira',  emoji:'🦸'},
+    {jawi:'ڽي', rumi:'nyi',audio:'sk-nyi',contoh:'ڽير',   contohrumi:'nyir',  emoji:'🥥'},
+  ],
+  u: [
+    {jawi:'بو', rumi:'bu', audio:'sk-bu', contoh:'بوكو',  contohrumi:'buku',   emoji:'📚'},
+    {jawi:'تو', rumi:'tu', audio:'sk-tu', contoh:'توݢو',  contohrumi:'tugu',  emoji:'🗿'},
+    {jawi:'جو', rumi:'ju', audio:'sk-ju', contoh:'جوروس', contohrumi:'jurus',  emoji:'➡️'},
+    {jawi:'دو', rumi:'du', audio:'sk-du', contoh:'دودو',  contohrumi:'dudu',  emoji:'🪑'},
+    {jawi:'رو', rumi:'ru', audio:'sk-ru', contoh:'روماه', contohrumi:'rumah', emoji:'🏠'},
+    {jawi:'سو', rumi:'su', audio:'sk-su', contoh:'سوسو',  contohrumi:'susu',  emoji:'🥛'},
+    {jawi:'ڠو', rumi:'ngu',audio:'sk-ngu',contoh:'ڠولا',  contohrumi:'ngula', emoji:'🐛'},
+    {jawi:'فو', rumi:'fu', audio:'sk-fu', contoh:'فولا',  contohrumi:'fula',  emoji:'🧣'},
+    {jawi:'ڤو', rumi:'pu', audio:'sk-pu', contoh:'ڤوترا', contohrumi:'putra', emoji:'🤴'},
+    {jawi:'لو', rumi:'lu', audio:'sk-lu', contoh:'لوبڠ',  contohrumi:'lubang',emoji:'🕳️'},
+    {jawi:'مو', rumi:'mu', audio:'sk-mu', contoh:'موتو',  contohrumi:'moto',  emoji:'🏍️'},
+    {jawi:'نو', rumi:'nu', audio:'sk-nu', contoh:'نوتا',  contohrumi:'nota',  emoji:'📝'},
+    {jawi:'ݢو', rumi:'gu', audio:'sk-gu', contoh:'ݢورو',  contohrumi:'guru',  emoji:'👩‍🏫'},
+    {jawi:'كو', rumi:'ku', audio:'sk-ku', contoh:'كوكو',  contohrumi:'kuku',  emoji:'💅'},
+    {jawi:'ڽو', rumi:'nyu',audio:'sk-nyu',contoh:'ڽور',   contohrumi:'nyur',  emoji:'🥥'},
+  ]
+};
+
+// Pool semua SK untuk pilihan
+const ALL_SK = [...SK_DATA.a, ...SK_DATA.i, ...SK_DATA.u];
+
+// ══════════════════════════════════════════
+// AKTIVITI KV — STATE
+// ══════════════════════════════════════════
+let kvVokal = 'a';
+let kvList = [], kvIdx = 0, kvBetul = 0, kvSalah = 0, kvXpGained = 0;
+let kvAudio = null, kvAnswered = false;
+const AUDIO_FOLDER_SK = 'audio/';
+const AUDIO_EXT_SK = '.m4a';
+
+function startKv(vokal) {
+  kvVokal = vokal;
+  kvList = shuffle([...SK_DATA[vokal]]);
+  kvIdx = 0; kvBetul = 0; kvSalah = 0; kvXpGained = 0; kvAnswered = false;
+
+  const titles = { a:'Vokal A — Suku Kata KV', i:'Vokal I — Suku Kata KV', u:'Vokal U — Suku Kata KV' };
+  document.getElementById('kvTitle').textContent = titles[vokal];
+  document.getElementById('kvTot').textContent = kvList.length;
+  document.getElementById('kvResult').classList.remove('show');
+  document.getElementById('kvBtnNext').className = 'kv-btn-next';
+
+  showScreen('kv');
+  renderKvCard();
+}
+
+function renderKvCard() {
+  const sk = kvList[kvIdx];
+  kvAnswered = false;
+
+  document.getElementById('kvCur').textContent = kvIdx + 1;
+  document.getElementById('kvJawi').textContent = sk.jawi;
+  document.getElementById('kvRumiReveal').textContent = sk.rumi;
+  document.getElementById('kvRumiReveal').className = 'kv-rumi-reveal';
+  document.getElementById('kvCard').className = 'kv-card';
+  document.getElementById('kvFeedback').textContent = '';
+  document.getElementById('kvFeedback').className = 'kv-feedback';
+  document.getElementById('kvBtnNext').className = 'kv-btn-next';
+  document.getElementById('kvXpCount').textContent = '+' + kvXpGained + ' XP';
+
+  // Reset audio
+  const audioBtn = document.getElementById('kvAudioBtn');
+  audioBtn.className = 'kv-audio-btn';
+  audioBtn.innerHTML = '<span class="btn-icon">🔊</span><span class="btn-label">Dengar</span>';
+  document.getElementById('kvAudioNote').textContent = '';
+  if (kvAudio) { kvAudio.pause(); kvAudio = null; }
+
+  // Progress dots
+  document.getElementById('kvDots').innerHTML = kvList.map((_,i) => `
+    <div class="kv-dot ${i < kvIdx ? 'done' : i === kvIdx ? 'active' : ''}"></div>`).join('');
+
+  // Jana pilihan — Rumi sahaja, 2 pilihan
+  const pool = shuffle(ALL_SK.filter(s => s.rumi !== sk.rumi));
+  const choices = shuffle([sk, pool[0]]);
+
+  document.getElementById('kvQuestionLabel').textContent = 'Apakah bunyi suku kata ini?';
+
+  document.getElementById('kvChoices').innerHTML = choices.map(c => `
+    <button class="kv-choice" onclick="checkKv(this, ${c.rumi === sk.rumi})" data-correct="${c.rumi === sk.rumi}">
+      <span class="kv-choice-rumi" style="font-size:1.2rem;color:var(--text);">${c.rumi}</span>
+    </button>`).join('');
+
+  // Auto play audio
+  setTimeout(() => playKvAudio(), 400);
+}
+
+function playKvAudio() {
+  const sk = kvList[kvIdx];
+  if (!sk) return;
+  const btn = document.getElementById('kvAudioBtn');
+  if (kvAudio) { kvAudio.pause(); kvAudio = null; }
+
+  kvAudio = new Audio(`${AUDIO_FOLDER_SK}${sk.audio}${AUDIO_EXT_SK}`);
+  btn.classList.add('playing');
+  btn.innerHTML = '<span class="btn-icon">▶️</span><span class="btn-label">Main...</span>';
+
+  kvAudio.play()
+    .then(() => {
+      kvAudio.onended = () => {
+        btn.classList.remove('playing');
+        btn.innerHTML = '<span class="btn-icon">🔊</span><span class="btn-label">Dengar</span>';
+      };
+    })
+    .catch(() => {
+      btn.classList.remove('playing');
+      btn.className = 'kv-audio-btn no-audio';
+      btn.innerHTML = '<span class="btn-icon">🔇</span><span class="btn-label">Tiada</span>';
+      document.getElementById('kvAudioNote').textContent =
+        `Letakkan fail: audio/${sk.audio}.m4a`;
+    });
+}
+
+function checkKv(btn, isCorrect) {
+  if (kvAnswered) return;
+  kvAnswered = true;
+  document.querySelectorAll('.kv-choice').forEach(b => b.disabled = true);
+
+  const card = document.getElementById('kvCard');
+  const fb = document.getElementById('kvFeedback');
+
+  if (isCorrect) {
+    kvBetul++;
+    gainXp(6);
+    kvXpGained += 6;
+    sfxOk();
+    btn.classList.add('correct');
+    card.className = 'kv-card ok';
+    document.getElementById('kvRumiReveal').className = 'kv-rumi-reveal show';
+    fb.textContent = randomPraise();
+    fb.className = 'kv-feedback ok';
+  } else {
+    kvSalah++;
+    sfxErr();
+    btn.classList.add('wrong');
+    card.className = 'kv-card err';
+    document.getElementById('kvRumiReveal').className = 'kv-rumi-reveal show';
+    document.querySelectorAll('.kv-choice').forEach(b => {
+      if (b.dataset.correct === 'true') b.classList.add('reveal');
+    });
+    fb.textContent = 'Cuba lagi! Jawapan betul ditunjukkan ✨';
+    fb.className = 'kv-feedback err';
+  }
+  document.getElementById('kvXpCount').textContent = '+' + kvXpGained + ' XP';
+
+  const isLast = kvIdx >= kvList.length - 1;
+  const btnNext = document.getElementById('kvBtnNext');
+  btnNext.className = 'kv-btn-next show';
+  btnNext.textContent = isLast ? '✅ Lihat Keputusan' : 'Seterusnya →';
+}
+
+function kvNext() {
+  kvIdx++;
+  if (kvIdx >= kvList.length) {
+    showKvResult();
+  } else {
+    renderKvCard();
+  }
+}
+
+function showKvResult() {
+  const total = kvList.length;
+  const pct = Math.round(kvBetul / total * 100);
+  document.getElementById('kvRBetul').textContent = kvBetul;
+  document.getElementById('kvRSalah').textContent = kvSalah;
+  document.getElementById('kvRPct').textContent = pct + '%';
+  document.getElementById('kvTrophy').textContent = pct>=90?'🏆':pct>=60?'🌟':'💪';
+  document.getElementById('kvRTitle').textContent = pct>=90?'Luar Biasa!':pct>=60?'Bagus!':'Teruskan!';
+  document.getElementById('kvRSub').textContent = `${kvBetul}/${total} suku kata betul!`;
+  document.getElementById('kvResult').classList.add('show');
+  document.getElementById('kvBtnNext').className = 'kv-btn-next';
+  stats.sesi++;
+  localStorage.setItem('jawiSkStats', JSON.stringify(stats));
+  saveSukukataSession('kenali_bunyi_' + kvVokal, kvBetul, total, kvXpGained);
+  if (pct >= 90) confetti();
+}
+
+function retryKv() { startKv(kvVokal); }
+
+
+// ══════════════════════════════════════════
+// GAME STATE
+// ══════════════════════════════════════════
+let currentVokal = 'a';
+let questions = [], qIdx = 0, betul = 0, salah = 0;
+const TOTAL_Q = 15;
+
+const VOKAL_CONFIG = {
+  a: { name:'Vokal A', color:'var(--primary)', skClass:'highlight-a' },
+  i: { name:'Vokal I', color:'var(--blue)',    skClass:'highlight-i' },
+  u: { name:'Vokal U',  color:'var(--green)',   skClass:'highlight-u' },
+};
+
+// ══════════════════════════════════════════
+// SCREENS
+// ══════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function goHome(){ showScreen('home'); renderXp(); }
+
+// ══════════════════════════════════════════
+// GAME
+// ══════════════════════════════════════════
+function startVokal(vokal){
+  currentVokal=vokal;
+  const cfg=VOKAL_CONFIG[vokal];
+  document.getElementById('gameTitle').textContent=cfg.name;
+  document.getElementById('gameSub').textContent='Suku Kata Terbuka';
+
+  // Jana soalan — 15 soalan dari perkataan vokal ini
+  const pool=shuffle([...WORDS[vokal]]);
+  questions=[];
+  for(let i=0;i<TOTAL_Q;i++) questions.push(pool[i%pool.length]);
+
+  qIdx=0; betul=0; salah=0;
+  document.getElementById('qBetul').textContent='0';
+  document.getElementById('qSalah').textContent='0';
+  document.getElementById('resultBox').classList.remove('show');
+  document.getElementById('btnNext').className='btn-next';
+
+  showScreen('game');
+  renderQ();
+}
+
+function renderQ(){
+  const q=questions[qIdx];
+  const cfg=VOKAL_CONFIG[currentVokal];
+  const pct=Math.round(qIdx/TOTAL_Q*100);
+
+  document.getElementById('qIdx').textContent=qIdx+1;
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('feedbackMsg').textContent='';
+  document.getElementById('feedbackMsg').className='feedback-msg';
+  document.getElementById('btnNext').className='btn-next';
+
+  const panel=document.getElementById('soalanPanel');
+  panel.className='soalan-panel';
+
+  // Perkataan
+  document.getElementById('qPerkataan').textContent=q.jawi;
+
+  // Suku kata breakdown dengan highlight vokal
+  document.getElementById('qSukukata').innerHTML=q.sk.map(sk=>`
+    <div class="sk-chip ${cfg.skClass}">
+      <span>${sk}</span>
+    </div>`).join('');
+
+  // Soalan jenis: tukar gilir antara 3 jenis (buang "berapa suku kata")
+  const qType=qIdx%3;
+  let qText='';
+  if(qType===0) qText='Apakah perkataan ini dalam Rumi?';
+  else if(qType===1) qText='Suku kata manakah TIDAK ada dalam perkataan ini?';
+  else qText='Pilih tulisan Jawi yang betul:';
+  document.getElementById('qText').textContent=qText;
+
+  // Untuk qType 2 (Rumi→Jawi), sembunyikan perkataan Jawi & sukukata, tunjuk Rumi sahaja
+  const perkataanEl = document.getElementById('qPerkataan');
+  const sukukataEl = document.getElementById('qSukukata');
+  if (qType===2) {
+    perkataanEl.style.display='none';
+    sukukataEl.style.display='none';
+    let rumiDisplay = document.getElementById('qRumiAsSoalan');
+    if (!rumiDisplay) {
+      rumiDisplay = document.createElement('div');
+      rumiDisplay.id = 'qRumiAsSoalan';
+      rumiDisplay.style.cssText = 'font-family:\'Fredoka One\',cursive;font-size:2.6rem;color:var(--primary);text-align:center;margin-bottom:10px;';
+      perkataanEl.parentNode.insertBefore(rumiDisplay, perkataanEl);
+    }
+    rumiDisplay.style.display='block';
+    rumiDisplay.textContent = q.rumi;
+  } else {
+    perkataanEl.style.display='block';
+    sukukataEl.style.display='flex';
+    const rumiDisplay = document.getElementById('qRumiAsSoalan');
+    if (rumiDisplay) rumiDisplay.style.display='none';
+  }
+
+  renderChoices(q, qType);
+}
+
+function renderChoices(q, qType){
+  // Ambil 1 distractor sahaja — 2 pilihan jawapan
+  const pool=shuffle(ALL_WORDS.filter(w=>w.jawi!==q.jawi));
+  const distractor=pool[0];
+
+  if(qType===0){
+    // Jawab dalam Rumi — 2 pilihan
+    const choices=shuffle([
+      {label:q.rumi, isCorrect:true},
+      {label:distractor.rumi, isCorrect:false}
+    ]);
+    document.getElementById('choicesGrid').innerHTML=choices.map(c=>`
+      <button class="choice-btn" onclick="checkAnswer(this,${c.isCorrect})">
+        <span style="font-size:1.1rem;font-weight:800;">${c.label}</span>
+      </button>`).join('');
+  } else if(qType===1){
+    // Suku kata yang TIDAK ada — 2 pilihan
+    const correctSk=q.sk;
+    const fakeSk=['ما','تي','كو','بو','لا','سي','رو','في','نو','جا','هي','وا','دو','مي'];
+    const wrongSk=shuffle(fakeSk.filter(sk=>!correctSk.includes(sk))).slice(0,1)[0];
+    const realSk=shuffle(correctSk)[0];
+    const opts=shuffle([
+      {label:wrongSk, isCorrect:true},
+      {label:realSk, isCorrect:false}
+    ]);
+    document.getElementById('qText').textContent=`Suku kata manakah TIDAK ada dalam "${q.rumi}"?`;
+    document.getElementById('choicesGrid').innerHTML=opts.map(c=>`
+      <button class="choice-btn" onclick="checkAnswer(this,${c.isCorrect})">
+        <span class="choice-jawi">${c.label}</span>
+      </button>`).join('');
+  } else {
+    // qType 2 — Rumi ke Jawi: pilih tulisan Jawi yang betul — 2 pilihan
+    const choices=shuffle([
+      {label:q.jawi, isCorrect:true},
+      {label:distractor.jawi, isCorrect:false}
+    ]);
+    document.getElementById('choicesGrid').innerHTML=choices.map(c=>`
+      <button class="choice-btn" onclick="checkAnswer(this,${c.isCorrect})">
+        <span class="choice-jawi">${c.label}</span>
+      </button>`).join('');
+  }
+}
+
+function checkAnswer(btn, isCorrect){
+  document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
+  const panel=document.getElementById('soalanPanel');
+  const fb=document.getElementById('feedbackMsg');
+
+  if(isCorrect){
+    betul++;
+    sfxOk();
+    gainXp(8);
+    btn.classList.add('correct');
+    panel.classList.add('correct-anim');
+    fb.textContent=randomPraise();
+    fb.className='feedback-msg ok';
+    document.getElementById('qBetul').textContent=betul;
+  } else {
+    salah++;
+    sfxErr();
+    btn.classList.add('wrong');
+    panel.classList.add('wrong-anim');
+    document.querySelectorAll('.choice-btn').forEach(b=>{if(b.dataset.correct==='true') b.classList.add('reveal');});
+    fb.textContent='Cuba lagi! Jawapan betul ditandakan ✨';
+    fb.className='feedback-msg err';
+    document.getElementById('qSalah').textContent=salah;
+  }
+
+  const isLast=qIdx>=TOTAL_Q-1;
+  document.getElementById('btnNext').className='btn-next show';
+  document.getElementById('btnNext').textContent=isLast?'✅ Lihat Keputusan':'Seterusnya →';
+}
+
+function nextQ(){
+  qIdx++;
+  if(qIdx>=TOTAL_Q){
+    showResult();
+  } else {
+    renderQ();
+  }
+}
+
+function showResult(){
+  const pct=Math.round(betul/TOTAL_Q*100);
+  document.getElementById('rBetul').textContent=betul;
+  document.getElementById('rSalah').textContent=salah;
+  document.getElementById('rPct').textContent=pct+'%';
+  document.getElementById('rTrophy').textContent=pct>=90?'🏆':pct>=60?'🌟':'💪';
+  document.getElementById('rTitle').textContent=pct>=90?'Luar Biasa!':pct>=60?'Bagus!':'Teruskan!';
+  document.getElementById('rSub').textContent=`${betul}/${TOTAL_Q} soalan betul!`;
+  document.getElementById('resultBox').classList.add('show');
+  document.getElementById('btnNext').className='btn-next';
+  stats.sesi++;
+  localStorage.setItem('jawiSkStats',JSON.stringify(stats));
+  saveSukukataSession('pilih_perkataan_' + currentVokal, betul, TOTAL_Q, betul*8);
+  if(pct>=90) confetti();
+}
+
+function retryGame(){ startVokal(currentVokal); }
+
+
+// ══════════════════════════════════════════
+// SUBMENU VOKAL
+// ══════════════════════════════════════════
+let currentVokalMenu = 'a';
+const VOKAL_NAMES = { a:'Vokal A — ا', i:'Vokal I — ي', u:'Vokal U — و', gugur:'Suku Kata Terbuka (Gugur ا) — اـ' };
+
+function showVokalMenu(vokal) {
+  currentVokalMenu = vokal;
+  document.getElementById('submenuTitle').textContent = VOKAL_NAMES[vokal];
+
+  // Submenu berbeza untuk kategori "gugur"
+  const normalSubmenu = document.getElementById('submenuNormalActs');
+  const gugurSubmenu = document.getElementById('submenuGugurActs');
+  if (vokal === 'gugur') {
+    normalSubmenu.style.display = 'none';
+    gugurSubmenu.style.display = 'flex';
+  } else {
+    normalSubmenu.style.display = 'flex';
+    gugurSubmenu.style.display = 'none';
+  }
+
+  showScreen('submenu');
+}
+
+// ══════════════════════════════════════════
+// SIDEBAR
+// ══════════════════════════════════════════
+function sbToggle(){
+  document.getElementById('sbSidebar').classList.toggle('open');
+  document.getElementById('sbOverlay').classList.toggle('open');
+}
+document.getElementById('sbOverlay').addEventListener('click',()=>{
+  document.getElementById('sbSidebar').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('open');
+});
+
+// ── INIT ──
+// ══════════════════════════════════════════
+// AUTH & SUPABASE
+// ══════════════════════════════════════════
+let currentStudentData = null;
+
+function initAuth() {
+  const raw = localStorage.getItem('jawikids_student');
+  if (!raw) { window.location.href = '/auth.html'; return; }
+  try {
+    currentStudentData = JSON.parse(raw);
+    if (!currentStudentData.id || !currentStudentData.nama) throw new Error('invalid');
+    const nameEl = document.getElementById('ubName');
+    if (nameEl) nameEl.textContent = currentStudentData.nama;
+  } catch(e) {
+    localStorage.removeItem('jawikids_student');
+    window.location.href = '/auth.html';
+  }
+}
+
+function handleUserClick() {
+  if (confirm('Nak log keluar?')) {
+    localStorage.removeItem('jawikids_student');
+    window.location.href = '/auth.html';
+  }
+}
+
+const SUPA_URL_SK = 'https://purjcpdckxvbcselbhby.supabase.co';
+const SUPA_KEY_SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1cmpjcGRja3h2YmNzZWxiaGJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MjgxNTQsImV4cCI6MjA5NTIwNDE1NH0.pS8Ml1YP2o4xkBxfhrD49oEjGNuNghd3hj5Q-TqgwbQ';
+let dbSK = null;
+
+async function saveSukukataSession(activityName, betulCount, totalCount, xpEarned) {
+  if (!currentStudentData) return;
+  try {
+    if (!dbSK && window.supabase) dbSK = window.supabase.createClient(SUPA_URL_SK, SUPA_KEY_SK);
+    if (!dbSK) return;
+    await dbSK.from('sessions').insert({
+      student_id: currentStudentData.id,
+      kumpulan_id: 'suku_kata_terbuka',
+      kumpulan_nama: 'Suku Kata Terbuka',
+      fasa: activityName,
+      score: betulCount,
+      total_soalan: totalCount,
+      ended_at: new Date().toISOString()
+    });
+    if (xpEarned > 0) {
+      const { data: cur } = await dbSK.from('students').select('xp').eq('id', currentStudentData.id).single();
+      const newXp = (cur?.xp || 0) + xpEarned;
+      await dbSK.from('students').update({ xp: newXp }).eq('id', currentStudentData.id);
+    }
+  } catch(e) {
+    console.warn('Gagal simpan sesi ke Supabase:', e.message);
+  }
+}
+
+initAuth();
+renderXp();
+</script>
+</body>
+</html>
