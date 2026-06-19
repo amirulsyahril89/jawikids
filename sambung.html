@@ -1059,18 +1059,18 @@ function renderA1() {
   clearInterval(window.a1Timer);
 
   if (tidakSambung) {
-    // 2 posisi sahaja: Tunggal/Akhir | Selepas huruf lain
+    // 2 posisi sahaja: Selepas huruf lain | Tunggal/Akhir (ikut arah RTL)
     grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
     grid.innerHTML = `
       <div class="posisi-card" id="pc-0">
-        <div class="posisi-char">${l.solo}</div>
-        <div class="posisi-label">Tunggal / Akhir</div>
-        <div style="font-size:0.58rem;color:var(--text-light);margin-top:3px;">Berdiri sendiri atau di hujung</div>
-      </div>
-      <div class="posisi-card" id="pc-1">
         <div class="posisi-char">${l.akhir}</div>
         <div class="posisi-label">Selepas Huruf Lain</div>
         <div style="font-size:0.58rem;color:var(--text-light);margin-top:3px;">Bila ada huruf sebelumnya</div>
+      </div>
+      <div class="posisi-card" id="pc-1">
+        <div class="posisi-char">${l.solo}</div>
+        <div class="posisi-label">Tunggal / Akhir</div>
+        <div style="font-size:0.58rem;color:var(--text-light);margin-top:3px;">Berdiri sendiri atau di hujung</div>
       </div>`;
 
     // Highlight berganti-ganti antara 2 kad
@@ -1129,9 +1129,9 @@ function a1Nav(dir) {
 // ══════════════════════════════════════════
 // AKTIVITI 2 — PADANKAN POSISI (DRAG & DROP)
 // ══════════════════════════════════════════
-const POSISI = ['solo','awal','tengah','akhir'];
-const POSISI_LABEL = ['Tunggal','Awal','Tengah','Akhir'];
-const POSISI_DESC = ['Berdiri sendiri','Di awal perkataan','Di tengah perkataan','Di akhir perkataan'];
+const POSISI = ['akhir','tengah','awal','solo'];
+const POSISI_LABEL = ['Akhir','Tengah','Awal','Tunggal'];
+const POSISI_DESC = ['Di akhir perkataan','Di tengah perkataan','Di awal perkataan','Berdiri sendiri'];
 
 let a2Q = [], a2QIdx = 0, a2Betul = 0, a2Salah = 0;
 let a2DragChar = null, a2DragPosisi = null;
