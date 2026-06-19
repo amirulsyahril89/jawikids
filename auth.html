@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#FF6B35">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="JawiKids">
+  <link rel="apple-touch-icon" href="/icons/icon.svg">
 <title>JawiKids — Log Masuk</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
@@ -125,7 +132,8 @@ body {
   <div class="alert" id="muridAlert"></div>
   <div class="field">
     <label>Nama Penuh Kamu</label>
-    <input type="text" id="muridNama" placeholder="cth: Ahmad bin Ali" autocomplete="off">
+    <input type="text" id="muridNama" placeholder="cth: Ahmad bin Ali" autocomplete="off"
+           oninput="delete this.dataset.selectedId">
   </div>
   <div class="field">
     <label>Kod Kelas</label>
@@ -222,7 +230,7 @@ body {
 </div>
 
 <div class="footer">
-  JawiKids · <strong>Direka oleh Ustaz Wan Amirul (SK Bohor Baharu)</strong>
+  JawiKids · <strong>Direka oleh Ustaz Wan</strong>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -259,32 +267,93 @@ function setLoading(btnId, loading, text) {
   if (text) btn.textContent = loading ? '⏳ Tunggu...' : text;
 }
 
+// ── NORMALISASI NAMA ──
+// Standardize nama supaya "ali", "ALI", " Ali " semua dikira sama
+function normalizeName(raw) {
+  return raw
+    .trim()
+    .replace(/\s+/g, ' ')           // padam spasi berganda
+    .toLowerCase()
+    .split(' ')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
 // ── CARI KELAS (murid taip kod) ──
 let kelasData = null;
+let kelasMuridList = [];
 let cariTimer = null;
 function cariKelas() {
   clearTimeout(cariTimer);
   const kod = document.getElementById('muridKod').value.trim();
   document.getElementById('kelasFound').classList.remove('show');
+  document.getElementById('kelasFound').innerHTML = '';
   kelasData = null;
+  kelasMuridList = [];
   if (kod.length < 4) return;
   cariTimer = setTimeout(async () => {
     const { data } = await db.from('classes').select('id,nama_kelas,kod_kelas').eq('kod_kelas', kod).maybeSingle();
     if (data) {
       kelasData = data;
-      document.getElementById('kelasFound').textContent = '✅ Kelas: ' + data.nama_kelas;
-      document.getElementById('kelasFound').classList.add('show');
+      await loadKelasMuridList();
     }
   }, 600);
+}
+
+// ── PAPAR SENARAI MURID SEDIA ADA DALAM KELAS ──
+async function loadKelasMuridList() {
+  if (!kelasData) return;
+  const { data: murid } = await db.from('students')
+    .select('id,nama').eq('class_id', kelasData.id).order('nama');
+  kelasMuridList = murid || [];
+
+  const box = document.getElementById('kelasFound');
+  box.classList.add('show');
+
+  let html = `<div style="font-weight:800;margin-bottom:6px;">✅ Kelas: ${kelasData.nama_kelas}</div>`;
+
+  if (kelasMuridList.length) {
+    html += `<div style="font-size:0.76rem;font-weight:700;color:var(--text-light);margin-bottom:6px;">
+      Sudah ada nama kamu? Klik untuk pilih:
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+      ${kelasMuridList.map(m => `
+        <button type="button" onclick="pilihMuridSediaAda('${m.id}','${m.nama.replace(/'/g,"\\'")}')"
+          style="background:white;border:2px solid #ddd;border-radius:99px;padding:6px 14px;
+                 font-family:'Nunito',sans-serif;font-weight:700;font-size:0.8rem;cursor:pointer;
+                 transition:all 0.15s;"
+          onmouseover="this.style.borderColor='#06D6A0';this.style.background='#D0F7EE';"
+          onmouseout="this.style.borderColor='#ddd';this.style.background='white';">
+          ${m.nama}
+        </button>
+      `).join('')}
+    </div>`;
+  } else {
+    html += `<div style="font-size:0.76rem;font-weight:700;color:var(--text-light);">
+      Belum ada murid dalam kelas ini. Kamu yang pertama! 🎉
+    </div>`;
+  }
+
+  box.innerHTML = html;
+}
+
+// ── PILIH MURID SEDIA ADA — ISI NAMA TERUS ──
+function pilihMuridSediaAda(id, nama) {
+  document.getElementById('muridNama').value = nama;
+  document.getElementById('muridNama').dataset.selectedId = id;
 }
 
 // ── MURID LOGIN ──
 async function muridLogin() {
   clearAlert('muridAlert');
-  const nama = document.getElementById('muridNama').value.trim();
+  const namaInput = document.getElementById('muridNama');
+  const namaRaw = namaInput.value.trim();
   const kod  = document.getElementById('muridKod').value.trim().toUpperCase();
-  if (!nama) { showAlert('muridAlert', '⚠️ Sila masukkan nama penuh kamu.'); return; }
+  if (!namaRaw) { showAlert('muridAlert', '⚠️ Sila masukkan nama penuh kamu.'); return; }
   if (!kod)  { showAlert('muridAlert', '⚠️ Sila masukkan kod kelas.'); return; }
+
+  const nama = normalizeName(namaRaw);
+  const selectedId = namaInput.dataset.selectedId;
 
   setLoading('muridBtn', true, '🚀 Mula Belajar!');
 
@@ -296,10 +365,23 @@ async function muridLogin() {
       kelasData = data;
     }
 
-    // Cari atau cipta murid
-    let { data: murid, error } = await db.from('students')
-      .select('id,nama,class_id').eq('nama', nama).eq('class_id', kelasData.id).maybeSingle();
+    let murid = null;
 
+    // Jika murid pilih dari senarai sedia ada, terus guna ID tersebut
+    if (selectedId) {
+      const { data } = await db.from('students')
+        .select('id,nama,class_id').eq('id', selectedId).eq('class_id', kelasData.id).maybeSingle();
+      murid = data;
+    }
+
+    // Jika tiada pilihan ID, cari ikut nama (case-insensitive)
+    if (!murid) {
+      const { data } = await db.from('students')
+        .select('id,nama,class_id').ilike('nama', nama).eq('class_id', kelasData.id).maybeSingle();
+      murid = data;
+    }
+
+    // Jika masih tiada, cipta murid baru dengan nama yang dinormalisasi
     if (!murid) {
       const { data: baru, error: err2 } = await db.from('students')
         .insert({ nama, class_id: kelasData.id }).select().single();
@@ -313,7 +395,7 @@ async function muridLogin() {
       kod_kelas: kod, role: 'murid'
     }));
 
-    window.location.href = 'index.html';
+    window.location.href = '/index.html';
 
   } catch(e) {
     showAlert('muridAlert', '❌ ' + (e.message || 'Cuba lagi.'));
@@ -335,7 +417,7 @@ async function guruLogin() {
     const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
     if (error) throw error;
     localStorage.setItem('jawikids_guru', JSON.stringify({ id: data.user.id, email: data.user.email, role: 'guru' }));
-    window.location.href = 'dashboard.html';
+    window.location.href = '/dashboard.html';
   } catch(e) {
     const msg = e.message.includes('Invalid') ? '❌ Emel atau kata laluan salah.'
               : e.message.includes('confirmed') ? '📧 Sila sahkan emel dahulu. Semak inbox/spam.'
@@ -410,11 +492,24 @@ switchRole('murid');
 (async () => {
   try {
     const raw = localStorage.getItem('jawikids_student');
-    if (raw) { window.location.href = 'index.html'; return; }
+    if (raw) { window.location.href = '/index.html'; return; }
     const { data: { session } } = await db.auth.getSession();
-    if (session) { window.location.href = 'dashboard.html'; }
+    if (session) { window.location.href = '/dashboard.html'; }
   } catch(e) { console.warn('Session check:', e.message); }
 })();
 </script>
+    <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+          .then(r => {
+            console.log('SW registered, scope:', r.scope);
+          })
+          .catch(e => {
+            console.error('SW error:', e.message);
+          });
+      });
+    }
+  </script>
 </body>
 </html>
