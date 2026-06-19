@@ -1369,11 +1369,15 @@ function updateStreak() {
 // ══════════════════════════════════════════
 async function updateLeaderboard() {
   const myNama = currentStudentData?.nama || localStorage.getItem('jawikids_nama') || 'Saya';
-  const myXp   = stats.xp || 0;
 
   if (sb && currentStudentData) {
-    // Simpan XP murid dalam Supabase
     try {
+      // Baca XP semasa dari Supabase — elak overwrite XP dari modul lain
+      const { data: curData } = await sb.from('students').select('xp').eq('id', currentStudentData.id).single();
+      const remoteXp = curData?.xp || 0;
+      const myXp = Math.max(stats.xp || 0, remoteXp);
+      if (myXp !== stats.xp) { stats.xp = myXp; saveStats(); renderXpBar(); }
+
       await sb.from('students').update({ xp: myXp }).eq('id', currentStudentData.id);
       const { data } = await sb.from('students')
         .select('nama, xp, classes(nama_kelas)')
@@ -1384,6 +1388,7 @@ async function updateLeaderboard() {
     } catch(e) { document.getElementById('lbWrap').style.display = 'none'; }
   } else {
     // localStorage fallback
+    const myXp = stats.xp || 0;
     const lb = JSON.parse(localStorage.getItem('jawikids_lb') || '[]');
     const ex = lb.find(e => e.nama === myNama);
     if (ex) ex.xp = myXp; else lb.push({nama:myNama, xp:myXp});
@@ -1422,6 +1427,7 @@ function initAuth() {
     document.getElementById('userBadge').style.display = 'flex';
     document.getElementById('ubName').textContent = currentStudentData.nama;
     renderSidebarAccount();
+    syncXpFromSupabase();
   } catch(e) {
     localStorage.removeItem('jawikids_student');
     window.location.href = '/auth.html';
@@ -1440,6 +1446,22 @@ function renderSidebarAccount() {
       <span class="sb-icon">🚪</span>
       <span class="sb-label">Log Keluar</span>
     </button>`;
+}
+
+// ── SEGERAK XP DARI SUPABASE (sumber kebenaran merentas semua modul) ──
+async function syncXpFromSupabase() {
+  if (!sb || !currentStudentData) return;
+  try {
+    const { data } = await sb.from('students').select('xp').eq('id', currentStudentData.id).single();
+    const remoteXp = data?.xp || 0;
+    const localXp = stats.xp || 0;
+    // Ambil nilai yang lebih besar — elak hilang XP yang sudah disimpan dari modul lain
+    if (remoteXp > localXp) {
+      stats.xp = remoteXp;
+      saveStats();
+      renderXpBar();
+    }
+  } catch(e) { console.warn('Sync XP gagal:', e.message); }
 }
 
 function handleUserClick() {
@@ -1830,8 +1852,12 @@ async function saveSessionToSupabase(sessionData) {
       })));
     }
 
-    // 3. Kemaskini XP murid dalam jadual students
-    await sb.from('students').update({ xp: stats.xp || 0 }).eq('id', currentStudentData.id);
+    // 3. Kemaskini XP murid dalam jadual students — guna nilai lebih besar, elak overwrite
+    const { data: curStudent } = await sb.from('students').select('xp').eq('id', currentStudentData.id).single();
+    const remoteXp = curStudent?.xp || 0;
+    const finalXp = Math.max(stats.xp || 0, remoteXp);
+    if (finalXp !== stats.xp) { stats.xp = finalXp; saveStats(); }
+    await sb.from('students').update({ xp: finalXp }).eq('id', currentStudentData.id);
 
   } catch(e) { console.warn('Supabase save error:', e.message); }
 }
