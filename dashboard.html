@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#FF6B35">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="JawiKids">
+  <link rel="apple-touch-icon" href="/icons/icon.svg">
 <title>JawiKids — Dashboard Guru</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
@@ -299,10 +306,10 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
         <table class="tbl">
           <thead><tr>
             <th>Nama Murid</th><th>Kelas</th><th>Sesi</th>
-            <th>Betul</th><th>Salah</th><th>% Betul</th><th>Huruf Lemah</th>
+            <th>Betul</th><th>Salah</th><th>% Betul</th><th>Huruf Lemah</th><th>Tindakan</th>
           </tr></thead>
           <tbody id="studentsBody">
-            <tr><td colspan="7"><div class="loading">⏳ Memuatkan...</div></td></tr>
+            <tr><td colspan="8"><div class="loading">⏳ Memuatkan...</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -344,7 +351,7 @@ let selectedClass = null;
 (async () => {
   try {
     const { data: { session } } = await db.auth.getSession();
-    if (!session) { window.location.href = 'auth.html'; return; }
+    if (!session) { window.location.href = '/auth.html'; return; }
     guru = session.user;
     const nama = guru.user_metadata?.nama || guru.email.split('@')[0];
     document.getElementById('guruName').textContent = nama;
@@ -354,7 +361,7 @@ let selectedClass = null;
     await loadAll();
   } catch(e) {
     console.error('Init error:', e);
-    window.location.href = 'auth.html';
+    window.location.href = '/auth.html';
   }
 })();
 
@@ -574,12 +581,12 @@ async function loadWeakHuruf() {
 async function loadStudents() {
   const filter = document.getElementById('filterKelas')?.value;
   const classIds = filter ? [filter] : allClasses.map(c => c.id);
-  if (!classIds.length) { document.getElementById('studentsBody').innerHTML = '<tr><td colspan="7"><div class="empty"><p>Belum ada kelas.</p></div></td></tr>'; return; }
+  if (!classIds.length) { document.getElementById('studentsBody').innerHTML = '<tr><td colspan="8"><div class="empty"><p>Belum ada kelas.</p></div></td></tr>'; return; }
 
   const { data: students } = await db.from('students')
     .select('id,nama,classes(nama_kelas)').in('class_id', classIds).order('nama');
 
-  if (!students?.length) { document.getElementById('studentsBody').innerHTML = '<tr><td colspan="7"><div class="empty"><div class="ei">🎒</div><p>Belum ada murid.</p></div></td></tr>'; return; }
+  if (!students?.length) { document.getElementById('studentsBody').innerHTML = '<tr><td colspan="8"><div class="empty"><div class="ei">🎒</div><p>Belum ada murid.</p></div></td></tr>'; return; }
 
   const ids = students.map(s => s.id);
   const { data: ans } = await db.from('answers').select('student_id,betul,huruf_char').in('student_id', ids);
@@ -607,8 +614,31 @@ async function loadStudents() {
       <td style="color:var(--red)">${st.salah}</td>
       <td>${pct!==null?`<span class="badge ${cls}">${pct}%</span>`:'—'}</td>
       <td style="direction:rtl;font-size:1.1rem;letter-spacing:4px;">${weak||'—'}</td>
+      <td>
+        <button onclick="deleteStudent('${s.id}','${s.nama.replace(/'/g,"\\'")}')"
+          style="background:var(--red-light);color:var(--red);border:none;border-radius:8px;padding:6px 12px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.75rem;cursor:pointer;transition:all 0.15s;"
+          onmouseover="this.style.background='var(--red)';this.style.color='white';"
+          onmouseout="this.style.background='var(--red-light)';this.style.color='var(--red)';">
+          🗑️ Padam
+        </button>
+      </td>
     </tr>`;
   }).join('');
+}
+
+// ── PADAM MURID ──
+async function deleteStudent(studentId, namaMurid) {
+  const confirmed = confirm(`Padam murid "${namaMurid}"?\n\nSemua rekod sesi dan jawapan murid ini akan dipadam serentak. Tindakan ini tidak boleh dibatalkan.`);
+  if (!confirmed) return;
+
+  try {
+    const { error } = await db.from('students').delete().eq('id', studentId);
+    if (error) throw error;
+    await loadStudents();
+    await loadStats();
+  } catch(e) {
+    alert('❌ Gagal padam murid: ' + (e.message || 'Cuba lagi.'));
+  }
 }
 
 // ── ANALISIS HURUF ──
@@ -661,8 +691,21 @@ function clearAlert(id) { const el = document.getElementById(id); if (el) el.cla
 async function logout() {
   await db.auth.signOut();
   localStorage.removeItem('jawikids_guru');
-  window.location.href = 'auth.html';
+  window.location.href = '/auth.html';
 }
 </script>
+    <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+          .then(r => {
+            console.log('SW registered, scope:', r.scope);
+          })
+          .catch(e => {
+            console.error('SW error:', e.message);
+          });
+      });
+    }
+  </script>
 </body>
 </html>
