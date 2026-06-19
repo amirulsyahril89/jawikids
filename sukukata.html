@@ -335,6 +335,27 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 .kv-card.err { border-color:var(--red);  background:linear-gradient(135deg,#fff0f3,white); }
 
 .kv-jawi { font-size:6rem; direction:rtl; line-height:1; margin-bottom:10px; display:block; }
+
+/* Pecahan huruf + vokal */
+.kv-breakdown {
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  direction:rtl; margin-bottom:14px;
+}
+.kv-bd-box {
+  background:white; border:3px solid var(--primary); border-radius:16px;
+  width:64px; height:64px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:2rem; direction:rtl; font-weight:800;
+  box-shadow:0 4px 14px rgba(33,150,243,0.18);
+}
+.kv-bd-plus {
+  font-size:1.4rem; font-weight:800; color:var(--primary);
+  font-family:'Fredoka One',cursive; flex-shrink:0;
+}
+@media(max-width:480px){
+  .kv-bd-box{width:52px;height:52px;font-size:1.6rem;}
+  .kv-bd-plus{font-size:1.1rem;}
+}
 .kv-rumi-hint { font-size:0.8rem; font-weight:700; color:var(--text-light); margin-bottom:14px; letter-spacing:2px; }
 .kv-rumi-reveal {
   font-family:'Fredoka One',cursive; font-size:2.2rem;
@@ -707,6 +728,14 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
   <div class="kv-card-wrap">
     <div class="kv-card" id="kvCard">
       <span class="kv-jawi" id="kvJawi">با</span>
+
+      <!-- Pecahan huruf + vokal -->
+      <div class="kv-breakdown" id="kvBreakdown">
+        <div class="kv-bd-box" id="kvBdKonsonan">ب</div>
+        <div class="kv-bd-plus">+</div>
+        <div class="kv-bd-box" id="kvBdVokal">ا</div>
+      </div>
+
       <div class="kv-rumi-hint">Tekan 🔊 untuk dengar bunyi</div>
       <div style="display:flex;justify-content:center;width:100%;margin:8px 0;">
         <button class="kv-audio-btn" id="kvAudioBtn" onclick="playKvAudio()">
@@ -1134,57 +1163,57 @@ function guNext() {
 // ══════════════════════════════════════════
 const SK_DATA = {
   a: [
-    {jawi:'با', rumi:'ba', audio:'sk-ba', contoh:'بادان', contohrumi:'badan',    emoji:'🧍'},
-    {jawi:'تا', rumi:'ta', audio:'sk-ta', contoh:'تالي',  contohrumi:'tali',     emoji:'🪢'},
-    {jawi:'جا', rumi:'ja', audio:'sk-ja', contoh:'جالا',  contohrumi:'jala',     emoji:'🕸️'},
-    {jawi:'دا', rumi:'da', audio:'sk-da', contoh:'دادا',  contohrumi:'dada',     emoji:'👴'},
-    {jawi:'را', rumi:'ra', audio:'sk-ra', contoh:'راجا',  contohrumi:'raja',     emoji:'👑'},
-    {jawi:'سا', rumi:'sa', audio:'sk-sa', contoh:'ساتو',  contohrumi:'satu',     emoji:'1️⃣'},
-    {jawi:'ڠا', rumi:'nga',audio:'sk-nga',contoh:'ڠاڠا', contohrumi:'nganga',   emoji:'😮'},
-    {jawi:'فا', rumi:'fa', audio:'sk-fa', contoh:'فاجر',  contohrumi:'fajar',    emoji:'🌅'},
-    {jawi:'ڤا', rumi:'pa', audio:'sk-pa', contoh:'ڤادي', contohrumi:'padi',     emoji:'🌾'},
-    {jawi:'لا', rumi:'la', audio:'sk-la', contoh:'لادا',  contohrumi:'lada',     emoji:'🌶️'},
-    {jawi:'ما', rumi:'ma', audio:'sk-ma', contoh:'مادو',  contohrumi:'madu',     emoji:'🍯'},
-    {jawi:'نا', rumi:'na', audio:'sk-na', contoh:'نادا',  contohrumi:'nada',     emoji:'🎵'},
-    {jawi:'ݢا', rumi:'ga', audio:'sk-ga', contoh:'ݢاجه',  contohrumi:'gajah',   emoji:'🐘'},
-    {jawi:'كا', rumi:'ka', audio:'sk-ka', contoh:'كاكي',  contohrumi:'kaki',    emoji:'🦵'},
-    {jawi:'وا', rumi:'wa', audio:'sk-wa', contoh:'واڠ',   contohrumi:'wang',    emoji:'💰'},
-    {jawi:'ڽا', rumi:'nya',audio:'sk-nya',contoh:'ڽاموق', contohrumi:'nyamuk', emoji:'🦟'},
+    {jawi:'با', konsonan:'ب', rumi:'ba', audio:'sk-ba', contoh:'بادان', contohrumi:'badan',    emoji:'🧍'},
+    {jawi:'تا', konsonan:'ت', rumi:'ta', audio:'sk-ta', contoh:'تالي',  contohrumi:'tali',     emoji:'🪢'},
+    {jawi:'جا', konsonan:'ج', rumi:'ja', audio:'sk-ja', contoh:'جالا',  contohrumi:'jala',     emoji:'🕸️'},
+    {jawi:'دا', konsonan:'د', rumi:'da', audio:'sk-da', contoh:'دادا',  contohrumi:'dada',     emoji:'👴'},
+    {jawi:'را', konsonan:'ر', rumi:'ra', audio:'sk-ra', contoh:'راجا',  contohrumi:'raja',     emoji:'👑'},
+    {jawi:'سا', konsonan:'س', rumi:'sa', audio:'sk-sa', contoh:'ساتو',  contohrumi:'satu',     emoji:'1️⃣'},
+    {jawi:'ڠا', konsonan:'ڠ', rumi:'nga',audio:'sk-nga',contoh:'ڠاڠا', contohrumi:'nganga',   emoji:'😮'},
+    {jawi:'فا', konsonan:'ف', rumi:'fa', audio:'sk-fa', contoh:'فاجر',  contohrumi:'fajar',    emoji:'🌅'},
+    {jawi:'ڤا', konsonan:'ڤ', rumi:'pa', audio:'sk-pa', contoh:'ڤادي', contohrumi:'padi',     emoji:'🌾'},
+    {jawi:'لا', konsonan:'ل', rumi:'la', audio:'sk-la', contoh:'لادا',  contohrumi:'lada',     emoji:'🌶️'},
+    {jawi:'ما', konsonan:'م', rumi:'ma', audio:'sk-ma', contoh:'مادو',  contohrumi:'madu',     emoji:'🍯'},
+    {jawi:'نا', konsonan:'ن', rumi:'na', audio:'sk-na', contoh:'نادا',  contohrumi:'nada',     emoji:'🎵'},
+    {jawi:'ݢا', konsonan:'ݢ', rumi:'ga', audio:'sk-ga', contoh:'ݢاجه',  contohrumi:'gajah',   emoji:'🐘'},
+    {jawi:'كا', konsonan:'ك', rumi:'ka', audio:'sk-ka', contoh:'كاكي',  contohrumi:'kaki',    emoji:'🦵'},
+    {jawi:'وا', konsonan:'و', rumi:'wa', audio:'sk-wa', contoh:'واڠ',   contohrumi:'wang',    emoji:'💰'},
+    {jawi:'ڽا', konsonan:'ڽ', rumi:'nya',audio:'sk-nya',contoh:'ڽاموق', contohrumi:'nyamuk', emoji:'🦟'},
   ],
   i: [
-    {jawi:'بي', rumi:'bi', audio:'sk-bi', contoh:'بيجي',  contohrumi:'biji',    emoji:'🌰'},
-    {jawi:'تي', rumi:'ti', audio:'sk-ti', contoh:'تيتي',  contohrumi:'titi',    emoji:'🌉'},
-    {jawi:'جي', rumi:'ji', audio:'sk-ji', contoh:'جيراڤ', contohrumi:'jerapah', emoji:'🦒'},
-    {jawi:'دي', rumi:'di', audio:'sk-di', contoh:'دينو',  contohrumi:'dino',    emoji:'🦕'},
-    {jawi:'ري', rumi:'ri', audio:'sk-ri', contoh:'ريبوت', contohrumi:'ribut',   emoji:'⛈️'},
-    {jawi:'سي', rumi:'si', audio:'sk-si', contoh:'سيڤو',  contohrumi:'sipu',   emoji:'🐚'},
-    {jawi:'ڠي', rumi:'ngi',audio:'sk-ngi',contoh:'ڠيلي',  contohrumi:'ngeri',  emoji:'😨'},
-    {jawi:'في', rumi:'fi', audio:'sk-fi', contoh:'فيلم',  contohrumi:'filem',   emoji:'🎬'},
-    {jawi:'ڤي', rumi:'pi', audio:'sk-pi', contoh:'ڤيڤي',  contohrumi:'pipi',   emoji:'😊'},
-    {jawi:'لي', rumi:'li', audio:'sk-li', contoh:'ليدي',  contohrumi:'lidi',   emoji:'🪵'},
-    {jawi:'مي', rumi:'mi', audio:'sk-mi', contoh:'ميز',   contohrumi:'meja',   emoji:'🪑'},
-    {jawi:'ني', rumi:'ni', audio:'sk-ni', contoh:'نيلا',  contohrumi:'nila',   emoji:'💜'},
-    {jawi:'ݢي', rumi:'gi', audio:'sk-gi', contoh:'ݢيݢي',  contohrumi:'gigi',  emoji:'🦷'},
-    {jawi:'كي', rumi:'ki', audio:'sk-ki', contoh:'كيتا',  contohrumi:'kita',  emoji:'👥'},
-    {jawi:'وي', rumi:'wi', audio:'sk-wi', contoh:'ويرا',  contohrumi:'wira',  emoji:'🦸'},
-    {jawi:'ڽي', rumi:'nyi',audio:'sk-nyi',contoh:'ڽير',   contohrumi:'nyir',  emoji:'🥥'},
+    {jawi:'بي', konsonan:'ب', rumi:'bi', audio:'sk-bi', contoh:'بيجي',  contohrumi:'biji',    emoji:'🌰'},
+    {jawi:'تي', konsonan:'ت', rumi:'ti', audio:'sk-ti', contoh:'تيتي',  contohrumi:'titi',    emoji:'🌉'},
+    {jawi:'جي', konsonan:'ج', rumi:'ji', audio:'sk-ji', contoh:'جيراڤ', contohrumi:'jerapah', emoji:'🦒'},
+    {jawi:'دي', konsonan:'د', rumi:'di', audio:'sk-di', contoh:'دينو',  contohrumi:'dino',    emoji:'🦕'},
+    {jawi:'ري', konsonan:'ر', rumi:'ri', audio:'sk-ri', contoh:'ريبوت', contohrumi:'ribut',   emoji:'⛈️'},
+    {jawi:'سي', konsonan:'س', rumi:'si', audio:'sk-si', contoh:'سيڤو',  contohrumi:'sipu',   emoji:'🐚'},
+    {jawi:'ڠي', konsonan:'ڠ', rumi:'ngi',audio:'sk-ngi',contoh:'ڠيلي',  contohrumi:'ngeri',  emoji:'😨'},
+    {jawi:'في', konsonan:'ف', rumi:'fi', audio:'sk-fi', contoh:'فيلم',  contohrumi:'filem',   emoji:'🎬'},
+    {jawi:'ڤي', konsonan:'ڤ', rumi:'pi', audio:'sk-pi', contoh:'ڤيڤي',  contohrumi:'pipi',   emoji:'😊'},
+    {jawi:'لي', konsonan:'ل', rumi:'li', audio:'sk-li', contoh:'ليدي',  contohrumi:'lidi',   emoji:'🪵'},
+    {jawi:'مي', konsonan:'م', rumi:'mi', audio:'sk-mi', contoh:'ميز',   contohrumi:'meja',   emoji:'🪑'},
+    {jawi:'ني', konsonan:'ن', rumi:'ni', audio:'sk-ni', contoh:'نيلا',  contohrumi:'nila',   emoji:'💜'},
+    {jawi:'ݢي', konsonan:'ݢ', rumi:'gi', audio:'sk-gi', contoh:'ݢيݢي',  contohrumi:'gigi',  emoji:'🦷'},
+    {jawi:'كي', konsonan:'ك', rumi:'ki', audio:'sk-ki', contoh:'كيتا',  contohrumi:'kita',  emoji:'👥'},
+    {jawi:'وي', konsonan:'و', rumi:'wi', audio:'sk-wi', contoh:'ويرا',  contohrumi:'wira',  emoji:'🦸'},
+    {jawi:'ڽي', konsonan:'ڽ', rumi:'nyi',audio:'sk-nyi',contoh:'ڽير',   contohrumi:'nyir',  emoji:'🥥'},
   ],
   u: [
-    {jawi:'بو', rumi:'bu', audio:'sk-bu', contoh:'بوكو',  contohrumi:'buku',   emoji:'📚'},
-    {jawi:'تو', rumi:'tu', audio:'sk-tu', contoh:'توݢو',  contohrumi:'tugu',  emoji:'🗿'},
-    {jawi:'جو', rumi:'ju', audio:'sk-ju', contoh:'جوروس', contohrumi:'jurus',  emoji:'➡️'},
-    {jawi:'دو', rumi:'du', audio:'sk-du', contoh:'دودو',  contohrumi:'dudu',  emoji:'🪑'},
-    {jawi:'رو', rumi:'ru', audio:'sk-ru', contoh:'روماه', contohrumi:'rumah', emoji:'🏠'},
-    {jawi:'سو', rumi:'su', audio:'sk-su', contoh:'سوسو',  contohrumi:'susu',  emoji:'🥛'},
-    {jawi:'ڠو', rumi:'ngu',audio:'sk-ngu',contoh:'ڠولا',  contohrumi:'ngula', emoji:'🐛'},
-    {jawi:'فو', rumi:'fu', audio:'sk-fu', contoh:'فولا',  contohrumi:'fula',  emoji:'🧣'},
-    {jawi:'ڤو', rumi:'pu', audio:'sk-pu', contoh:'ڤوترا', contohrumi:'putra', emoji:'🤴'},
-    {jawi:'لو', rumi:'lu', audio:'sk-lu', contoh:'لوبڠ',  contohrumi:'lubang',emoji:'🕳️'},
-    {jawi:'مو', rumi:'mu', audio:'sk-mu', contoh:'موتو',  contohrumi:'moto',  emoji:'🏍️'},
-    {jawi:'نو', rumi:'nu', audio:'sk-nu', contoh:'نوتا',  contohrumi:'nota',  emoji:'📝'},
-    {jawi:'ݢو', rumi:'gu', audio:'sk-gu', contoh:'ݢورو',  contohrumi:'guru',  emoji:'👩‍🏫'},
-    {jawi:'كو', rumi:'ku', audio:'sk-ku', contoh:'كوكو',  contohrumi:'kuku',  emoji:'💅'},
-    {jawi:'ڽو', rumi:'nyu',audio:'sk-nyu',contoh:'ڽور',   contohrumi:'nyur',  emoji:'🥥'},
+    {jawi:'بو', konsonan:'ب', rumi:'bu', audio:'sk-bu', contoh:'بوكو',  contohrumi:'buku',   emoji:'📚'},
+    {jawi:'تو', konsonan:'ت', rumi:'tu', audio:'sk-tu', contoh:'توݢو',  contohrumi:'tugu',  emoji:'🗿'},
+    {jawi:'جو', konsonan:'ج', rumi:'ju', audio:'sk-ju', contoh:'جوروس', contohrumi:'jurus',  emoji:'➡️'},
+    {jawi:'دو', konsonan:'د', rumi:'du', audio:'sk-du', contoh:'دودو',  contohrumi:'dudu',  emoji:'🪑'},
+    {jawi:'رو', konsonan:'ر', rumi:'ru', audio:'sk-ru', contoh:'روماه', contohrumi:'rumah', emoji:'🏠'},
+    {jawi:'سو', konsonan:'س', rumi:'su', audio:'sk-su', contoh:'سوسو',  contohrumi:'susu',  emoji:'🥛'},
+    {jawi:'ڠو', konsonan:'ڠ', rumi:'ngu',audio:'sk-ngu',contoh:'ڠولا',  contohrumi:'ngula', emoji:'🐛'},
+    {jawi:'فو', konsonan:'ف', rumi:'fu', audio:'sk-fu', contoh:'فولا',  contohrumi:'fula',  emoji:'🧣'},
+    {jawi:'ڤو', konsonan:'ڤ', rumi:'pu', audio:'sk-pu', contoh:'ڤوترا', contohrumi:'putra', emoji:'🤴'},
+    {jawi:'لو', konsonan:'ل', rumi:'lu', audio:'sk-lu', contoh:'لوبڠ',  contohrumi:'lubang',emoji:'🕳️'},
+    {jawi:'مو', konsonan:'م', rumi:'mu', audio:'sk-mu', contoh:'موتو',  contohrumi:'moto',  emoji:'🏍️'},
+    {jawi:'نو', konsonan:'ن', rumi:'nu', audio:'sk-nu', contoh:'نوتا',  contohrumi:'nota',  emoji:'📝'},
+    {jawi:'ݢو', konsonan:'ݢ', rumi:'gu', audio:'sk-gu', contoh:'ݢورو',  contohrumi:'guru',  emoji:'👩‍🏫'},
+    {jawi:'كو', konsonan:'ك', rumi:'ku', audio:'sk-ku', contoh:'كوكو',  contohrumi:'kuku',  emoji:'💅'},
+    {jawi:'ڽو', konsonan:'ڽ', rumi:'nyu',audio:'sk-nyu',contoh:'ڽور',   contohrumi:'nyur',  emoji:'🥥'},
   ]
 };
 
@@ -1215,6 +1244,8 @@ function startKv(vokal) {
   renderKvCard();
 }
 
+const VOKAL_SYMBOL = { a:'ا', i:'ي', u:'و' };
+
 function renderKvCard() {
   const sk = kvList[kvIdx];
   kvAnswered = false;
@@ -1228,6 +1259,10 @@ function renderKvCard() {
   document.getElementById('kvFeedback').className = 'kv-feedback';
   document.getElementById('kvBtnNext').className = 'kv-btn-next';
   document.getElementById('kvXpCount').textContent = '+' + kvXpGained + ' XP';
+
+  // Papar pecahan konsonan + vokal
+  document.getElementById('kvBdKonsonan').textContent = sk.konsonan;
+  document.getElementById('kvBdVokal').textContent = VOKAL_SYMBOL[kvVokal];
 
   // Reset audio
   const audioBtn = document.getElementById('kvAudioBtn');
@@ -1603,10 +1638,27 @@ function initAuth() {
     const nameEl = document.getElementById('ubName');
     if (nameEl) nameEl.textContent = currentStudentData.nama;
     renderSidebarAccount();
+    syncXpFromSupabase();
   } catch(e) {
     localStorage.removeItem('jawikids_student');
     window.location.href = '/auth.html';
   }
+}
+
+// ── SEGERAK XP DARI SUPABASE — sumber kebenaran merentas semua modul ──
+async function syncXpFromSupabase() {
+  try {
+    if (!dbSK && window.supabase) dbSK = window.supabase.createClient(SUPA_URL_SK, SUPA_KEY_SK);
+    if (!dbSK || !currentStudentData) return;
+    const { data } = await dbSK.from('students').select('xp').eq('id', currentStudentData.id).single();
+    const remoteXp = data?.xp || 0;
+    const localXp = stats.xp || 0;
+    if (remoteXp > localXp) {
+      stats.xp = remoteXp;
+      localStorage.setItem('jawiSkStats', JSON.stringify(stats));
+      renderXp();
+    }
+  } catch(e) { console.warn('Sync XP gagal:', e.message); }
 }
 
 function renderSidebarAccount() {
