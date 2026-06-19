@@ -424,12 +424,14 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
       <span class="sb-badge">Aktif</span>
     </a>
     <div class="sb-section-label" style="margin-top:8px;">Akaun</div>
-    <a class="sb-item" data-page="dashboard.html" href="dashboard.html">
-      <span class="sb-icon">📊</span><span class="sb-label">Dashboard Guru</span>
-    </a>
-    <a class="sb-item" data-page="auth.html" href="auth.html">
-      <span class="sb-icon">👤</span><span class="sb-label">Log Masuk</span>
-    </a>
+    <div id="sbAccountSection">
+      <a class="sb-item" data-page="dashboard.html" href="dashboard.html">
+        <span class="sb-icon">📊</span><span class="sb-label">Dashboard Guru</span>
+      </a>
+      <a class="sb-item" data-page="auth.html" href="auth.html">
+        <span class="sb-icon">👤</span><span class="sb-label">Log Masuk</span>
+      </a>
+    </div>
   </nav>
   <div class="sb-footer">
     <div class="sb-footer-sig">✦ Direka oleh <span>Ustaz Wan</span> ✦<br>© 2026 JawiKids</div>
@@ -1600,10 +1602,25 @@ function initAuth() {
     if (!currentStudentData.id || !currentStudentData.nama) throw new Error('invalid');
     const nameEl = document.getElementById('ubName');
     if (nameEl) nameEl.textContent = currentStudentData.nama;
+    renderSidebarAccount();
   } catch(e) {
     localStorage.removeItem('jawikids_student');
     window.location.href = '/auth.html';
   }
+}
+
+function renderSidebarAccount() {
+  const section = document.getElementById('sbAccountSection');
+  if (!section) return;
+  section.innerHTML = `
+    <div class="sb-item" style="cursor:default;pointer-events:none;opacity:0.85;">
+      <span class="sb-icon">👤</span>
+      <span class="sb-label">${currentStudentData.nama}</span>
+    </div>
+    <button class="sb-item" onclick="handleUserClick()" style="cursor:pointer;">
+      <span class="sb-icon">🚪</span>
+      <span class="sb-label">Log Keluar</span>
+    </button>`;
 }
 
 function handleUserClick() {
