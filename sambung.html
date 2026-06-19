@@ -1528,10 +1528,27 @@ function initAuth() {
     const nameEl = document.getElementById('ubName');
     if (nameEl) nameEl.textContent = currentStudentData.nama;
     renderSidebarAccount();
+    syncXpFromSupabase();
   } catch(e) {
     localStorage.removeItem('jawikids_student');
     window.location.href = '/auth.html';
   }
+}
+
+// ── SEGERAK XP DARI SUPABASE — sumber kebenaran merentas semua modul ──
+async function syncXpFromSupabase() {
+  try {
+    if (!dbS && window.supabase) dbS = window.supabase.createClient(SUPA_URL_S, SUPA_KEY_S);
+    if (!dbS || !currentStudentData) return;
+    const { data } = await dbS.from('students').select('xp').eq('id', currentStudentData.id).single();
+    const remoteXp = data?.xp || 0;
+    const localXp = stats.xp || 0;
+    if (remoteXp > localXp) {
+      stats.xp = remoteXp;
+      saveStats();
+      renderXp();
+    }
+  } catch(e) { console.warn('Sync XP gagal:', e.message); }
 }
 
 function renderSidebarAccount() {
