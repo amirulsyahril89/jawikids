@@ -367,7 +367,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
         <table class="tbl">
           <thead><tr>
             <th>Nama Murid</th><th>Kelas</th><th>Sesi</th>
-            <th>Betul</th><th>Salah</th><th>% Betul</th><th>Huruf Lemah</th><th>Tindakan</th>
+            <th>ب Huruf Tunggal</th><th>بـ Bersambung</th><th>با Suku Kata</th><th>Huruf Lemah</th><th>Tindakan</th>
           </tr></thead>
           <tbody id="studentsBody">
             <tr><td colspan="8"><div class="loading">⏳ Memuatkan...</div></td></tr>
@@ -700,42 +700,60 @@ async function loadStudents() {
   const { data: ans } = await db.from('answers').select('student_id,betul,huruf_char').in('student_id', ids);
   const { data: sess } = await db.from('sessions').select('student_id,kumpulan_id,score,total_soalan').in('student_id', ids);
 
-  const ansMap = {}, sessMap = {}, sessScoreMap = {};
+  // Skor per-modul untuk setiap murid
+  const moduleMap = {}; // { student_id: { huruf_tunggal:{betul,total}, huruf_bersambung:{...}, suku_kata_terbuka:{...} } }
+  const initModule = () => ({
+    huruf_tunggal: {betul:0,total:0},
+    huruf_bersambung: {betul:0,total:0},
+    suku_kata_terbuka: {betul:0,total:0}
+  });
+
   (ans||[]).forEach(a => {
-    if (!ansMap[a.student_id]) ansMap[a.student_id] = {betul:0,salah:0,hurufSalah:{}};
-    a.betul ? ansMap[a.student_id].betul++ : ansMap[a.student_id].salah++;
+    if (!moduleMap[a.student_id]) moduleMap[a.student_id] = initModule();
+    moduleMap[a.student_id].huruf_tunggal.total++;
+    if (a.betul) moduleMap[a.student_id].huruf_tunggal.betul++;
+  });
+
+  const ansMap = {}, sessMap = {};
+  (ans||[]).forEach(a => {
+    if (!ansMap[a.student_id]) ansMap[a.student_id] = {hurufSalah:{}};
     if (!a.betul) ansMap[a.student_id].hurufSalah[a.huruf_char] = (ansMap[a.student_id].hurufSalah[a.huruf_char]||0)+1;
   });
   (sess||[]).forEach(s => {
     sessMap[s.student_id] = (sessMap[s.student_id]||0)+1;
-    // Sesi modul huruf_tunggal (kumpulan_id kosong/M-x) sudah dikira melalui 'answers' di atas.
-    // Hanya kumpul skor sesi dari sambung.html & sukukata.html supaya tiada double-count.
+    if (!moduleMap[s.student_id]) moduleMap[s.student_id] = initModule();
     const kid = s.kumpulan_id || '';
-    if (kid === 'huruf_bersambung' || kid === 'suku_kata_terbuka') {
-      if (!sessScoreMap[s.student_id]) sessScoreMap[s.student_id] = {score:0,total:0};
-      sessScoreMap[s.student_id].score += (s.score||0);
-      sessScoreMap[s.student_id].total += (s.total_soalan||0);
+    if (kid === 'huruf_bersambung') {
+      moduleMap[s.student_id].huruf_bersambung.betul += (s.score||0);
+      moduleMap[s.student_id].huruf_bersambung.total += (s.total_soalan||0);
+    } else if (kid === 'suku_kata_terbuka') {
+      moduleMap[s.student_id].suku_kata_terbuka.betul += (s.score||0);
+      moduleMap[s.student_id].suku_kata_terbuka.total += (s.total_soalan||0);
     }
+    // Sesi huruf_tunggal lama (kumpulan_id M-x) sudah dikira melalui 'answers'
   });
 
-  document.getElementById('studentsBody').innerHTML = students.map(s => {
-    const stAns = ansMap[s.id] || {betul:0,salah:0,hurufSalah:{}};
-    const stSess = sessScoreMap[s.id] || {score:0,total:0};
+  function skillBadge(stat) {
+    if (!stat || stat.total === 0) return '<span style="color:#bbb;font-size:0.78rem;font-weight:700;">Belum cuba</span>';
+    const pct = Math.round(stat.betul / stat.total * 100);
+    let label, cls;
+    if (pct >= 80) { label = 'Mahir'; cls = 'ok'; }
+    else if (pct >= 50) { label = 'Sederhana'; cls = 'mid'; }
+    else { label = 'Perlu Bantuan'; cls = 'low'; }
+    return `<span class="badge ${cls}">${pct}% · ${label}</span>`;
+  }
 
-    // Gabungkan: jawapan huruf-tunggal (answers, per-huruf) + sesi sambung/sukukata (sessions, per-sesi)
-    const betul = stAns.betul + stSess.score;
-    const salah = stAns.salah + Math.max(0, stSess.total - stSess.score);
-    const total = betul + salah;
-    const pct = total ? Math.round(betul/total*100) : null;
-    const cls = pct===null?'mid':pct>=70?'ok':pct>=40?'mid':'low';
+  document.getElementById('studentsBody').innerHTML = students.map(s => {
+    const mod = moduleMap[s.id] || initModule();
+    const stAns = ansMap[s.id] || {hurufSalah:{}};
     const weak = Object.entries(stAns.hurufSalah).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([c])=>c).join(' ');
     return `<tr>
       <td><strong>${s.nama}</strong></td>
       <td>${s.classes?.nama_kelas||'—'}</td>
       <td>${sessMap[s.id]||0}</td>
-      <td style="color:var(--green)">${betul}</td>
-      <td style="color:var(--red)">${salah}</td>
-      <td>${pct!==null?`<span class="badge ${cls}">${pct}%</span>`:'—'}</td>
+      <td>${skillBadge(mod.huruf_tunggal)}</td>
+      <td>${skillBadge(mod.huruf_bersambung)}</td>
+      <td>${skillBadge(mod.suku_kata_terbuka)}</td>
       <td style="direction:rtl;font-size:1.1rem;letter-spacing:4px;">${weak||'—'}</td>
       <td>
         <button onclick="deleteStudent('${s.id}','${s.nama.replace(/'/g,"\\'")}')"
