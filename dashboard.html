@@ -343,7 +343,16 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
         <button class="btn-copy" onclick="copyKod()">📋 Salin Kod Kelas</button>
 
         <!-- Senarai murid -->
-        <div style="margin-top:16px;font-size:0.72rem;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Murid dalam kelas ini</div>
+        <div style="margin-top:16px;font-size:0.72rem;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Daftar Murid Baru</div>
+        <div style="font-size:0.74rem;color:var(--text-light);font-weight:600;margin-bottom:8px;">
+          Taip satu nama setiap baris untuk daftar beberapa murid sekaligus.
+        </div>
+        <textarea id="bulkMuridInput" rows="4" placeholder="cth:&#10;Ahmad bin Ali&#10;Siti Nurhaliza&#10;Muhammad Ariff"
+          style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.85rem;resize:vertical;outline:none;margin-bottom:8px;"></textarea>
+        <div class="alert" id="bulkMuridAlert"></div>
+        <button class="btn-action btn-purple" onclick="bulkAddMurid()" style="width:100%;margin-bottom:16px;">➕ Daftar Murid</button>
+
+        <div style="font-size:0.72rem;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Murid Dalam Kelas Ini</div>
         <div id="detailStudents"></div>
       </div>
 
@@ -566,9 +575,64 @@ async function selectClass(id) {
     ? students.map(s => `
         <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
           <span style="font-size:0.85rem;font-weight:700;">🎒 ${s.nama}</span>
-          <span style="font-size:0.7rem;color:var(--text-light);font-weight:700;">${new Date(s.created_at).toLocaleDateString('ms-MY')}</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:0.7rem;color:var(--text-light);font-weight:700;">${new Date(s.created_at).toLocaleDateString('ms-MY')}</span>
+            <button onclick="deleteStudent('${s.id}','${s.nama.replace(/'/g,"\\'")}')"
+              style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.9rem;padding:2px 4px;" title="Padam murid">🗑️</button>
+          </div>
         </div>`).join('')
     : '<div class="empty"><p>Belum ada murid dalam kelas ini.</p></div>';
+}
+
+// ── DAFTAR MURID SECARA PUKAL ──
+async function bulkAddMurid() {
+  if (!selectedClass) return;
+  clearAlert('bulkMuridAlert');
+
+  const raw = document.getElementById('bulkMuridInput').value;
+  const names = raw.split('\n').map(n => n.trim()).filter(n => n.length > 0);
+
+  if (!names.length) { showAlert('bulkMuridAlert', '⚠️ Sila masukkan sekurang-kurangnya satu nama.', 'err'); return; }
+
+  // Normalisasi nama — sama logik dengan auth.html
+  const normalized = names.map(normalizeNameLocal);
+
+  // Semak nama yang sudah wujud dalam kelas ini (elak duplicate)
+  const { data: existing } = await db.from('students').select('nama').eq('class_id', selectedClass.id);
+  const existingLower = (existing||[]).map(s => s.nama.toLowerCase());
+
+  const toInsert = [];
+  const skipped = [];
+  normalized.forEach(n => {
+    if (existingLower.includes(n.toLowerCase())) skipped.push(n);
+    else toInsert.push({ nama: n, class_id: selectedClass.id });
+  });
+
+  if (!toInsert.length) {
+    showAlert('bulkMuridAlert', '⚠️ Semua nama sudah wujud dalam kelas ini.', 'err');
+    return;
+  }
+
+  const { error } = await db.from('students').insert(toInsert);
+  if (error) { showAlert('bulkMuridAlert', '❌ ' + error.message, 'err'); return; }
+
+  let msg = `✅ ${toInsert.length} murid berjaya didaftarkan!`;
+  if (skipped.length) msg += ` (${skipped.length} nama dilangkau — sudah wujud)`;
+  showAlert('bulkMuridAlert', msg, 'ok');
+  document.getElementById('bulkMuridInput').value = '';
+  await selectClass(selectedClass.id);
+  await loadClasses();
+}
+
+// Normalisasi nama — sama logik dengan auth.html supaya konsisten
+function normalizeNameLocal(raw) {
+  return raw
+    .trim()
+    .replace(/\s+/g, ' ')
+    .toLowerCase()
+    .split(' ')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
 }
 
 // ── KEMASKINI KOD KELAS ──
@@ -777,6 +841,9 @@ async function deleteStudent(studentId, namaMurid) {
     if (error) throw error;
     await loadStudents();
     await loadStats();
+    // Refresh panel Urus Kelas jika kelas semasa sedang dipaparkan
+    if (selectedClass) await selectClass(selectedClass.id);
+    await loadClasses();
   } catch(e) {
     alert('❌ Gagal padam murid: ' + (e.message || 'Cuba lagi.'));
   }
