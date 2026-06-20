@@ -128,13 +128,8 @@ body {
 <!-- ═══ KAD MURID ═══ -->
 <div class="card" id="muridCard">
   <div class="card-title">👋 Hai, Murid!</div>
-  <div class="card-sub">Taip nama dan kod kelas untuk masuk</div>
+  <div class="card-sub">Masukkan kod kelas, kemudian pilih nama kamu</div>
   <div class="alert" id="muridAlert"></div>
-  <div class="field">
-    <label>Nama Penuh Kamu</label>
-    <input type="text" id="muridNama" placeholder="cth: Ahmad bin Ali" autocomplete="off"
-           oninput="delete this.dataset.selectedId">
-  </div>
   <div class="field">
     <label>Kod Kelas</label>
     <input type="text" id="muridKod" placeholder="cth: ARIF-X7K2" maxlength="15" autocomplete="off"
@@ -142,7 +137,9 @@ body {
     <div class="input-hint">Tanya guru kamu untuk kod kelas</div>
   </div>
   <div class="student-found" id="kelasFound"></div>
-  <button class="btn-submit btn-murid" id="muridBtn" onclick="muridLogin()">🚀 Mula Belajar!</button>
+  <input type="hidden" id="muridSelectedId">
+  <input type="hidden" id="muridSelectedNama">
+  <button class="btn-submit btn-murid" id="muridBtn" onclick="muridLogin()" disabled>🚀 Mula Belajar!</button>
 </div>
 
 <!-- ═══ KAD GURU ═══ -->
@@ -309,84 +306,82 @@ async function loadKelasMuridList() {
 
   const box = document.getElementById('kelasFound');
   box.classList.add('show');
+  document.getElementById('muridBtn').disabled = true;
+  document.getElementById('muridSelectedId').value = '';
+  document.getElementById('muridSelectedNama').value = '';
 
   let html = `<div style="font-weight:800;margin-bottom:6px;">✅ Kelas: ${kelasData.nama_kelas}</div>`;
 
   if (kelasMuridList.length) {
     html += `<div style="font-size:0.76rem;font-weight:700;color:var(--text-light);margin-bottom:6px;">
-      Sudah ada nama kamu? Klik untuk pilih:
+      Klik nama kamu dari senarai:
     </div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+    <div style="display:flex;flex-wrap:wrap;gap:6px;" id="muridListBtns">
       ${kelasMuridList.map(m => `
-        <button type="button" onclick="pilihMuridSediaAda('${m.id}','${m.nama.replace(/'/g,"\\'")}')"
-          style="background:white;border:2px solid #ddd;border-radius:99px;padding:6px 14px;
-                 font-family:'Nunito',sans-serif;font-weight:700;font-size:0.8rem;cursor:pointer;
-                 transition:all 0.15s;"
-          onmouseover="this.style.borderColor='#06D6A0';this.style.background='#D0F7EE';"
-          onmouseout="this.style.borderColor='#ddd';this.style.background='white';">
+        <button type="button" id="mb-${m.id}" onclick="pilihMuridSediaAda('${m.id}','${m.nama.replace(/'/g,"\\'")}')"
+          style="background:white;border:2px solid #ddd;border-radius:99px;padding:7px 16px;
+                 font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;
+                 transition:all 0.15s;">
           ${m.nama}
         </button>
       `).join('')}
     </div>`;
   } else {
     html += `<div style="font-size:0.76rem;font-weight:700;color:var(--text-light);">
-      Belum ada murid dalam kelas ini. Kamu yang pertama! 🎉
+      ⚠️ Belum ada nama murid didaftarkan dalam kelas ini.<br>Sila minta guru kamu daftarkan nama kamu dahulu.
     </div>`;
   }
 
   box.innerHTML = html;
 }
 
-// ── PILIH MURID SEDIA ADA — ISI NAMA TERUS ──
+// ── PILIH MURID DARI SENARAI ──
 function pilihMuridSediaAda(id, nama) {
-  document.getElementById('muridNama').value = nama;
-  document.getElementById('muridNama').dataset.selectedId = id;
+  document.getElementById('muridSelectedId').value = id;
+  document.getElementById('muridSelectedNama').value = nama;
+  document.getElementById('muridBtn').disabled = false;
+
+  // Highlight butang yang dipilih, reset yang lain
+  document.querySelectorAll('#muridListBtns button').forEach(b => {
+    if (b.id === 'mb-' + id) {
+      b.style.borderColor = '#06D6A0';
+      b.style.background = '#D0F7EE';
+      b.style.color = '#04a87d';
+    } else {
+      b.style.borderColor = '#ddd';
+      b.style.background = 'white';
+      b.style.color = '';
+    }
+  });
 }
 
 // ── MURID LOGIN ──
 async function muridLogin() {
   clearAlert('muridAlert');
-  const namaInput = document.getElementById('muridNama');
-  const namaRaw = namaInput.value.trim();
-  const kod  = document.getElementById('muridKod').value.trim().toUpperCase();
-  if (!namaRaw) { showAlert('muridAlert', '⚠️ Sila masukkan nama penuh kamu.'); return; }
-  if (!kod)  { showAlert('muridAlert', '⚠️ Sila masukkan kod kelas.'); return; }
+  const selectedId = document.getElementById('muridSelectedId').value;
+  const selectedNama = document.getElementById('muridSelectedNama').value;
+  const kod = document.getElementById('muridKod').value.trim().toUpperCase();
 
-  const nama = normalizeName(namaRaw);
-  const selectedId = namaInput.dataset.selectedId;
+  if (!kod) { showAlert('muridAlert', '⚠️ Sila masukkan kod kelas.'); return; }
+  if (!selectedId) { showAlert('muridAlert', '⚠️ Sila pilih nama kamu dari senarai.'); return; }
 
   setLoading('muridBtn', true, '🚀 Mula Belajar!');
 
   try {
-    // Semak kod kelas
     if (!kelasData) {
       const { data } = await db.from('classes').select('id,nama_kelas,kod_kelas').eq('kod_kelas', kod).maybeSingle();
       if (!data) { showAlert('muridAlert', '❌ Kod kelas tidak sah. Semak semula.'); return; }
       kelasData = data;
     }
 
-    let murid = null;
+    // Sahkan murid yang dipilih memang wujud dalam kelas ini
+    const { data: murid } = await db.from('students')
+      .select('id,nama,class_id').eq('id', selectedId).eq('class_id', kelasData.id).maybeSingle();
 
-    // Jika murid pilih dari senarai sedia ada, terus guna ID tersebut
-    if (selectedId) {
-      const { data } = await db.from('students')
-        .select('id,nama,class_id').eq('id', selectedId).eq('class_id', kelasData.id).maybeSingle();
-      murid = data;
-    }
-
-    // Jika tiada pilihan ID, cari ikut nama (case-insensitive)
     if (!murid) {
-      const { data } = await db.from('students')
-        .select('id,nama,class_id').ilike('nama', nama).eq('class_id', kelasData.id).maybeSingle();
-      murid = data;
-    }
-
-    // Jika masih tiada, cipta murid baru dengan nama yang dinormalisasi
-    if (!murid) {
-      const { data: baru, error: err2 } = await db.from('students')
-        .insert({ nama, class_id: kelasData.id }).select().single();
-      if (err2) throw err2;
-      murid = baru;
+      showAlert('muridAlert', '❌ Nama tidak sah. Sila pilih semula dari senarai.');
+      await loadKelasMuridList();
+      return;
     }
 
     localStorage.setItem('jawikids_student', JSON.stringify({
