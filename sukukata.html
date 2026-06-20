@@ -1268,7 +1268,7 @@ function renderKvCard() {
   audioBtn.className = 'kv-audio-btn';
   audioBtn.innerHTML = '<span class="btn-icon">🔊</span><span class="btn-label">Dengar</span>';
   document.getElementById('kvAudioNote').textContent = '';
-  if (kvAudio) { kvAudio.pause(); kvAudio = null; }
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
 
   // Progress dots
   document.getElementById('kvDots').innerHTML = kvList.map((_,i) => `
@@ -1289,30 +1289,57 @@ function renderKvCard() {
   setTimeout(() => playKvAudio(), 400);
 }
 
+// ── PILIH SUARA TERBAIK SECARA AUTOMATIK ──
+let kvVoices = [];
+let kvSelectedVoice = null;
+
+function loadKvVoices() {
+  kvVoices = speechSynthesis.getVoices();
+  if (!kvVoices.length) return;
+  // Keutamaan: Bahasa Melayu > Bahasa Indonesia > Default
+  kvSelectedVoice =
+    kvVoices.find(v => v.lang.startsWith('ms')) ||
+    kvVoices.find(v => v.lang.startsWith('id')) ||
+    kvVoices.find(v => v.lang.startsWith('en')) ||
+    kvVoices[0];
+}
+
+if ('speechSynthesis' in window) {
+  loadKvVoices();
+  speechSynthesis.onvoiceschanged = loadKvVoices;
+}
+
 function playKvAudio() {
   const sk = kvList[kvIdx];
   if (!sk) return;
   const btn = document.getElementById('kvAudioBtn');
-  if (kvAudio) { kvAudio.pause(); kvAudio = null; }
 
-  kvAudio = new Audio(`${AUDIO_FOLDER_SK}${sk.audio}${AUDIO_EXT_SK}`);
+  if (!('speechSynthesis' in window)) {
+    btn.className = 'kv-audio-btn no-audio';
+    btn.innerHTML = '<span class="btn-icon">🔇</span><span class="btn-label">Tiada</span>';
+    document.getElementById('kvAudioNote').textContent = 'Pelayar ini tidak menyokong suara automatik';
+    return;
+  }
+
+  speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(sk.rumi);
+  if (kvSelectedVoice) utter.voice = kvSelectedVoice;
+  utter.rate = 0.8;
+  utter.pitch = 1.1;
+
   btn.classList.add('playing');
   btn.innerHTML = '<span class="btn-icon">▶️</span><span class="btn-label">Main...</span>';
 
-  kvAudio.play()
-    .then(() => {
-      kvAudio.onended = () => {
-        btn.classList.remove('playing');
-        btn.innerHTML = '<span class="btn-icon">🔊</span><span class="btn-label">Dengar</span>';
-      };
-    })
-    .catch(() => {
-      btn.classList.remove('playing');
-      btn.className = 'kv-audio-btn no-audio';
-      btn.innerHTML = '<span class="btn-icon">🔇</span><span class="btn-label">Tiada</span>';
-      document.getElementById('kvAudioNote').textContent =
-        `Letakkan fail: audio/${sk.audio}.m4a`;
-    });
+  utter.onend = () => {
+    btn.classList.remove('playing');
+    btn.innerHTML = '<span class="btn-icon">🔊</span><span class="btn-label">Dengar</span>';
+  };
+  utter.onerror = () => {
+    btn.classList.remove('playing');
+    btn.innerHTML = '<span class="btn-icon">🔊</span><span class="btn-label">Dengar</span>';
+  };
+
+  speechSynthesis.speak(utter);
 }
 
 function checkKv(btn, isCorrect) {
