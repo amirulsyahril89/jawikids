@@ -39,8 +39,10 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 .sidebar {
   position: fixed; left: 0; top: 0; bottom: 0; width: 230px;
   background: var(--card); border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; padding: 20px 14px; z-index: 100;
+  display: flex; flex-direction: column; padding: 20px 14px; z-index: 200;
   box-shadow: 2px 0 12px rgba(0,0,0,0.05);
+  overflow-y: auto;
+  transition: transform 0.3s cubic-bezier(.4,0,.2,1);
 }
 .sidebar-brand { margin-bottom: 24px; }
 .sidebar-logo { font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: var(--primary); }
@@ -172,7 +174,36 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 .loading { display: flex; align-items: center; justify-content: center; padding: 32px; color: var(--text-light); gap: 8px; font-weight: 700; font-size: 0.85rem; }
 
 /* ── MOBILE ── */
-@media(max-width:768px){ .sidebar{display:none;} .main{margin-left:0;padding:16px;} .stats-grid{grid-template-columns:1fr 1fr;} .grid2{grid-template-columns:1fr;} }
+/* ── MOBILE: HAMBURGER & OVERLAY ── */
+.db-topbar { display: none; }
+.db-hamburger {
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  gap: 5px; width: 40px; height: 40px; cursor: pointer;
+  background: var(--purple-light); border: none; border-radius: 10px; flex-shrink: 0;
+}
+.db-hamburger span { width: 18px; height: 2px; border-radius: 99px; background: var(--purple); display: block; }
+.db-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 150; backdrop-filter: blur(2px);
+}
+.db-overlay.open { display: block; }
+
+@media(max-width:768px){
+  .sidebar { transform: translateX(-100%); top: 60px; }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; padding: 16px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .grid2 { grid-template-columns: 1fr; }
+  .db-topbar {
+    display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+    background: var(--card); border-bottom: 1px solid var(--border);
+    position: fixed; top: 0; left: 0; right: 0; z-index: 120; height: 60px;
+  }
+  .db-hamburger { display: flex; }
+  .db-topbar-logo { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: var(--primary); }
+  .db-topbar-logo span { color: var(--purple); }
+  .main { padding-top: 76px; }
+}
 
 /* ── LEADERBOARD ── */
 .lb-row {
@@ -232,8 +263,17 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 </head>
 <body>
 
+<!-- ══════════ TOPBAR MOBILE ══════════ -->
+<div class="db-topbar">
+  <button class="db-hamburger" onclick="dbSidebarToggle()"><span></span><span></span><span></span></button>
+  <div class="db-topbar-logo">Jawi<span>Kids</span></div>
+</div>
+
+<!-- ══════════ OVERLAY MOBILE ══════════ -->
+<div class="db-overlay" id="dbOverlay" onclick="dbSidebarClose()"></div>
+
 <!-- ══════════ SIDEBAR ══════════ -->
-<div class="sidebar">
+<div class="sidebar" id="dbSidebar">
   <div class="sidebar-brand">
     <div class="sidebar-logo">Jawi<span>Kids</span></div>
     <div class="sidebar-sub">Panel Guru</div>
@@ -485,6 +525,17 @@ function navTo(name) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('sec-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
+  dbSidebarClose(); // tutup sidebar mobile selepas pilih menu
+}
+
+// ── SIDEBAR MOBILE ──
+function dbSidebarToggle() {
+  document.getElementById('dbSidebar').classList.toggle('open');
+  document.getElementById('dbOverlay').classList.toggle('open');
+}
+function dbSidebarClose() {
+  document.getElementById('dbSidebar').classList.remove('open');
+  document.getElementById('dbOverlay').classList.remove('open');
 }
 
 // ── LOAD ALL ──
