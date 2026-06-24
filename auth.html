@@ -411,7 +411,37 @@ async function guruLogin() {
   try {
     const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
     if (error) throw error;
-    localStorage.setItem('jawikids_guru', JSON.stringify({ id: data.user.id, email: data.user.email, role: 'guru' }));
+
+    // Semak status kelulusan guru
+    const { data: profil } = await db.from('guru_profiles')
+      .select('status,is_admin,nama').eq('id', data.user.id).maybeSingle();
+
+    if (!profil) {
+      // Profil tiada — mungkin akaun lama sebelum sistem kelulusan wujud, cipta profil pending
+      await db.from('guru_profiles').insert({
+        id: data.user.id, nama: data.user.user_metadata?.nama || data.user.email,
+        email: data.user.email, status: 'pending'
+      });
+      await db.auth.signOut();
+      showAlert('loginAlert', '⏳ Akaun kamu sedang menunggu kelulusan Ustaz Wan. Sila cuba log masuk lagi selepas diluluskan.');
+      return;
+    }
+
+    if (profil.status === 'pending') {
+      await db.auth.signOut();
+      showAlert('loginAlert', '⏳ Akaun kamu sedang menunggu kelulusan Ustaz Wan. Sila cuba log masuk lagi kemudian.');
+      return;
+    }
+    if (profil.status === 'rejected') {
+      await db.auth.signOut();
+      showAlert('loginAlert', '❌ Pendaftaran akaun kamu tidak diluluskan. Hubungi Ustaz Wan untuk maklumat lanjut.');
+      return;
+    }
+
+    localStorage.setItem('jawikids_guru', JSON.stringify({
+      id: data.user.id, email: data.user.email, nama: profil.nama,
+      is_admin: profil.is_admin, role: 'guru'
+    }));
     window.location.href = '/dashboard.html';
   } catch(e) {
     const msg = e.message.includes('Invalid') ? '❌ Emel atau kata laluan salah.'
@@ -443,7 +473,8 @@ async function guruDaftar() {
     document.getElementById('verifyMsg').innerHTML =
       'Emel pengesahan dihantar ke:<br><strong>' + email + '</strong><br><br>' +
       'Klik pautan dalam emel, kemudian log masuk.<br>' +
-      '<small style="opacity:0.7">Semak folder Spam jika tidak nampak.</small>';
+      '<small style="opacity:0.7">Semak folder Spam jika tidak nampak.</small><br><br>' +
+      '⏳ <strong>Nota:</strong> Selepas log masuk, akaun kamu akan menunggu kelulusan Ustaz Wan sebelum boleh akses Dashboard.';
     tunjuk('panelVerify');
   } catch(e) {
     const msg = e.message.includes('already') ? '❌ Emel ini sudah didaftarkan. Cuba log masuk.' : '❌ ' + e.message;
