@@ -298,6 +298,9 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     <button class="nav-item" id="nav-leaderboard" onclick="navTo('leaderboard')">
       <span class="nav-icon">🏆</span> Top Murid
     </button>
+    <button class="nav-item" id="nav-guru" onclick="navTo('guru')" style="display:none;">
+      <span class="nav-icon">🔐</span> Kelulusan Guru
+    </button>
   </nav>
 
   <div class="sidebar-footer">
@@ -488,6 +491,24 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     </div>
   </div>
 
+  <!-- ── KELULUSAN GURU (ADMIN SAHAJA) ── -->
+  <div class="section" id="sec-guru">
+    <div class="page-header">
+      <div class="page-title">🔐 Kelulusan Guru</div>
+      <div class="page-sub">Luluskan atau tolak permohonan akaun guru baru</div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-head"><div class="card-title">⏳ Menunggu Kelulusan</div></div>
+      <div id="guruPending"><div class="loading">⏳ Memuatkan...</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-title">👥 Semua Guru</div></div>
+      <div id="guruAll"><div class="loading">⏳ Memuatkan...</div></div>
+    </div>
+  </div>
+
 </div><!-- end .main -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -498,6 +519,7 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
 let guru = null;
+let guruIsAdmin = false;
 let allClasses = [];
 let selectedClass = null;
 
@@ -507,12 +529,31 @@ let selectedClass = null;
     const { data: { session } } = await db.auth.getSession();
     if (!session) { window.location.href = '/auth.html'; return; }
     guru = session.user;
-    const nama = guru.user_metadata?.nama || guru.email.split('@')[0];
+
+    // Semak status kelulusan guru
+    const { data: profil } = await db.from('guru_profiles')
+      .select('status,is_admin,nama').eq('id', guru.id).maybeSingle();
+
+    if (!profil || profil.status !== 'approved') {
+      alert('⏳ Akaun kamu belum diluluskan oleh Ustaz Wan. Sila cuba lagi kemudian.');
+      await db.auth.signOut();
+      localStorage.removeItem('jawikids_guru');
+      window.location.href = '/auth.html';
+      return;
+    }
+
+    guruIsAdmin = profil.is_admin === true;
+    if (guruIsAdmin) {
+      document.getElementById('nav-guru').style.display = 'flex';
+    }
+
+    const nama = profil.nama || guru.user_metadata?.nama || guru.email.split('@')[0];
     document.getElementById('guruName').textContent = nama;
     document.getElementById('guruAvatar').textContent = nama.charAt(0).toUpperCase();
     document.getElementById('overviewDate').textContent =
       `Selamat datang, ${nama}! • ${new Date().toLocaleDateString('ms-MY',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}`;
     await loadAll();
+    if (guruIsAdmin) await loadGuruApprovals();
   } catch(e) {
     console.error('Init error:', e);
     window.location.href = '/auth.html';
@@ -1113,6 +1154,58 @@ async function loadLeaderboard() {
 
 function rankEmoji(i) {
   return ['🥇','🥈','🥉'][i] || `${i+1}.`;
+}
+
+// ── KELULUSAN GURU (ADMIN SAHAJA) ──
+async function loadGuruApprovals() {
+  const { data: all } = await db.from('guru_profiles').select('*').order('created_at',{ascending:false});
+
+  const pending = (all||[]).filter(g => g.status === 'pending');
+  document.getElementById('guruPending').innerHTML = pending.length
+    ? pending.map(g => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-size:0.88rem;font-weight:800;">${g.nama}</div>
+          <div style="font-size:0.75rem;color:var(--text-light);font-weight:600;">${g.email}</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button onclick="setGuruStatus('${g.id}','approved')"
+            style="background:var(--green-light);color:#04a87d;border:none;border-radius:8px;padding:7px 14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.75rem;cursor:pointer;">
+            ✅ Luluskan
+          </button>
+          <button onclick="setGuruStatus('${g.id}','rejected')"
+            style="background:var(--red-light);color:var(--red);border:none;border-radius:8px;padding:7px 14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.75rem;cursor:pointer;">
+            ❌ Tolak
+          </button>
+        </div>
+      </div>`).join('')
+    : '<div class="empty"><p>Tiada permohonan menunggu kelulusan.</p></div>';
+
+  document.getElementById('guruAll').innerHTML = (all||[]).length
+    ? all.map(g => {
+        const statusLabel = g.status === 'approved' ? '✅ Diluluskan' : g.status === 'rejected' ? '❌ Ditolak' : '⏳ Menunggu';
+        const statusColor = g.status === 'approved' ? 'var(--green)' : g.status === 'rejected' ? 'var(--red)' : 'var(--purple)';
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-size:0.85rem;font-weight:800;">${g.nama} ${g.is_admin ? '👑' : ''}</div>
+            <div style="font-size:0.72rem;color:var(--text-light);font-weight:600;">${g.email}</div>
+          </div>
+          <span style="font-size:0.75rem;font-weight:800;color:${statusColor};">${statusLabel}</span>
+        </div>`;
+      }).join('')
+    : '<div class="empty"><p>Tiada rekod guru.</p></div>';
+}
+
+async function setGuruStatus(guruId, status) {
+  const label = status === 'approved' ? 'luluskan' : 'tolak';
+  if (!confirm(`Pasti nak ${label} permohonan guru ini?`)) return;
+  try {
+    const { error } = await db.from('guru_profiles').update({ status }).eq('id', guruId);
+    if (error) throw error;
+    await loadGuruApprovals();
+  } catch(e) {
+    alert('❌ Gagal kemaskini status: ' + (e.message || 'Cuba lagi.'));
+  }
 }
 
 // ── HELPERS ──
