@@ -642,61 +642,46 @@ header { width:100%; padding:16px 20px; display:flex; align-items:center; justif
 .makhraj-area { transition: all 0.4s ease; }
 .makhraj-area.active { filter: brightness(0.85); }
 
-/* ── FLASHCARD PANEL ── */
-.fc-scene {
-  perspective: 1000px; cursor: pointer;
-  width: 100%; margin-bottom: 12px;
-}
-.fc-card {
-  width: 100%; height: 230px;
-  position: relative; transform-style: preserve-3d;
-  transition: transform 0.55s cubic-bezier(.4,.2,.2,1);
-  border-radius: 20px;
-}
-.fc-card.flipped { transform: rotateY(180deg); }
-
-.fc-front, .fc-back {
-  position: absolute; inset: 0; border-radius: 20px;
-  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+/* ── KAD MAKLUMAT HURUF (paparan terus, tanpa flip) ── */
+.fc-static-card {
+  width: 100%; border-radius: 20px;
+  background: linear-gradient(135deg, #e8f4ff, #fff8f0);
+  border: 2px solid #d0e8ff;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  padding: 16px;
+  padding: 22px 16px; margin-bottom: 12px;
 }
-.fc-front {
-  background: linear-gradient(135deg, #e8f4ff, #f0e8ff);
-  border: 2px solid #d0e8ff;
-}
-.fc-back {
-  background: linear-gradient(135deg, #fff8f0, #fff0e8);
-  border: 2px solid #FFD93D;
-  transform: rotateY(180deg);
-}
-.fc-front-char {
+.fc-static-char {
   font-size: 4.6rem; direction: rtl; line-height: 1;
   margin-bottom: 4px; color: var(--text);
 }
-.fc-front-name {
+.fc-static-name {
   font-family: 'Fredoka One', cursive; font-size: 1.2rem;
-  color: var(--purple); margin-bottom: 10px;
+  color: var(--purple); margin-bottom: 14px;
 }
-.fc-back-emoji { font-size: 4.5rem; line-height: 1; margin-bottom: 8px; }
-.fc-back-word {
-  font-family: 'Fredoka One', cursive; font-size: 1.5rem;
-  color: var(--primary); margin-bottom: 0;
+.fc-static-divider {
+  width: 60%; height: 2px;
+  background: linear-gradient(90deg, transparent, #FFD93D, transparent);
+  margin-bottom: 14px;
+}
+.fc-static-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 14px;
+}
+.fc-static-emoji { font-size: 3rem; line-height: 1; }
+.fc-static-word {
+  font-family: 'Fredoka One', cursive; font-size: 1.4rem;
+  color: var(--primary);
 }
 .fc-audio-btn {
   background: var(--purple-light); border: 2px solid var(--purple);
-  border-radius: 99px; padding: 7px 18px;
-  font-family: 'Nunito', sans-serif; font-size: 0.88rem;
+  border-radius: 99px; padding: 9px 22px;
+  font-family: 'Nunito', sans-serif; font-size: 0.92rem;
   font-weight: 800; color: var(--purple); cursor: pointer;
-  transition: all 0.15s; margin-bottom: 6px;
+  transition: all 0.15s;
 }
 .fc-audio-btn:hover { background: var(--purple); color: white; }
 .fc-audio-btn.playing { background: var(--purple); color: white; animation: pulsAudio 0.5s ease infinite alternate; }
-.fc-tap-hint {
-  font-size: 0.62rem; font-weight: 700;
-  color: var(--text-light); opacity: 0.7; position: absolute; bottom: 10px;
-}
 .fc-nav {
   display: flex; align-items: center; justify-content: center; gap: 12px;
 }
@@ -847,25 +832,18 @@ header { width:100%; padding:16px 20px; display:flex; align-items:center; justif
         </div>
       </div>
 
-      <!-- Flashcard flip -->
-      <div class="fc-scene" onclick="flipRefCard()">
-        <div class="fc-card" id="fcCard">
-          <!-- Depan: Huruf + Audio -->
-          <div class="fc-front">
-            <div class="fc-front-char" id="fcChar">ب</div>
-            <div class="fc-front-name" id="fcName">Ba</div>
-            <button class="fc-audio-btn" id="fcAudioBtn" onclick="event.stopPropagation();playFcAudio()">
-              🔊 Dengar
-            </button>
-            <div class="fc-tap-hint">Ketuk untuk lihat gambar 👆</div>
-          </div>
-          <!-- Belakang: Gambar -->
-          <div class="fc-back">
-            <div class="fc-back-emoji" id="fcEmoji">👕</div>
-            <div class="fc-back-word" id="fcWord">Baju</div>
-            <div class="fc-tap-hint">Ketuk untuk kembali 👆</div>
-          </div>
+      <!-- Kad Maklumat Huruf — paparan terus tanpa flip -->
+      <div class="fc-static-card" id="fcCard">
+        <div class="fc-static-char" id="fcChar">ب</div>
+        <div class="fc-static-name" id="fcName">Ba</div>
+        <div class="fc-static-divider"></div>
+        <div class="fc-static-row">
+          <span class="fc-static-emoji" id="fcEmoji">👕</span>
+          <span class="fc-static-word" id="fcWord">Baju</span>
         </div>
+        <button class="fc-audio-btn" id="fcAudioBtn" onclick="playFcAudio()">
+          🔊 Dengar
+        </button>
       </div>
 
       <!-- Navigasi -->
@@ -1104,7 +1082,7 @@ const GROUPS = {
   bunyi: [
     { id:'M-1', name:'Kelompok 1', subtitle:'Makhraj Bibir — شفتان', emoji:'👄', letters:[
       {char:'ب',name:'Ba',dots:'Satu titik bawah',word:'Baju',wordEmoji:'👕'},
-      {char:'م',name:'Mim',dots:'Tiada titik',word:'Meja',wordEmoji:'🪑'},
+      {char:'م',name:'Mim',dots:'Tiada titik',word:'Mata',wordEmoji:'👁️'},
       {char:'و',name:'Wau',dots:'Tiada titik',word:'Warna',wordEmoji:'🎨'},
       {char:'ف',name:'Fa',dots:'Satu titik atas',word:'Fajar',wordEmoji:'🌅'},
     ]},
@@ -1624,10 +1602,10 @@ function updateMakhrajDiagram(groupId) {
 // ══════════════════════════════════════════
 // FLASHCARD PANEL — HURUF SATU PERSATU
 // ══════════════════════════════════════════
-let fcIdx = 0, fcFlipped = false, fcAudio = null;
+let fcIdx = 0, fcAudio = null;
 
 function renderLetterRefPanel() {
-  fcIdx = 0; fcFlipped = false;
+  fcIdx = 0;
   renderFcCard();
 }
 
@@ -1635,10 +1613,6 @@ function renderFcCard() {
   const letters = currentGroup.letters;
   const l = letters[fcIdx];
   if (!l) return;
-
-  // Reset flip
-  const card = document.getElementById('fcCard');
-  if (card) { card.classList.remove('flipped'); fcFlipped = false; }
 
   document.getElementById('fcChar').textContent = l.char;
   document.getElementById('fcName').textContent = l.name;
@@ -1660,13 +1634,6 @@ function renderFcCard() {
     Array.from({length: max}, (_, i) =>
       `<div class="fc-dot ${i === fcIdx ? 'active' : ''}"></div>`
     ).join('');
-}
-
-function flipRefCard() {
-  const card = document.getElementById('fcCard');
-  if (!card) return;
-  fcFlipped = !fcFlipped;
-  card.classList.toggle('flipped', fcFlipped);
 }
 
 function fcNav(dir) {
